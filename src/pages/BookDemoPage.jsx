@@ -29,10 +29,10 @@ const BookDemoPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       await sendEmail(formData);
-      
+
       toast({
         title: "Demo Request Sent! 🎉",
         description: "We'll reach out within 24 hours to schedule your personalized demo.",
@@ -69,14 +69,14 @@ const BookDemoPage = () => {
 
       <Breadcrumbs />
 
-      <HeroSection 
+      <HeroSection
             headline="Book Your OMIS Demo"
             subheadline="Get a personalized demo tailored to your business. See exactly how OMIS turns your data into actionable insights."
             primaryCtaText="Skip to Form"
             primaryCtaLink="#booking-form"
             secondaryCtaText="Try OMIS Now"
             secondaryCtaLink={omisAppLink}
-            backgroundImage="https://horizons-cdn.hostinger.com/c48fe537-27be-40d7-8d60-8141bf615504/6c791827b7678a9f8d9ad64649fb7527.png"
+            backgroundImage="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=2000"
             minHeight="min-h-[60vh]"
         />
 
@@ -94,8 +94,8 @@ const BookDemoPage = () => {
                 <h2 className="text-3xl md:text-4xl font-extrabold text-slate-900 mb-8 tracking-tight">Why schedule a demo?</h2>
                 <ul className="space-y-6">
                   {benefits.map((benefit, i) => (
-                    <motion.li 
-                      key={i} 
+                    <motion.li
+                      key={i}
                       initial={{ opacity: 0, x: -20 }}
                       whileInView={{ opacity: 1, x: 0 }}
                       viewport={{ once: true }}
@@ -136,13 +136,13 @@ const BookDemoPage = () => {
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <label htmlFor="name" className="text-sm font-bold text-slate-900">Full Name *</label>
-                    <input 
-                      type="text" 
-                      id="name" 
-                      name="name" 
-                      value={formData.name} 
-                      onChange={handleChange} 
-                      required 
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-all text-slate-900 bg-slate-50"
                       placeholder="Jane Doe"
                     />
@@ -150,13 +150,13 @@ const BookDemoPage = () => {
 
                   <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-bold text-slate-900">Email Address *</label>
-                    <input 
-                      type="email" 
-                      id="email" 
-                      name="email" 
-                      value={formData.email} 
-                      onChange={handleChange} 
-                      required 
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
                       className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-all text-slate-900 bg-slate-50"
                       placeholder="jane@company.com"
                     />
@@ -165,12 +165,12 @@ const BookDemoPage = () => {
 
                 <div className="space-y-2">
                   <label htmlFor="phone" className="text-sm font-bold text-slate-900">Phone Number</label>
-                  <input 
-                    type="tel" 
-                    id="phone" 
-                    name="phone" 
-                    value={formData.phone} 
-                    onChange={handleChange} 
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-all text-slate-900 bg-slate-50"
                     placeholder="+1 (555) 000-0000"
                   />
@@ -180,12 +180,12 @@ const BookDemoPage = () => {
                   <div className="space-y-2">
                     <label htmlFor="businessType" className="text-sm font-bold text-slate-900">Business Type *</label>
                     <div className="relative">
-                      <select 
-                        id="businessType" 
-                        name="businessType" 
-                        value={formData.businessType} 
-                        onChange={handleChange} 
-                        required 
+                      <select
+                        id="businessType"
+                        name="businessType"
+                        value={formData.businessType}
+                        onChange={handleChange}
+                        required
                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none bg-slate-50 transition-all text-slate-900 appearance-none"
                       >
                         <option value="" disabled>Select industry</option>
@@ -204,11 +204,11 @@ const BookDemoPage = () => {
                   <div className="space-y-2">
                     <label htmlFor="preferredTime" className="text-sm font-bold text-slate-900">Preferred Time</label>
                     <div className="relative">
-                      <select 
-                        id="preferredTime" 
-                        name="preferredTime" 
-                        value={formData.preferredTime} 
-                        onChange={handleChange} 
+                      <select
+                        id="preferredTime"
+                        name="preferredTime"
+                        value={formData.preferredTime}
+                        onChange={handleChange}
                         className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none bg-slate-50 transition-all text-slate-900 appearance-none"
                       >
                         <option value="" disabled>Select time</option>
@@ -225,21 +225,21 @@ const BookDemoPage = () => {
 
                 <div className="space-y-2">
                   <label htmlFor="message" className="text-sm font-bold text-slate-900">Additional Notes</label>
-                  <textarea 
-                    id="message" 
-                    name="message" 
-                    value={formData.message} 
-                    onChange={handleChange} 
-                    rows={4} 
+                  <textarea
+                    id="message"
+                    name="message"
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={4}
                     className="w-full px-4 py-3 rounded-xl border border-slate-300 focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none resize-none transition-all text-slate-900 bg-slate-50"
                     placeholder="Tell us a little about your goals or what systems you currently use..."
                   ></textarea>
                 </div>
 
-                <Button 
-                  type="submit" 
-                  size="lg" 
-                  className="w-full bg-blue-700 hover:bg-blue-800 text-white py-6 text-lg rounded-xl shadow-lg shadow-blue-600/20 font-bold transition-all hover:scale-[1.02]" 
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full bg-blue-700 hover:bg-blue-800 text-white py-6 text-lg rounded-xl shadow-lg shadow-blue-600/20 font-bold transition-all hover:scale-[1.02]"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
