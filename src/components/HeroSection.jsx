@@ -34,7 +34,7 @@ const HeroSection = ({
   secondaryCtaLink = "https://omis-crm.com/",
   backgroundImage = "https://images.unsplash.com/photo-1516383274235-5f42d6c6426d?auto=format&fit=crop&q=80&w=2000",
   showDashboardPreview = false,
-  dashboardImage = "https://horizons-cdn.hostinger.com/c48fe537-27be-40d7-8d60-8141bf615504/1554aa5e682c1a92818a701065b25c91.jpg",
+  dashboardImage = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000",
   minHeight = "min-h-[85vh]"
 }) => {
   const ref = useRef(null);
