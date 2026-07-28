@@ -74,7 +74,7 @@ const ContactPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const industries = ["Dental", "Veterinary", "Physiotherapy", "Spa & Wellness", "Restaurant", "Auto Repair", "Fitness", "Retail", "Cleaning", "Property Management", "Tutoring", "Other"];
+  const industries = ["Tattoo & Piercing Studio", "Barbershop", "Auto Repair", "Spa & Wellness", "Restaurant", "Fitness", "Retail", "Cleaning", "Property Management", "Tutoring", "Other"];
 
   return (
     <div className="bg-slate-50 font-sans">
@@ -198,7 +198,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                         <h4 className="font-extrabold text-slate-900 text-lg">Call Us</h4>
-                        <a href="tel:+14168485058" className="text-blue-700 font-bold hover:underline">+1-416-848-5058</a>
+                        <a href="tel:+14164779893" className="text-blue-700 font-bold hover:underline">+1 (416) 477-9893</a>
                     </div>
                 </div>
               </div>
@@ -208,7 +208,7 @@ const ContactPage = () => {
                         <Building className="w-7 h-7 text-blue-700" />
                     </div>
                     <div>
-                        <h4 className="font-extrabold text-slate-900 text-lg">Our Office</h4>
+                        <h4 className="font-extrabold text-slate-900 text-lg">Based In</h4>
                         <p className="text-slate-800 font-medium">Toronto, ON, Canada</p>
                     </div>
                 </div>

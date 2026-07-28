@@ -15,24 +15,21 @@ const ROICalculatorChart = ({ results, inputs }) => {
 
   const data = [
     {
-      name: 'Manual Reporting',
-      'Before OMIS': results.annualCost,
-      'After OMIS': results.afterOmisReportingCost,
+      name: 'Deposits Recovered',
+      'Annual Value': results.annualDepositsRecovered,
     },
     {
-      name: 'Software Costs',
-      'Before OMIS': inputs.softwareCosts,
-      'After OMIS': results.afterOmisSoftwareCost,
+      name: 'Admin Time Saved',
+      'Annual Value': results.annualAdminCostSaved,
     },
     {
-      name: 'Total Costs',
-      'Before OMIS': results.annualCost + inputs.softwareCosts,
-      'After OMIS': results.afterOmisReportingCost + results.afterOmisSoftwareCost + results.omisCost,
+      name: 'Net of OMIS Cost',
+      'Annual Value': results.netAnnualValue,
     }
   ];
 
-  const formatCurrency = (value) => 
-    new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value);
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(value);
 
   return (
     <div className="h-[400px] w-full mt-8">
@@ -52,8 +49,7 @@ const ROICalculatorChart = ({ results, inputs }) => {
             contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)' }}
           />
           <Legend wrapperStyle={{ paddingTop: '20px' }} />
-          <Bar dataKey="Before OMIS" fill="#f97316" radius={[4, 4, 0, 0]} maxBarSize={60} />
-          <Bar dataKey="After OMIS" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={60} />
+          <Bar dataKey="Annual Value" fill="#10b981" radius={[4, 4, 0, 0]} maxBarSize={60} />
         </BarChart>
       </ResponsiveContainer>
     </div>

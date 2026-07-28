@@ -1,47 +1,43 @@
 export const knowledgeBase = {
   company: {
     keywords: ["company", "about bdo", "what does bdo do", "who are you", "what is bdo analytics solutions", "bdo analytics"],
-    response: "BDO Analytics Solutions is dedicated to transforming raw data into actionable insights. Our mission is to help businesses make data-driven decisions through our flagship OMIS product, expert data transformation, and comprehensive analytics consulting services."
+    response: "BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, our flagship booking, deposits, and client-management platform for appointment-based businesses."
   },
   leadership: {
     keywords: ["leadership", "leaders", "ceo", "who runs", "management team", "executives"],
-    response: "Our leadership team consists of seasoned experts in data analytics and business intelligence. We share a unified vision to make enterprise-grade data insights accessible to businesses of all sizes, guiding our strategic direction and commitment to innovation."
+    response: "BDO Analytics Solutions is led by founder Otaigbe Ewoigbokhan, based in Toronto. You can read more on our /about page."
   },
   services: {
     keywords: ["services", "what do you offer", "help with", "what can you do", "consulting", "training"],
-    response: "We offer a wide range of services including Data Audit & Cleaning, Custom Dashboard Design, Automated Reporting, Goal Tracking, Real-time Business Intelligence, Data Transformation, Consulting, and Integration Services for SQL, Excel, and legacy tools. You can learn more on our /services page!"
+    response: "We offer data and analytics consulting — Power BI dashboard development, data audit and cleanup, automated reporting, goal tracking, and integration services — plus OMIS, our booking and client-management platform for appointment-based businesses. You can learn more on our /services page!"
   },
   features: {
     keywords: ["feature", "capability", "can omis do", "what does it do", "functions", "what is omis", "omis capabilities"],
-    response: "OMIS is our powerful analytics platform featuring interactive dashboards, real-time analytics, automated reporting, goal tracking, custom visualizations, and multi-source data support. It seamlessly integrates your existing data to give you a clear, operational command center. Visit /omis-product for details."
+    response: "OMIS is our booking, deposits, and client-management platform for appointment-based businesses — online booking, deposits paid directly into your own Stripe account, digital waivers, SMS/email reminders, per-staff booking links, and a business dashboard. It's live today for tattoo & piercing studios, barbershops, and auto repair shops. Visit /omis-product for details."
   },
   pricing: {
     keywords: ["price", "cost", "pricing", "how much", "plans", "fee", "tiers"],
-    response: "We offer 4 OMIS pricing tiers: Starter ($29/mo for 1 user), Professional ($79/mo for up to 5 users), Enterprise ($199/mo for unlimited users), and Custom (Contact us for bespoke pricing). Would you like to schedule a call to discuss which plan fits best?"
-  },
-  roi_calculation: {
-    keywords: ["how is roi calculated", "what's included in the roi calculation", "how does the roi calculator work", "what assumptions does the roi use", "what's the typical roi for omis", "how long until i see roi", "how does pricing affect roi", "can you explain the roi logic", "roi", "return on investment", "payback"],
-    response: "ROI is calculated by comparing your annual cost savings against the OMIS annual cost ($948 for the Professional plan). We measure three main components over a 12-month period: (1) Time savings from automation, (2) Labor cost reduction, and (3) Software cost reduction. Baseline costs are: manual reporting hours/week × 52 weeks × hourly rate × number of employees. We assume standard rates ($25-$75/hour), 2-10 hours/week of reporting, and teams of 1-50 employees. For example: A small business (3 employees, 5 hrs/wk, $35/hr) saves ~$27,300 annually (28x ROI). A medium business (10 employees, 8 hrs/wk, $50/hr) saves ~$208,000 (219x ROI). An enterprise (30 employees, 10 hrs/wk, $60/hr) saves ~$936,000 (987x ROI). Higher tiers yield better ROI due to advanced automation, with typical payback periods of 2-5 days. Try the interactive ROI Calculator on our OMIS product page to see your specific numbers!"
+    response: "For current OMIS pricing, check omis-crm.com/pricing — that's the source of truth. Would you like to schedule a call to discuss what fits best for your business?"
   },
   case_studies: {
     keywords: ["case study", "case studies", "testimonial", "testimonials", "success stor", "clients say", "results", "roi example"],
-    response: "We have helped numerous businesses achieve remarkable ROI. Our client success stories showcase significant operational improvements and revenue growth across various sectors. We'd love to share specific use cases and testimonials relevant to your business during a consultation."
+    response: "We're an early-stage practice and don't have public case studies to share yet. We'd love to talk through what OMIS or a consulting engagement could look like for your business during a consultation."
   },
   contact_support: {
     keywords: ["support", "help", "contact", "email", "phone", "reach you", "availability"],
-    response: "We provide comprehensive, responsive support. You can reach our team at info@bdoanalyticssolutions.com or +1-416-848-5058. Whether you need technical assistance or want to speak with sales, we are here to help ensure your data journey is successful."
+    response: "You can reach our team at info@bdoanalyticssolutions.com or +1 (416) 477-9893. Whether you need technical assistance or want to speak with sales, we are here to help."
   },
   getting_started: {
     keywords: ["start", "begin", "sign up", "demo", "onboarding", "next step", "consultation", "free trial"],
-    response: "Getting started is easy! The best next step is to schedule a demo or book a consultation with our experts. We'll discuss your specific data needs, review pricing options, and map out a tailored implementation plan for your business."
+    response: "Getting started is easy! The best next step is to schedule a demo or book a consultation. We'll discuss your business needs and map out a tailored plan — whether that's OMIS or a consulting engagement."
   },
   industries: {
-    keywords: ["industry", "industries", "vertical", "retail", "healthcare", "finance", "manufacturing", "hospitality", "my business"],
-    response: "We serve a diverse range of industries including retail, healthcare, finance, manufacturing, hospitality, and B2B services. Our industry-specific solutions and vertical expertise allow us to tailor OMIS and our analytics services to your unique operational use cases."
+    keywords: ["industry", "industries", "vertical", "retail", "finance", "manufacturing", "hospitality", "my business"],
+    response: "OMIS is live today for tattoo & piercing studios, barbershops, and auto repair shops. Our consulting services (Power BI, dashboards, reporting) serve small businesses more broadly. Tell us about your business and we'll let you know what fits."
   },
   values_mission: {
     keywords: ["value", "mission", "vision", "different", "why choose", "core values"],
-    response: "Our mission is to empower businesses with clear, actionable data. We operate on core values of data-driven innovation, unwavering customer success, and integrity. What sets BDO Analytics Solutions apart is our commitment to being a true partner in your growth, not just a software vendor."
+    response: "Our mission is to give small business owners clarity and control — over their bookings, their client relationships, and their numbers. We operate on core values of practicality, consistency, and being a true partner, not just a software vendor."
   }
 };
 

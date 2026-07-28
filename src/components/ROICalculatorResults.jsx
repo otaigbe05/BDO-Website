@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { DollarSign, Clock, TrendingUp, CalendarDays } from 'lucide-react';
 import ROICalculatorChart from './ROICalculatorChart';
 
-const formatCurrency = (val) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(val);
-const formatNumber = (val) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(val);
+const formatCurrency = (val) => new Intl.NumberFormat('en-CA', { style: 'currency', currency: 'CAD', maximumFractionDigits: 0 }).format(val);
+const formatNumber = (val) => new Intl.NumberFormat('en-CA', { maximumFractionDigits: 1 }).format(val);
 
 const ResultCard = ({ title, value, icon, colorClass, delay }) => (
-  <motion.div 
+  <motion.div
     initial={{ opacity: 0, scale: 0.9 }}
     animate={{ opacity: 1, scale: 1 }}
     transition={{ delay }}
@@ -33,87 +33,90 @@ const ROICalculatorResults = ({ results, inputs }) => {
     <div className="space-y-8" id="roi-results-container">
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <ResultCard 
-          title="Total Annual Savings" 
-          value={formatCurrency(results.totalSavings)} 
-          icon={<DollarSign className="w-6 h-6 text-white" />} 
-          colorClass="bg-gradient-to-br from-emerald-600 to-emerald-800" 
-          delay={0.1} 
+        <ResultCard
+          title="Total Annual Value"
+          value={formatCurrency(results.totalAnnualValue)}
+          icon={<DollarSign className="w-6 h-6 text-white" />}
+          colorClass="bg-gradient-to-br from-emerald-600 to-emerald-800"
+          delay={0.1}
         />
-        <ResultCard 
-          title="Time Saved Per Year" 
-          value={`${formatNumber(results.timeSavedHours)} hrs`} 
-          icon={<Clock className="w-6 h-6 text-white" />} 
-          colorClass="bg-gradient-to-br from-blue-600 to-blue-800" 
-          delay={0.2} 
+        <ResultCard
+          title="Admin Hours Saved Per Year"
+          value={`${formatNumber(results.annualAdminHoursSaved)} hrs`}
+          icon={<Clock className="w-6 h-6 text-white" />}
+          colorClass="bg-gradient-to-br from-blue-600 to-blue-800"
+          delay={0.2}
         />
-        <ResultCard 
-          title="Est. ROI Percentage" 
-          value={`${formatNumber(results.roi)}%`} 
-          icon={<TrendingUp className="w-6 h-6 text-white" />} 
-          colorClass="bg-gradient-to-br from-purple-600 to-purple-800" 
-          delay={0.3} 
+        <ResultCard
+          title="Est. ROI Percentage"
+          value={`${formatNumber(results.roi)}%`}
+          icon={<TrendingUp className="w-6 h-6 text-white" />}
+          colorClass="bg-gradient-to-br from-purple-600 to-purple-800"
+          delay={0.3}
         />
-        <ResultCard 
-          title="Payback Period" 
-          value={`${formatNumber(results.paybackPeriod)} mo`} 
-          icon={<CalendarDays className="w-6 h-6 text-white" />} 
-          colorClass="bg-gradient-to-br from-orange-600 to-orange-800" 
-          delay={0.4} 
+        <ResultCard
+          title="Payback Period"
+          value={`${formatNumber(results.paybackMonths)} mo`}
+          icon={<CalendarDays className="w-6 h-6 text-white" />}
+          colorClass="bg-gradient-to-br from-orange-600 to-orange-800"
+          delay={0.4}
         />
       </div>
 
       {/* Chart Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
         className="bg-white rounded-2xl shadow-xl border border-slate-300 p-6 md:p-8"
       >
-        <h3 className="text-xl font-bold text-slate-900 mb-2">Cost Comparison: Before vs. After OMIS</h3>
-        <p className="text-slate-800 font-medium text-sm mb-6">Visual breakdown of your annual cost reductions</p>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">Where the Value Comes From</h3>
+        <p className="text-slate-800 font-medium text-sm mb-6">Deposits recovered on no-shows vs. admin time saved by self-booking</p>
         <ROICalculatorChart results={results} inputs={inputs} />
       </motion.div>
 
       {/* Detailed Table */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
         className="bg-white rounded-2xl shadow-xl border border-slate-300 overflow-hidden"
       >
         <div className="p-6 border-b border-slate-200 bg-slate-50">
-          <h3 className="text-xl font-bold text-slate-900">Savings Breakdown</h3>
+          <h3 className="text-xl font-bold text-slate-900">Value Breakdown</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
             <tbody className="divide-y divide-slate-200">
               <tr className="hover:bg-slate-50 transition-colors">
-                <td className="p-4 text-slate-800 font-bold">Manual Reporting Cost Savings</td>
-                <td className="p-4 text-right text-emerald-700 font-bold">+{formatCurrency(results.costSaved)}</td>
+                <td className="p-4 text-slate-800 font-bold">Deposits Recovered on No-Shows</td>
+                <td className="p-4 text-right text-emerald-700 font-bold">+{formatCurrency(results.annualDepositsRecovered)}</td>
               </tr>
               <tr className="hover:bg-slate-50 transition-colors">
-                <td className="p-4 text-slate-800 font-bold">Software Cost Reduction</td>
-                <td className="p-4 text-right text-emerald-700 font-bold">+{formatCurrency(results.softwareCostReduction)}</td>
+                <td className="p-4 text-slate-800 font-bold">Admin Time Saved (Self-Booking)</td>
+                <td className="p-4 text-right text-emerald-700 font-bold">+{formatCurrency(results.annualAdminCostSaved)}</td>
               </tr>
               <tr className="bg-slate-50">
-                <td className="p-4 text-slate-900 font-bold text-lg">Gross Total Savings</td>
-                <td className="p-4 text-right text-emerald-700 font-bold text-lg">{formatCurrency(results.totalSavings)}</td>
+                <td className="p-4 text-slate-900 font-bold text-lg">Gross Total Value</td>
+                <td className="p-4 text-right text-emerald-700 font-bold text-lg">{formatCurrency(results.totalAnnualValue)}</td>
               </tr>
               <tr className="hover:bg-slate-50 transition-colors">
                 <td className="p-4 text-slate-800 font-bold flex items-center gap-2">
-                  Estimated OMIS Annual Cost
-                  <span className="text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full font-bold">Pro Plan</span>
+                  OMIS Annual Cost
+                  <span className="text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full font-bold">$39/mo + tax</span>
                 </td>
                 <td className="p-4 text-right text-red-600 font-bold">-{formatCurrency(results.omisCost)}</td>
               </tr>
               <tr className="bg-blue-50 border-t-2 border-blue-200">
                 <td className="p-5 text-blue-900 font-bold text-xl">Net Annual Value</td>
-                <td className="p-5 text-right text-blue-800 font-extrabold text-2xl">{formatCurrency(results.totalSavings - results.omisCost)}</td>
+                <td className="p-5 text-right text-blue-800 font-extrabold text-2xl">{formatCurrency(results.netAnnualValue)}</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p className="px-6 pb-6 text-xs text-slate-500 leading-relaxed">
+          Estimate based on the numbers you entered above. Deposit recovery assumes a no-show forfeits its deposit under your business's own cancellation policy. Excludes applicable taxes on the OMIS subscription.
+        </p>
       </motion.div>
     </div>
   );

@@ -1,57 +1,50 @@
 /**
  * ROI Calculator Logic Utility
+ *
+ * Models the two mechanisms OMIS actually affects for an appointment-based
+ * business: deposits recovered on no-shows, and admin time saved by letting
+ * clients self-book instead of the owner/staff booking manually.
  */
 
-export const calculateAnnualManualReportingHours = (hoursPerWeek) => hoursPerWeek * 52;
+export const OMIS_MONTHLY_COST = 39;
+export const OMIS_ANNUAL_COST = OMIS_MONTHLY_COST * 12; // 468, plus applicable taxes
 
-export const calculateAnnualManualReportingCost = (annualHours, hourlyRate, numEmployees) => 
-  annualHours * hourlyRate * numEmployees;
+export const calculateNoShowsPerWeek = (appointmentsPerWeek, noShowRatePercent) =>
+  appointmentsPerWeek * (noShowRatePercent / 100);
 
-export const calculateTimeSaved = (annualHours) => 
-  annualHours * 0.60; // 60% reduction
+export const calculateAnnualDepositsRecovered = (noShowsPerWeek, depositAmount) =>
+  noShowsPerWeek * 52 * depositAmount;
 
-export const calculateCostSaved = (timeSaved, hourlyRate, numEmployees) => 
-  timeSaved * hourlyRate * numEmployees;
+export const calculateAnnualAdminHoursSaved = (adminHoursPerWeek) =>
+  adminHoursPerWeek * 52;
 
-export const calculateSoftwareCostReduction = (currentSoftwareCosts) => 
-  currentSoftwareCosts * 0.30; // 30% reduction
-
-export const calculateTotalAnnualSavings = (costSaved, softwareCostReduction) => 
-  costSaved + softwareCostReduction;
-
-export const calculateROI = (totalSavings, omisCost = 948) => 
-  (totalSavings / omisCost) * 100;
-
-export const calculatePaybackPeriod = (totalSavings, omisCost = 948) => 
-  totalSavings > 0 ? (omisCost / (totalSavings / 12)) : 0; // months to break even
+export const calculateAnnualAdminCostSaved = (annualAdminHoursSaved, hourlyRate) =>
+  annualAdminHoursSaved * hourlyRate;
 
 export const calculateAllMetrics = (inputs) => {
-  const { employees, hourlyRate, hoursPerWeek, softwareCosts } = inputs;
-  const omisCost = 948; // $79/mo * 12 for Professional tier
-  
-  const annualHours = calculateAnnualManualReportingHours(hoursPerWeek);
-  const annualCost = calculateAnnualManualReportingCost(annualHours, hourlyRate, employees);
-  
-  const timeSavedHours = calculateTimeSaved(annualHours);
-  const costSaved = calculateCostSaved(timeSavedHours, hourlyRate, employees);
-  
-  const softwareCostReduction = calculateSoftwareCostReduction(softwareCosts);
-  const totalSavings = calculateTotalAnnualSavings(costSaved, softwareCostReduction);
-  
-  const roi = calculateROI(totalSavings, omisCost);
-  const paybackPeriod = calculatePaybackPeriod(totalSavings, omisCost);
-  
+  const { appointmentsPerWeek, depositAmount, noShowRate, adminHoursPerWeek, hourlyRate } = inputs;
+  const omisCost = OMIS_ANNUAL_COST;
+
+  const noShowsPerWeek = calculateNoShowsPerWeek(appointmentsPerWeek, noShowRate);
+  const annualDepositsRecovered = calculateAnnualDepositsRecovered(noShowsPerWeek, depositAmount);
+
+  const annualAdminHoursSaved = calculateAnnualAdminHoursSaved(adminHoursPerWeek);
+  const annualAdminCostSaved = calculateAnnualAdminCostSaved(annualAdminHoursSaved, hourlyRate);
+
+  const totalAnnualValue = annualDepositsRecovered + annualAdminCostSaved;
+  const netAnnualValue = totalAnnualValue - omisCost;
+  const roi = omisCost > 0 ? (netAnnualValue / omisCost) * 100 : 0;
+  const paybackMonths = totalAnnualValue > 0 ? omisCost / (totalAnnualValue / 12) : 0;
+
   return {
-    annualHours,
-    annualCost,
-    timeSavedHours,
-    costSaved,
-    softwareCostReduction,
-    totalSavings,
-    roi,
-    paybackPeriod,
+    noShowsPerWeek,
+    annualDepositsRecovered,
+    annualAdminHoursSaved,
+    annualAdminCostSaved,
+    totalAnnualValue,
     omisCost,
-    afterOmisReportingCost: annualCost - costSaved,
-    afterOmisSoftwareCost: softwareCosts - softwareCostReduction
+    netAnnualValue,
+    roi,
+    paybackMonths,
   };
 };

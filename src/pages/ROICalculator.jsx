@@ -27,7 +27,7 @@ const ROICalculator = () => {
     <div className="bg-white min-h-screen font-sans">
       <Helmet>
         <title>OMIS ROI Calculator - BDO Analytics Solutions</title>
-        <meta name="description" content="Calculate your potential return on investment, time saved, and cost reduction by switching from manual reporting to the OMIS analytics platform." />
+        <meta name="description" content="Calculate how much your business could recover in deposits on no-shows and save in admin time by switching to OMIS for booking and client management." />
         <link rel="canonical" href="https://www.bdoanalyticssolutions.com/roi-calculator" />
       </Helmet>
 
@@ -54,7 +54,7 @@ const ROICalculator = () => {
               OMIS <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-600">ROI Calculator</span>
             </h1>
             <p className="text-xl text-slate-700 leading-relaxed font-semibold">
-              Stop guessing. See exactly how much time and money you could save by automating your business intelligence with OMIS.
+              See how much you could recover in deposits on no-shows, and how much admin time you could save by letting clients book themselves.
             </p>
           </motion.div>
         </div>

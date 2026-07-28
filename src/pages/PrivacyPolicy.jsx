@@ -6,10 +6,10 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 
 const PrivacyPolicy = () => {
   const siteUrl = "https://www.bdoanalyticssolutions.com/privacy-policy";
-  const lastUpdated = "May 11, 2026";
+  const lastUpdated = "July 28, 2026";
   const COMPANY = "BDO Analytics Solutions";
   const EMAIL = "info@bdoanalyticssolutions.com";
-  const PHONE = "+1-416-848-5058";
+  const PHONE = "+1 (416) 477-9893";
 
   const sections = [
     {
@@ -43,6 +43,7 @@ const PrivacyPolicy = () => {
             <li><strong>Usage Data:</strong> Information about how you interact with our services, such as pages viewed, features used, access times, and IP addresses.</li>
             <li><strong>Device Information:</strong> Browser type, operating system, and device identifiers used to access our services.</li>
             <li><strong>Payment Information:</strong> Billing details processed securely through Stripe. We do not store credit card numbers on our servers.</li>
+            <li><strong>Client Deposits (OMIS Platform):</strong> Where a business uses OMIS's deposit feature, client deposit payments are processed through Stripe Connect and paid directly into that business's own Stripe account. We never receive, hold, or have custody of deposit funds — we store only deposit metadata (amount, currency, status, timestamps) within the platform.</li>
             <li><strong>Communications:</strong> Records of your correspondence with us, including support requests and feedback.</li>
           </ul>
         </div>
@@ -254,6 +255,9 @@ const PrivacyPolicy = () => {
           </div>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
             This policy applies to all services provided by {COMPANY}, including the OMIS platform and our analytics consulting services.
+          </p>
+          <p className="mt-4 text-sm text-slate-500 max-w-2xl mx-auto italic">
+            This document is provided for general informational purposes and does not constitute legal advice. We recommend having this policy reviewed by a licensed lawyer for your specific circumstances.
           </p>
         </motion.div>
 

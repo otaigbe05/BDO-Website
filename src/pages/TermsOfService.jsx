@@ -6,10 +6,10 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 
 const TermsOfService = () => {
   const siteUrl = "https://www.bdoanalyticssolutions.com/terms-of-service";
-  const lastUpdated = "May 11, 2026";
+  const lastUpdated = "July 28, 2026";
   const COMPANY = "BDO Analytics Solutions";
   const EMAIL = "info@bdoanalyticssolutions.com";
-  const PHONE = "+1-416-848-5058";
+  const PHONE = "+1 (416) 477-9893";
 
   const sections = [
     {
@@ -19,7 +19,7 @@ const TermsOfService = () => {
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
-            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of all services provided by {COMPANY}, including the OMIS platform (omis-crm.com), Power BI analytics consulting, business templates, and this website (bdoanalyticssolutions.com) (collectively, the "Services").
+            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of all services provided by {COMPANY}, including the OMIS platform (omis-crm.com), our data and analytics consulting services (Power BI dashboards, data audit and cleanup, automated reporting), and this website (bdoanalyticssolutions.com) (collectively, the "Services").
           </p>
           <p>
             By accessing or using any of our Services, you confirm that you are at least 18 years of age, have the legal authority to enter into these Terms on behalf of yourself or your organization, and agree to be bound by these Terms and our Privacy Policy.
@@ -87,6 +87,9 @@ const TermsOfService = () => {
             <li><strong>Refunds:</strong> All fees are non-refundable unless otherwise expressly provided in these Terms or required by applicable law. Unused portions of subscription periods are not refundable upon cancellation.</li>
             <li><strong>Late Payments:</strong> Accounts with overdue balances may be suspended until payment is received. We reserve the right to charge interest on overdue amounts at the rate of 1.5% per month.</li>
           </ul>
+          <p className="mt-4">
+            <strong>Client Deposits (OMIS Platform):</strong> Where OMIS's deposit feature is used, client deposits are processed through Stripe Connect and paid directly into the subscribing business's own Stripe account. {COMPANY} charges no application fee on deposits, is never in the payment chain, and never receives, holds, or has custody of deposit funds at any point. The subscribing business is the merchant of record for every deposit and is solely responsible for refund, forfeiture, and cancellation decisions relating to it.
+          </p>
         </div>
       )
     },
@@ -308,6 +311,9 @@ const TermsOfService = () => {
           </div>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
             These Terms govern your use of all services provided by {COMPANY}, including the OMIS platform and our analytics consulting services.
+          </p>
+          <p className="mt-4 text-sm text-slate-500 max-w-2xl mx-auto italic">
+            This document is provided for general informational purposes and does not constitute legal advice. We recommend having these Terms reviewed by a licensed lawyer for your specific circumstances.
           </p>
         </motion.div>
 

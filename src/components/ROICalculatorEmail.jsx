@@ -25,7 +25,7 @@ const ROICalculatorEmail = ({ results, inputs }) => {
       await sendEmail({
         name: 'ROI Calculator User',
         email: email,
-        message: `Requested ROI Results. Total Savings: $${results.totalSavings}, ROI: ${results.roi}%`,
+        message: `Requested ROI Results. Total Annual Value: $${results.totalAnnualValue}, ROI: ${results.roi}%`,
         calculator_results: JSON.stringify({ inputs, results }, null, 2)
       });
       
@@ -88,7 +88,7 @@ const ROICalculatorEmail = ({ results, inputs }) => {
       
       <div className="relative z-10 grid lg:grid-cols-2 gap-10 items-center">
         <div>
-          <h3 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight">Ready to stop losing money on manual processes?</h3>
+          <h3 className="text-2xl md:text-3xl font-bold mb-4 tracking-tight">Ready to stop losing money on no-shows and manual booking?</h3>
           <p className="text-slate-400 mb-8 leading-relaxed">
             Download your customized report to share with your team, or schedule a demo to see how OMIS can make these savings a reality.
           </p>

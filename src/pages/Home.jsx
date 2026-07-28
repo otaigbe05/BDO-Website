@@ -3,10 +3,9 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, BarChart3, TrendingUp, Bell, Target, Award, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, ExternalLink, CalendarCheck, Wallet, FileSignature, BellRing, Users2, LayoutDashboard, BarChart2, FileSpreadsheet, RefreshCw } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import TrustTicker from '@/components/TrustTicker';
-import NewsletterSignup from '@/components/NewsletterSignup';
 
 const Home = () => {
     const siteUrl = "https://www.bdoanalyticssolutions.com";
@@ -18,11 +17,11 @@ const Home = () => {
         transition: { duration: 0.6, ease: "easeOut" }
     };
 
-    const features = [
-        { 
-            icon: <BarChart3 className="w-8 h-8" />, 
-            title: "Live Dashboards", 
-            desc: "Real-time visual insights tailored to your business",
+    const omisFeatures = [
+        {
+            icon: <CalendarCheck className="w-8 h-8" />,
+            title: "Online Booking",
+            desc: "Clients book their own appointments, day or night",
             glowColor: "from-blue-500/10 via-transparent to-transparent",
             iconColor: "text-blue-700",
             iconBg: "bg-blue-50",
@@ -31,10 +30,10 @@ const Home = () => {
             hoverBorder: "group-hover:border-blue-400",
             linkColor: "text-blue-700 hover:text-blue-800"
         },
-        { 
-            icon: <TrendingUp className="w-8 h-8" />, 
-            title: "Smart Forecasting", 
-            desc: "Predict trends and plan ahead with confidence",
+        {
+            icon: <Wallet className="w-8 h-8" />,
+            title: "Deposits",
+            desc: "Paid straight into your own Stripe account — we never hold your funds",
             glowColor: "from-emerald-500/10 via-transparent to-transparent",
             iconColor: "text-emerald-700",
             iconBg: "bg-emerald-50",
@@ -43,10 +42,10 @@ const Home = () => {
             hoverBorder: "group-hover:border-emerald-400",
             linkColor: "text-emerald-700 hover:text-emerald-800"
         },
-        { 
-            icon: <Bell className="w-8 h-8" />, 
-            title: "Automated Alerts", 
-            desc: "Get notified when metrics need your attention",
+        {
+            icon: <FileSignature className="w-8 h-8" />,
+            title: "Digital Waivers",
+            desc: "Clients sign before they arrive — no paper, no chasing",
             glowColor: "from-violet-500/10 via-transparent to-transparent",
             iconColor: "text-violet-700",
             iconBg: "bg-violet-50",
@@ -55,10 +54,10 @@ const Home = () => {
             hoverBorder: "group-hover:border-violet-400",
             linkColor: "text-violet-700 hover:text-violet-800"
         },
-        { 
-            icon: <Target className="w-8 h-8" />, 
-            title: "Actionable Insights", 
-            desc: "Skip the guesswork with clear recommendations",
+        {
+            icon: <BellRing className="w-8 h-8" />,
+            title: "SMS & Email Reminders",
+            desc: "Fewer no-shows, automatically",
             glowColor: "from-amber-500/10 via-transparent to-transparent",
             iconColor: "text-amber-700",
             iconBg: "bg-amber-50",
@@ -67,10 +66,10 @@ const Home = () => {
             hoverBorder: "group-hover:border-amber-400",
             linkColor: "text-amber-700 hover:text-amber-800"
         },
-        { 
-            icon: <Award className="w-8 h-8" />, 
-            title: "Industry Benchmarks", 
-            desc: "See how you stack up against competitors",
+        {
+            icon: <Users2 className="w-8 h-8" />,
+            title: "Per-Staff Booking Links",
+            desc: "Every team member gets their own bookable page",
             glowColor: "from-rose-500/10 via-transparent to-transparent",
             iconColor: "text-rose-700",
             iconBg: "bg-rose-50",
@@ -79,27 +78,51 @@ const Home = () => {
             hoverBorder: "group-hover:border-rose-400",
             linkColor: "text-rose-700 hover:text-rose-800"
         },
+        {
+            icon: <LayoutDashboard className="w-8 h-8" />,
+            title: "Business Dashboard",
+            desc: "Bookings, deposits, and client activity in one place",
+            glowColor: "from-teal-500/10 via-transparent to-transparent",
+            iconColor: "text-teal-700",
+            iconBg: "bg-teal-50",
+            iconBorder: "border-teal-200",
+            hoverIconBg: "group-hover:bg-teal-600 group-hover:text-white",
+            hoverBorder: "group-hover:border-teal-400",
+            linkColor: "text-teal-700 hover:text-teal-800"
+        },
+    ];
+
+    const consultingServices = [
+        { icon: <BarChart2 className="w-7 h-7" />, title: "Power BI Dashboards", desc: "Custom dashboards built around how you actually run your business" },
+        { icon: <FileSpreadsheet className="w-7 h-7" />, title: "Data Audit & Cleanup", desc: "We untangle scattered spreadsheets, POS exports, and legacy tools" },
+        { icon: <RefreshCw className="w-7 h-7" />, title: "Automated Reporting", desc: "Reports that update themselves instead of eating your Sunday night" },
+    ];
+
+    const verticals = [
+        { name: "Tattoo & Piercing Studios", href: "https://www.omis-crm.com/tattoo" },
+        { name: "Barbershops", href: "https://www.omis-crm.com/barbers" },
+        { name: "Auto Repair Shops", href: "https://www.omis-crm.com/auto" },
     ];
 
     return (
         <>
             <Helmet>
-                <title>Turn Business Data Into Clear Insights — No CRM Needed | BDO Analytics Solutions</title>
-                <meta name="description" content="OMIS analyzes your existing data and gives you dashboards, forecasts, and recommendations instantly. Small business analytics without the CRM complexity." />
+                <title>Data & Analytics Consulting + OMIS | BDO Analytics Solutions</title>
+                <meta name="description" content="BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
             <div className="bg-white overflow-hidden font-sans">
-                <HeroSection 
+                <HeroSection
                     headline={
                         <span>
-                            Turn Your Business Data Into Clear, Actionable Insights <br className="hidden md:block" />
+                            We turn business data into <br className="hidden md:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-teal-700">
-                                — No CRM Needed
+                                better decisions.
                             </span>
                         </span>
                     }
-                    subheadline="OMIS transforms your existing data into dashboards, forecasts, and recommendations — without forcing you into a complex CRM system. BDO Analytics Solutions gives small businesses the clarity they need to grow."
+                    subheadline="BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses."
                     primaryCtaText="Book a Demo"
                     primaryCtaLink="/book-demo"
                     secondaryCtaText="Try OMIS Now"
@@ -112,19 +135,15 @@ const Home = () => {
                 <section className="py-24 bg-white border-t border-slate-200">
                     <div className="container mx-auto px-4">
                         <motion.div {...fadeInUp} className="max-w-4xl mx-auto text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Running Without a CRM? You're Not Alone.</h2>
+                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Our Consulting Practice</h2>
                             <p className="text-xl text-slate-800 font-medium leading-relaxed">
-                                Most small businesses don't use CRMs — and that's perfectly fine. But you still need to understand your numbers.
+                                Before OMIS, there's the work we've always done: making sense of your business's numbers.
                             </p>
                         </motion.div>
 
                         <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                            {[
-                                { title: "Scattered Data", desc: "Sales in one place, expenses in another, customer info in spreadsheets" },
-                                { title: "No Clear Picture", desc: "Hard to see trends, predict slow months, or identify your best customers" },
-                                { title: "Time Wasted", desc: "Hours spent manually creating reports that are outdated by the time you finish" }
-                            ].map((item, i) => (
-                                <motion.div 
+                            {consultingServices.map((item, i) => (
+                                <motion.div
                                     key={i}
                                     initial={{ opacity: 0, y: 20 }}
                                     whileInView={{ opacity: 1, y: 0 }}
@@ -132,10 +151,13 @@ const Home = () => {
                                     transition={{ delay: i * 0.1 }}
                                     className="bg-slate-50 p-8 rounded-2xl border border-slate-300"
                                 >
+                                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 border border-blue-100 text-blue-700">
+                                        {item.icon}
+                                    </div>
                                     <h3 className="text-2xl font-bold text-slate-900 mb-3">{item.title}</h3>
                                     <p className="text-slate-800 font-medium mb-4">{item.desc}</p>
                                     <Link to="/services" className="inline-flex items-center font-bold text-blue-700 hover:text-blue-800 transition-colors group">
-                                      Fix this with us <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                      See our services <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
                                     </Link>
                                 </motion.div>
                             ))}
@@ -146,38 +168,37 @@ const Home = () => {
                 <section className="py-24 bg-blue-50/50 border-y border-slate-200">
                     <div className="container mx-auto px-4">
                         <motion.div {...fadeInUp} className="max-w-4xl mx-auto text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">OMIS: Analytics Made Simple</h2>
+                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Meet OMIS</h2>
                             <p className="text-xl text-slate-800 font-medium leading-relaxed">
-                                Connect your data sources and OMIS does the rest. Get professional dashboards, forecasts, and insights — without hiring a data analyst.
+                                Our flagship product: online booking, deposits, digital waivers, and client management for appointment-based businesses. Live today for three industries.
                             </p>
                         </motion.div>
 
-                        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            {[
-                                { title: "Quick Setup", desc: "Connect in minutes, fully implemented in weeks. No technical skills required." },
-                                { title: "Always Up-to-Date", desc: "Live dashboards refresh automatically. No manual updates." },
-                                { title: "Clear Recommendations", desc: "Don't just see numbers — get told what to do next." }
-                            ].map((item, i) => (
-                                <motion.div 
+                        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+                            {verticals.map((v, i) => (
+                                <motion.a
                                     key={i}
-                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    href={v.href}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: i * 0.1 }}
-                                    className="bg-white p-10 rounded-3xl shadow-lg border border-slate-300 hover:shadow-xl hover:scale-105 hover:border-blue-400 transition-all duration-300 flex flex-col"
+                                    className="bg-white p-6 rounded-2xl shadow-md border border-slate-300 hover:shadow-lg hover:border-blue-400 transition-all duration-300 flex items-center justify-between font-bold text-slate-900"
                                 >
-                                    <div className="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center mb-6 mx-auto border border-blue-200">
-                                        <CheckCircle2 className="w-8 h-8 text-blue-700" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-slate-900 mb-4 text-center">{item.title}</h3>
-                                    <p className="text-slate-800 font-medium text-center leading-relaxed flex-grow">{item.desc}</p>
-                                    <div className="mt-6 text-center">
-                                        <Link to="/omis-product" className="inline-flex items-center font-bold text-blue-700 hover:text-blue-800 transition-colors group">
-                                          Learn More <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                        </Link>
-                                    </div>
-                                </motion.div>
+                                    {v.name}
+                                    <ExternalLink className="w-4 h-4 text-blue-700" />
+                                </motion.a>
                             ))}
+                        </div>
+
+                        <div className="text-center">
+                            <Button asChild size="lg" className="bg-blue-700 hover:bg-blue-800 text-white font-bold h-14 px-8 rounded-full shadow-lg transition-transform hover:scale-105">
+                                <a href="https://omis-crm.com/" target="_blank" rel="noopener noreferrer">
+                                    Explore OMIS <ArrowRight className="ml-2 w-5 h-5" />
+                                </a>
+                            </Button>
                         </div>
                     </div>
                 </section>
@@ -185,11 +206,11 @@ const Home = () => {
                 <section className="py-24 bg-white border-b border-slate-200 relative">
                     <div className="container mx-auto px-4">
                         <motion.div {...fadeInUp} className="text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Everything You Need to Make Smart Decisions</h2>
+                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">What OMIS Gives Your Business</h2>
                         </motion.div>
 
                         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
-                            {features.map((feature, i) => (
+                            {omisFeatures.map((feature, i) => (
                                 <motion.div
                                     key={i}
                                     initial={{ opacity: 0, y: 20 }}
@@ -220,11 +241,6 @@ const Home = () => {
                     </div>
                 </section>
 
-                <section className="py-24 bg-slate-50 border-b border-slate-200">
-                    <div className="container mx-auto px-4">
-                        <NewsletterSignup />
-                    </div>
-                </section>
             </div>
         </>
     );

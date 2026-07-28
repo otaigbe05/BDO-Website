@@ -193,13 +193,13 @@ const About = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">Why OMIS?</h2>
               <p className="text-lg text-slate-300 font-medium mb-8 leading-relaxed">
-                The Operational Management Information System (OMIS) was built specifically to solve the data fragmentation problem. It's not just a dashboard; it's a dedicated analytics layer for your business.
+                OMIS is our booking, deposits, and client-management platform, built specifically for appointment-based businesses — live today for tattoo & piercing studios, barbershops, and auto repair shops.
               </p>
               <ul className="space-y-6">
                 {[
-                  "Automated Data Pipelines: Say goodbye to manual Excel exports.",
-                  "No CRM Bloat: We focus purely on analytics, avoiding the clunkiness of trying to be a CRM.",
-                  "Customized KPI Tracking: Track what actually matters to your specific industry.",
+                  "Online Booking: Clients book themselves, day or night.",
+                  "Deposits Direct to You: Paid straight into your own Stripe account — we never hold your funds.",
+                  "Digital Waivers: Signed before the client walks in.",
                   "Rapid Implementation: Get up and running in days, not months."
                 ].map((item, idx) => (
                   <li key={idx} className="flex items-start gap-4">
@@ -228,8 +228,8 @@ const About = () => {
                     <Database className="w-6 h-6 text-blue-400" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-white">Your Data Source</h4>
-                    <p className="text-sm text-slate-400">POS, ERP, Spreadsheets</p>
+                    <h4 className="text-xl font-bold text-white">Client Books Online</h4>
+                    <p className="text-sm text-slate-400">Booking, Deposit, Waiver — All in One Step</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4">
@@ -237,8 +237,8 @@ const About = () => {
                     <LineChart className="w-6 h-6 text-emerald-400" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-bold text-white">OMIS Output</h4>
-                    <p className="text-sm text-slate-400">Clear, Live Dashboards</p>
+                    <h4 className="text-xl font-bold text-white">OMIS Handles the Rest</h4>
+                    <p className="text-sm text-slate-400">Reminders, Deposits to Your Stripe, Business Dashboard</p>
                   </div>
                 </div>
                 <div className="absolute top-1/2 right-8 -translate-y-1/2 opacity-10">

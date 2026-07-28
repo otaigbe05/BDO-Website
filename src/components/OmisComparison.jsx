@@ -4,20 +4,19 @@ import { Check, X } from 'lucide-react';
 
 const OmisComparison = () => {
   const comparisonData = [
-    { feature: "Setup Time", omis: "2-4 Hours", manual: "40+ Hours", omisAdvantage: true },
-    { feature: "Monthly Cost", omis: "From $29/mo", manual: "$1000s in labor", omisAdvantage: true },
-    { feature: "Data Accuracy", omis: "99.9% (Automated)", manual: "85% (Prone to human error)", omisAdvantage: true },
-    { feature: "Reporting Speed", omis: "Real-time Live Data", manual: "Weekly / Monthly delays", omisAdvantage: true },
-    { feature: "Scalability", omis: "Infinite", manual: "Requires more staff", omisAdvantage: true },
-    { feature: "Actionable AI Insights", omis: "Included", manual: "None", omisAdvantage: true },
-    { feature: "Learning Curve", omis: "Minimal (No-code)", manual: "Steep (Excel/SQL experts needed)", omisAdvantage: true },
+    { feature: "Booking", omis: "Clients self-book online, anytime", manual: "Phone tag and DMs during business hours", omisAdvantage: true },
+    { feature: "Deposits", omis: "Collected automatically into your own Stripe account", manual: "Collected in person, or not at all", omisAdvantage: true },
+    { feature: "Waivers", omis: "Signed digitally before the appointment", manual: "Signed on paper at the door", omisAdvantage: true },
+    { feature: "No-Shows", omis: "Reduced by deposits and reminders", manual: "No protection against last-minute cancellations", omisAdvantage: true },
+    { feature: "Reminders", omis: "Automatic SMS & email", manual: "Manual texts and calls, if any", omisAdvantage: true },
+    { feature: "Staff Scheduling", omis: "Per-staff booking links", manual: "Shared calendar or notebook", omisAdvantage: true },
   ];
 
   return (
     <div className="w-full max-w-5xl mx-auto py-16">
       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">OMIS vs. Manual Processes</h2>
-        <p className="text-slate-600 text-lg">Stop wasting time on spreadsheets. See how automation transforms your workflow.</p>
+        <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-4">OMIS vs. Manual Booking</h2>
+        <p className="text-slate-600 text-lg">Stop losing time and money to phone tag and no-shows.</p>
       </div>
 
       <motion.div 
@@ -32,7 +31,7 @@ const OmisComparison = () => {
               <tr>
                 <th className="p-6 border-b border-slate-200 bg-slate-50 text-slate-700 font-semibold w-1/3">Feature / Metric</th>
                 <th className="p-6 border-b border-blue-200 bg-blue-50 text-blue-700 font-bold w-1/3 text-center text-lg">OMIS</th>
-                <th className="p-6 border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold w-1/3 text-center">Manual / Spreadsheets</th>
+                <th className="p-6 border-b border-slate-200 bg-slate-50 text-slate-600 font-semibold w-1/3 text-center">Manual / Phone & DMs</th>
               </tr>
             </thead>
             <tbody>

@@ -17,10 +17,10 @@ const OmisDashboardScreen = () => {
   ];
 
   const team = [
-    { id: 1, name: 'Grace Patel', role: 'Veterinarian', count: '0 today', initials: 'GP', color: 'bg-emerald-100 text-emerald-700' },
-    { id: 2, name: 'Michael Chen', role: 'Vet Tech', count: '0 today', initials: 'MC', color: 'bg-blue-100 text-blue-700' },
-    { id: 3, name: 'Sophia Lee', role: 'Receptionist', count: '0 today', initials: 'SL', color: 'bg-purple-100 text-purple-700' },
-    { id: 4, name: 'Amanda Garcia', role: 'Groomer', count: '0 today', initials: 'AG', color: 'bg-orange-100 text-orange-700' },
+    { id: 1, name: 'Grace Patel', role: 'Tattoo Artist', count: '0 today', initials: 'GP', color: 'bg-emerald-100 text-emerald-700' },
+    { id: 2, name: 'Michael Chen', role: 'Piercer', count: '0 today', initials: 'MC', color: 'bg-blue-100 text-blue-700' },
+    { id: 3, name: 'Sophia Lee', role: 'Front Desk', count: '0 today', initials: 'SL', color: 'bg-purple-100 text-purple-700' },
+    { id: 4, name: 'Amanda Garcia', role: 'Apprentice', count: '0 today', initials: 'AG', color: 'bg-orange-100 text-orange-700' },
   ];
 
   return (
@@ -55,8 +55,8 @@ const OmisDashboardScreen = () => {
              <div className="flex items-center gap-3">
                  <div className="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center font-bold text-lg">H</div>
                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 leading-tight">Hamilton Vet Clinic</h2>
-                    <p className="text-sm text-slate-500 font-medium">Veterinary Clinic</p>
+                    <h2 className="text-lg font-bold text-slate-900 leading-tight">Hamilton Ink & Iron Studio</h2>
+                    <p className="text-sm text-slate-500 font-medium">Tattoo & Piercing Studio</p>
                  </div>
              </div>
            </div>
@@ -74,7 +74,7 @@ const OmisDashboardScreen = () => {
                 </button>
                 <button className="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-all shadow-sm">
                     <Plus className="w-5 h-5" />
-                    New Pet Owner
+                    New Client
                 </button>
            </div>
         </header>
@@ -96,7 +96,7 @@ const OmisDashboardScreen = () => {
                     <div className="w-12 h-12 bg-purple-50 text-purple-600 rounded-xl flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                         <Users className="w-6 h-6" />
                     </div>
-                    <p className="text-slate-500 font-bold text-sm mb-1 uppercase tracking-wide">Total Pet Owners</p>
+                    <p className="text-slate-500 font-bold text-sm mb-1 uppercase tracking-wide">Total Clients</p>
                     <h3 className="text-4xl font-black text-slate-900 mb-2">0</h3>
                     <p className="text-slate-400 text-sm font-medium">
                         <span className="text-emerald-500 font-bold">+0 this month</span> • 0 vs last period

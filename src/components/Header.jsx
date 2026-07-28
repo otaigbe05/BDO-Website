@@ -2,22 +2,15 @@ import React, { useState } from 'react';
 import { NavLink, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, BarChart2, ShoppingCart as ShoppingCartIcon, ArrowRight } from 'lucide-react';
-import { useCart } from '@/hooks/useCart';
-import ShoppingCart from '@/components/ShoppingCart';
+import { Menu, X, BarChart2, ArrowRight } from 'lucide-react';
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    const [isCartOpen, setIsCartOpen] = useState(false);
-    const { cartItems } = useCart();
-
-    const itemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
     const navLinks = [
         { title: 'Home', to: '/' },
         { title: 'OMIS Product', to: '/omis-product' },
         { title: 'Services', to: '/services' },
-        { title: 'Business Templates', to: '/business-templates' },
         { title: 'ROI Calculator', to: '/roi-calculator' },
         { title: 'About', to: '/about' },
         { title: 'Contact', to: '/contact' },
@@ -56,24 +49,6 @@ const Header = () => {
 
                         <div className="flex items-center gap-3">
                            <div className="hidden xl:flex items-center gap-3">
-                                <button 
-                                    onClick={() => setIsCartOpen(true)}
-                                    className="relative p-2 text-slate-900 hover:text-blue-800 transition-colors focus:outline-none"
-                                    aria-label="Open Shopping Cart"
-                                >
-                                    <ShoppingCartIcon className="w-6 h-6" />
-                                    {itemCount > 0 && (
-                                        <motion.span 
-                                            key={itemCount}
-                                            initial={{ scale: 0.5 }}
-                                            animate={{ scale: 1 }}
-                                            className="absolute top-0 right-0 -mt-1 -mr-1 flex items-center justify-center w-5 h-5 bg-blue-700 text-white text-xs font-bold rounded-full"
-                                        >
-                                            {itemCount}
-                                        </motion.span>
-                                    )}
-                                </button>
-
                                 <Button asChild className="bg-blue-700 hover:bg-blue-800 text-white font-bold shadow-md shadow-blue-600/20 rounded-xl transition-all hover:scale-105 ml-2">
                                     <Link to="/book-demo">Book a Demo</Link>
                                 </Button>
@@ -84,19 +59,6 @@ const Header = () => {
                                 </Button>
                            </div>
                             <div className="lg:hidden flex items-center gap-2">
-                                <button 
-                                    onClick={() => setIsCartOpen(true)}
-                                    className="relative p-2 text-slate-900 hover:text-blue-800 transition-colors focus:outline-none"
-                                    aria-label="Open Shopping Cart"
-                                >
-                                    <ShoppingCartIcon className="w-6 h-6" />
-                                    {itemCount > 0 && (
-                                        <span className="absolute top-0 right-0 -mt-1 -mr-1 flex items-center justify-center w-5 h-5 bg-blue-700 text-white text-xs font-bold rounded-full">
-                                            {itemCount}
-                                        </span>
-                                    )}
-                                </button>
-
                                 <button
                                     onClick={() => setIsMenuOpen(!isMenuOpen)}
                                     className="p-2 rounded-md text-slate-900 hover:text-blue-800"
@@ -144,8 +106,6 @@ const Header = () => {
                 )}
                 </AnimatePresence>
             </header>
-
-            <ShoppingCart isCartOpen={isCartOpen} setIsCartOpen={setIsCartOpen} />
         </>
     );
 };

@@ -11,7 +11,6 @@ import ServicesHero from '@/components/ServicesHero';
 import ServicesComparison from '@/components/ServicesComparison';
 import ServicesPricingGrid from '@/components/ServicesPricingGrid';
 import ServicesClientStories from '@/components/ServicesClientStories';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import ServicesFinalCTA from '@/components/ServicesFinalCTA';
 
 const Services = () => {
@@ -47,7 +46,7 @@ const Services = () => {
                             </p>
                         </div>
 
-                        <div className="grid md:grid-cols-3 gap-8">
+                        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
                             {/* Option 1: Power BI Analytics */}
                             <motion.div 
                                 initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
@@ -76,33 +75,10 @@ const Services = () => {
                                 </div>
                                 <h3 className="text-2xl font-bold text-white mb-3 relative z-10">OMIS Implementation</h3>
                                 <p className="text-slate-300 font-medium mb-8 flex-grow relative z-10">
-                                    Rapid deployment of our Operational Management Information System. Automated, live dashboards built specifically for SMBs.
+                                    Get set up on OMIS — online booking, deposits, digital waivers, and client management for appointment-based businesses. Live today for tattoo & piercing studios, barbershops, and auto repair shops.
                                 </p>
                                 <Button asChild className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 relative z-10 shadow-lg shadow-blue-900/50">
                                     <Link to="/omis-product">Get Started <ArrowRight className="ml-2 w-4 h-4" /></Link>
-                                </Button>
-                            </motion.div>
-
-                            {/* Option 3: Business Templates */}
-                            <motion.div 
-                                initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeInUp}
-                                className="bg-white p-8 rounded-3xl shadow-lg border border-slate-200 hover:shadow-xl transition-all duration-300 flex flex-col relative overflow-hidden"
-                            >
-                                <div className="absolute top-6 right-6 bg-blue-100 text-blue-800 text-xs font-extrabold px-3 py-1 rounded-full uppercase tracking-wider">
-                                    New
-                                </div>
-                                <div className="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mb-6 border border-emerald-100">
-                                    <span className="text-3xl" role="img" aria-label="Clipboard">📋</span>
-                                </div>
-                                <h3 className="text-2xl font-bold text-slate-900 mb-3 pr-16">Business Reporting Templates</h3>
-                                <p className="text-slate-600 font-medium mb-8 flex-grow">
-                                    Not ready for a full platform? Start with our industry-specific Excel templates for auto shops, clinics, barbers, salons, and more. Plug in your numbers and your reports are done instantly.
-                                </p>
-                                <div className="flex items-center justify-between mb-4">
-                                    <span className="text-slate-900 font-bold">From $29</span>
-                                </div>
-                                <Button asChild variant="outline" className="w-full border-slate-300 text-slate-800 hover:bg-slate-50 font-bold py-6">
-                                    <Link to="/business-templates">Browse Templates <ArrowRight className="ml-2 w-4 h-4" /></Link>
                                 </Button>
                             </motion.div>
                         </div>
@@ -112,13 +88,6 @@ const Services = () => {
                 <ServicesComparison />
                 <ServicesPricingGrid />
                 <ServicesClientStories />
-                
-                <section className="py-24 bg-slate-50 border-t border-slate-300">
-                    <div className="container mx-auto px-4">
-                        <NewsletterSignup />
-                    </div>
-                </section>
-
                 <ServicesFinalCTA />
             </main>
         </div>

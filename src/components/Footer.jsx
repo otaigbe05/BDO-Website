@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart2, ExternalLink, Linkedin, Twitter, Mail, Phone } from 'lucide-react';
+import { BarChart2, ExternalLink, Mail, Phone } from 'lucide-react';
 
 const Footer = () => {
   const omisAppLink = "https://omis-crm.com/";
@@ -22,7 +22,6 @@ const Footer = () => {
         { text: "Power BI Consulting", to: "/services" },
         { text: "Data Cleanup", to: "/services" },
         { text: "Custom Dashboards", to: "/services" },
-        { text: "Business Templates", to: "/business-templates" },
         { text: "Strategy Calls", to: "/services" },
       ]
     },
@@ -50,16 +49,8 @@ const Footer = () => {
               <span className="text-xl font-extrabold text-slate-900 tracking-tight">BDO Analytics Solutions</span>
             </Link>
             <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6">
-              Your small business analytics platform. Automated dashboards, data insights, and forecasts — without CRM complexity.
+              Toronto data and analytics consulting — and the builders of OMIS.
             </p>
-            <div className="flex gap-4">
-              <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white border-2 border-slate-300 rounded-lg flex items-center justify-center text-slate-800 hover:bg-blue-100 hover:text-blue-800 hover:border-blue-400 transition-colors" aria-label="LinkedIn">
-                <Linkedin className="w-5 h-5" />
-              </a>
-              <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-white border-2 border-slate-300 rounded-lg flex items-center justify-center text-slate-800 hover:bg-blue-100 hover:text-blue-800 hover:border-blue-400 transition-colors" aria-label="Twitter">
-                <Twitter className="w-5 h-5" />
-              </a>
-            </div>
           </div>
 
           {footerSections.map(section => (
@@ -91,11 +82,11 @@ const Footer = () => {
               </p>
               <p className="text-sm text-slate-800 font-medium flex items-center gap-2">
                 <Phone className="w-4 h-4 text-slate-700" />
-                <a href="tel:+14168485058" className="font-bold hover:text-blue-800 hover:underline transition-colors">+1-416-848-5058</a>
+                <a href="tel:+14164779893" className="font-bold hover:text-blue-800 hover:underline transition-colors">+1 (416) 477-9893</a>
               </p>
             </div>
             <div className="text-sm text-slate-800 font-medium md:text-right">
-              <p className="mb-2">Keywords: Small business analytics, no-CRM analytics, business insights platform, automated dashboards, data insights for small business, Power BI consulting, business intelligence for SMBs, ROI Calculator</p>
+              <p className="mb-2">Keywords: Data and analytics consulting, Power BI consulting, business intelligence for SMBs, booking and client-management software, appointment deposits, tattoo studio booking, barbershop booking, auto repair shop booking</p>
             </div>
           </div>
           <p className="text-slate-800 font-bold text-sm text-center">© 2026 BDO Analytics Solutions. All rights reserved. | *Performance statistics based on third-party research including McKinsey & Company, BlackLine, PwC, and EasyInsights. Results vary. Not a guarantee of individual outcomes.</p>

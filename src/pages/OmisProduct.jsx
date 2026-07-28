@@ -24,7 +24,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { sendEmail } from '@/lib/email';
 import HeroSection from '@/components/HeroSection';
 import OmisComparison from '@/components/OmisComparison';
-import NewsletterSignup from '@/components/NewsletterSignup';
 import Breadcrumbs from '@/components/Breadcrumbs';
 import OmisDashboardScreens from '@/components/OmisDashboardScreens';
 import OmisPricingTable from '@/components/OmisPricingTable';
@@ -58,32 +57,32 @@ const OmisProduct = () => {
     };
 
     const howItWorksSteps = [
-        { icon: <Plug className="w-8 h-8 text-blue-600" />, title: "1. Connect Your Data", desc: "Upload files or connect tools like Excel, SQL, Stripe, and more." },
-        { icon: <LineChart className="w-8 h-8 text-teal-600" />, title: "2. OMIS Analyzes Everything", desc: "Your data is cleaned, structured, and transformed automatically." },
-        { icon: <Lightbulb className="w-8 h-8 text-amber-500" />, title: "3. Get Insights & Grow", desc: "Dashboards, forecasts, and recommendations guide your next steps." },
+        { icon: <Plug className="w-8 h-8 text-blue-600" />, title: "1. Set Up Your Booking Page", desc: "Add your services, staff, and hours — live in a day, no technical skills required." },
+        { icon: <LineChart className="w-8 h-8 text-teal-600" />, title: "2. Clients Book & Pay Deposits", desc: "Bookings, digital waivers, and deposits go straight into your own Stripe account." },
+        { icon: <Lightbulb className="w-8 h-8 text-amber-500" />, title: "3. Fewer No-Shows, Less Admin", desc: "Automated SMS/email reminders and a business dashboard keep you on top of it all." },
     ];
 
     return (
         <div className="bg-white text-slate-900 font-sans min-h-screen">
             <Helmet>
-                <title>OMIS - Instant Business Insights | BDO Analytics Solutions</title>
-                <meta name="description" content="OMIS: The no-CRM analytics platform for small business by BDO Analytics Solutions. Automated dashboards, forecasting, and insights without the complexity." />
+                <title>OMIS - Booking, Deposits & Client Management | BDO Analytics Solutions</title>
+                <meta name="description" content="OMIS is the booking, deposits, and client-management platform for appointment-based businesses. Live today for tattoo & piercing studios, barbershops, and auto repair shops." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
             <Breadcrumbs />
 
             {/* Hero with new gradient styling */}
-            <HeroSection 
+            <HeroSection
                 headline={
                     <span>
-                        OMIS: Your Data, <br />
+                        OMIS: Booking, Deposits, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
-                            Transformed Into Decisions
+                            and Client Management
                         </span>
                     </span>
                 }
-                subheadline="Turn your scattered data into dashboards, forecasts, and recommendations — without changing your workflow."
+                subheadline="Online booking, deposits paid directly into your own Stripe account, digital waivers, and automated reminders — built for appointment-based businesses."
                 primaryCtaText="Book a Demo"
                 primaryCtaLink="/book-demo"
                 secondaryCtaText="Try OMIS Now"
@@ -91,20 +90,44 @@ const OmisProduct = () => {
                 showDashboardPreview={false}
             />
 
+            {/* Live Verticals */}
+            <section className="py-16 bg-slate-50 border-b border-slate-200">
+                <div className="container mx-auto px-4 text-center">
+                    <p className="text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-6">Live Today For</p>
+                    <div className="flex flex-wrap justify-center gap-4">
+                        {[
+                            { name: "Tattoo & Piercing Studios", href: "https://www.omis-crm.com/tattoo" },
+                            { name: "Barbershops", href: "https://www.omis-crm.com/barbers" },
+                            { name: "Auto Repair Shops", href: "https://www.omis-crm.com/auto" },
+                        ].map((v) => (
+                            <a
+                                key={v.name}
+                                href={v.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="bg-white px-6 py-3 rounded-full border border-slate-300 shadow-sm hover:shadow-md hover:border-blue-400 transition-all font-bold text-slate-900"
+                            >
+                                {v.name}
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
             {/* Interactive Dashboard Screens Integration */}
             <OmisDashboardScreens />
 
             <section className="py-24 bg-white relative overflow-hidden border-t border-slate-100">
                 <div className="container mx-auto px-4 relative z-10">
                     <div className="max-w-4xl mx-auto text-center mb-16">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">Running Without a CRM? You're Not Alone.</h2>
-                        <p className="text-slate-600 text-lg font-light leading-relaxed">Most small businesses operate in chaos. OMIS brings order.</p>
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900 tracking-tight">Running Your Booking Book on Paper or DMs?</h2>
+                        <p className="text-slate-600 text-lg font-light leading-relaxed">Most appointment-based businesses lose time and money the same three ways. OMIS fixes all three.</p>
                     </div>
                     <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
                         {[
-                            { title: "Scattered Data", desc: "Sales in Stripe, expenses in Xero, customer lists in Excel. Nothing talks to each other." },
-                            { title: "No Clear Picture", desc: "You don't know if you're profitable until your accountant tells you at the end of the year." },
-                            { title: "Time Wasted", desc: "Hours spent manually updating spreadsheets that are outdated the moment you finish." }
+                            { title: "No-Shows", desc: "Clients skip appointments with nothing on the line — deposits fix that." },
+                            { title: "Manual Booking", desc: "Phone tag and DMs to book a slot, instead of clients booking themselves in seconds." },
+                            { title: "Paper Waivers", desc: "Chasing signatures at the door instead of having them done before the client arrives." }
                         ].map((point, i) => (
                             <motion.div 
                                 key={i}
@@ -154,8 +177,8 @@ const OmisProduct = () => {
             <section className="py-24 bg-slate-50 border-t border-slate-100" id="pricing">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16 max-w-3xl mx-auto">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900">Simple, Transparent Pricing</h2>
-                        <p className="text-lg text-slate-600">Choose the perfect plan for your business needs. No hidden fees.</p>
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900">Simple, Founding-Rate Pricing</h2>
+                        <p className="text-lg text-slate-600">$39/month, locked for life, for the first 10 businesses per industry — plus applicable taxes.</p>
                     </div>
 
                     <OmisPricingTable />
@@ -165,12 +188,6 @@ const OmisProduct = () => {
             <section className="py-12 bg-white border-t border-slate-50">
                 <div className="container mx-auto px-4">
                     <OmisComparison />
-                </div>
-            </section>
-
-            <section className="py-24 bg-white border-t border-slate-50">
-                <div className="container mx-auto px-4">
-                    <NewsletterSignup />
                 </div>
             </section>
         </div>
