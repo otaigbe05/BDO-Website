@@ -108,7 +108,7 @@ const Home = () => {
         <>
             <Helmet>
                 <title>Data & Analytics Consulting + OMIS | BDO Analytics Solutions</title>
-                <meta name="description" content="BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses." />
+                <meta name="description" content="BDO Analytics Solutions is an Ontario, Canada data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
@@ -122,7 +122,7 @@ const Home = () => {
                             </span>
                         </span>
                     }
-                    subheadline="BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses."
+                    subheadline="BDO Analytics Solutions is an Ontario, Canada data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses."
                     primaryCtaText="Book a Demo"
                     primaryCtaLink="/book-demo"
                     secondaryCtaText="Try OMIS Now"

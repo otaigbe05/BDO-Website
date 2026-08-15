@@ -281,7 +281,7 @@ const TermsOfService = () => {
           <ul className="list-none space-y-2">
             <li><strong>Email:</strong> <a href={`mailto:${EMAIL}`} className="text-blue-600 hover:underline">{EMAIL}</a></li>
             <li><strong>Phone:</strong> <a href={`tel:${PHONE}`} className="text-blue-600 hover:underline">{PHONE}</a></li>
-            <li><strong>Address:</strong> {COMPANY}, Toronto, ON, Canada</li>
+            <li><strong>Address:</strong> {COMPANY}, Ontario, Canada</li>
           </ul>
         </div>
       )

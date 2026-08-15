@@ -49,7 +49,7 @@ const Footer = () => {
               <span className="text-xl font-extrabold text-slate-900 tracking-tight">BDO Analytics Solutions</span>
             </Link>
             <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6">
-              Toronto data and analytics consulting — and the builders of OMIS.
+              Ontario, Canada data and analytics consulting — and the builders of OMIS.
             </p>
           </div>
 

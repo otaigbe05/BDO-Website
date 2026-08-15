@@ -1,11 +1,11 @@
 export const knowledgeBase = {
   company: {
     keywords: ["company", "about bdo", "what does bdo do", "who are you", "what is bdo analytics solutions", "bdo analytics"],
-    response: "BDO Analytics Solutions is a Toronto-based data and analytics consulting practice — and the builder of OMIS, our flagship booking, deposits, and client-management platform for appointment-based businesses."
+    response: "BDO Analytics Solutions is an Ontario, Canada data and analytics consulting practice — and the builder of OMIS, our flagship booking, deposits, and client-management platform for appointment-based businesses."
   },
   leadership: {
     keywords: ["leadership", "leaders", "ceo", "who runs", "management team", "executives"],
-    response: "BDO Analytics Solutions is led by founder Otaigbe Ewoigbokhan, based in Toronto. You can read more on our /about page."
+    response: "BDO Analytics Solutions is led by founder Otaigbe Ewoigbokhan, based in Ontario, Canada. You can read more on our /about page."
   },
   services: {
     keywords: ["services", "what do you offer", "help with", "what can you do", "consulting", "training"],

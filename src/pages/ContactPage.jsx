@@ -209,7 +209,7 @@ const ContactPage = () => {
                     </div>
                     <div>
                         <h4 className="font-extrabold text-slate-900 text-lg">Based In</h4>
-                        <p className="text-slate-800 font-medium">Toronto, ON, Canada</p>
+                        <p className="text-slate-800 font-medium">Ontario, Canada</p>
                     </div>
                 </div>
               </div>
