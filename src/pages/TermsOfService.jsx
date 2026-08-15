@@ -19,7 +19,10 @@ const TermsOfService = () => {
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
-            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of all services provided by {COMPANY}, including the OMIS platform (omis-crm.com), our data and analytics consulting services (Power BI dashboards, data audit and cleanup, automated reporting), and this website (bdoanalyticssolutions.com) (collectively, the "Services").
+            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of this website (bdoanalyticssolutions.com) and our data and analytics consulting services (Power BI dashboards, data audit and cleanup, automated reporting) (collectively, the "Services").
+          </p>
+          <p>
+            Use of the OMIS platform (omis-crm.com) is governed separately by OMIS's own <a href="https://www.omis-crm.com/terms" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Terms of Service</a>, not by these Terms. These Terms apply only to this website and to {COMPANY}'s non-OMIS consulting services.
           </p>
           <p>
             By accessing or using any of our Services, you confirm that you are at least 18 years of age, have the legal authority to enter into these Terms on behalf of yourself or your organization, and agree to be bound by these Terms and our Privacy Policy.
@@ -310,7 +313,7 @@ const TermsOfService = () => {
             <span className="text-slate-500 font-medium">Last Updated: <span className="text-slate-900">{lastUpdated}</span></span>
           </div>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            These Terms govern your use of all services provided by {COMPANY}, including the OMIS platform and our analytics consulting services.
+            These Terms govern your use of this website and {COMPANY}'s analytics consulting services. Use of the OMIS platform is governed separately by OMIS's own Terms of Service.
           </p>
           <p className="mt-4 text-sm text-slate-500 max-w-2xl mx-auto italic">
             This document is provided for general informational purposes and does not constitute legal advice. We recommend having these Terms reviewed by a licensed lawyer for your specific circumstances.

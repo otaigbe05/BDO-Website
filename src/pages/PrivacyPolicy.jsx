@@ -19,7 +19,10 @@ const PrivacyPolicy = () => {
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
-            {COMPANY} ("we," "us," or "our") is committed to protecting the privacy and security of your personal and business information. This Privacy Policy applies to all services offered by {COMPANY}, including the OMIS platform (omis-crm.com), our analytics consulting services, Power BI dashboards, and this website (bdoanalyticssolutions.com).
+            {COMPANY} ("we," "us," or "our") is committed to protecting the privacy and security of your personal and business information. This Privacy Policy applies to our analytics consulting services, Power BI dashboards, and this website (bdoanalyticssolutions.com).
+          </p>
+          <p>
+            Use of the OMIS platform (omis-crm.com) is governed separately by OMIS's own <a href="https://www.omis-crm.com/privacy" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Privacy Policy</a>, not by this policy. This policy applies only to this website and to {COMPANY}'s non-OMIS consulting services.
           </p>
           <p>
             By accessing or using any of our services, you acknowledge that you have read, understood, and agree to be bound by this Privacy Policy. If you do not agree, please discontinue use of our services immediately.
@@ -254,7 +257,7 @@ const PrivacyPolicy = () => {
             <span className="text-slate-500 font-medium">Last Updated: <span className="text-slate-900">{lastUpdated}</span></span>
           </div>
           <p className="mt-4 text-slate-600 max-w-2xl mx-auto">
-            This policy applies to all services provided by {COMPANY}, including the OMIS platform and our analytics consulting services.
+            This policy applies to this website and {COMPANY}'s analytics consulting services. Use of the OMIS platform is governed separately by OMIS's own Privacy Policy.
           </p>
           <p className="mt-4 text-sm text-slate-500 max-w-2xl mx-auto italic">
             This document is provided for general informational purposes and does not constitute legal advice. We recommend having this policy reviewed by a licensed lawyer for your specific circumstances.
