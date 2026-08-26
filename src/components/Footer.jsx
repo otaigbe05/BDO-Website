@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart2, ExternalLink, Mail, Phone } from 'lucide-react';
+import { BarChart2, ExternalLink, Mail, Phone, MapPin } from 'lucide-react';
 
 const Footer = () => {
   const omisAppLink = "https://omis-crm.com/";
@@ -83,6 +83,10 @@ const Footer = () => {
               <p className="text-sm text-slate-800 font-medium flex items-center gap-2">
                 <Phone className="w-4 h-4 text-slate-700" />
                 <a href="tel:+14164779893" className="font-bold hover:text-blue-800 hover:underline transition-colors">+1 (416) 477-9893</a>
+              </p>
+              <p className="text-sm text-slate-800 font-medium flex items-start gap-2 mt-2">
+                <MapPin className="w-4 h-4 text-slate-700 mt-0.5 shrink-0" />
+                <span className="font-bold">1025 King Street East, Unit 107 #1737, Cambridge, ON N3H 3P5</span>
               </p>
             </div>
             <div className="text-sm text-slate-800 font-medium md:text-right">

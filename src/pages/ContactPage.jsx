@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { motion } from 'framer-motion';
-import { Mail, Phone, Send, Building, Loader2 } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import Breadcrumbs from '@/components/Breadcrumbs';
@@ -39,6 +39,14 @@ const ContactPage = () => {
         "logo": {
             "@type": "ImageObject",
             "url": "https://www.bdoanalyticssolutions.com/og-image.jpg"
+        },
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "1025 King Street East, Unit 107 #1737",
+            "addressLocality": "Cambridge",
+            "addressRegion": "ON",
+            "postalCode": "N3H 3P5",
+            "addressCountry": "CA"
         }
       }
   };
@@ -80,7 +88,7 @@ const ContactPage = () => {
     <div className="bg-slate-50 font-sans">
       <Helmet>
         <title>Contact Us | Book a Demo | BDO Analytics Solutions</title>
-        <meta name="description" content="Get in touch with BDO Analytics Solutions. Schedule a free demo to see how our CRM and Power BI dashboards can help your small business grow." />
+        <meta name="description" content="Get in touch with BDO Analytics Solutions. Schedule a free demo to see how OMIS and our Power BI consulting can help your small business grow." />
         <link rel="canonical" href={siteUrl} />
 
         <meta property="og:title" content="Contact Us & Book a Demo | BDO Analytics Solutions" />
@@ -205,11 +213,14 @@ const ContactPage = () => {
               <div className="bg-white p-8 rounded-3xl shadow-md border-2 border-slate-200 hover:border-blue-300 transition-colors">
                 <div className="flex items-center gap-4">
                     <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100">
-                        <Building className="w-7 h-7 text-blue-700" />
+                        <MapPin className="w-7 h-7 text-blue-700" />
                     </div>
                     <div>
-                        <h4 className="font-extrabold text-slate-900 text-lg">Based In</h4>
-                        <p className="text-slate-800 font-medium">Ontario, Canada</p>
+                        <h4 className="font-extrabold text-slate-900 text-lg">Mailing Address</h4>
+                        <p className="text-slate-800 font-medium">
+                            1025 King Street East, Unit 107 #1737<br />
+                            Cambridge, ON N3H 3P5
+                        </p>
                     </div>
                 </div>
               </div>
