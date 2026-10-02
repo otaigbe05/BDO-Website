@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 const TrustTicker = () => {
   const items = [
     "Built for Canadian Small Business",
-    "OMIS: Live for Tattoo, Barber & Auto Shops",
+    "OMIS: Live in 5 Appointment-Based Industries",
     "Analytics show up to 40% revenue lift potential",
     "Power BI Consulting",
     "Your Data Stays Yours",

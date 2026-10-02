@@ -103,7 +103,7 @@ const ROICalculatorResults = ({ results, inputs }) => {
               <tr className="hover:bg-slate-50 transition-colors">
                 <td className="p-4 text-slate-800 font-bold flex items-center gap-2">
                   OMIS Annual Cost
-                  <span className="text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full font-bold">$39/mo + tax</span>
+                  <span className="text-[10px] bg-slate-200 text-slate-800 px-2 py-0.5 rounded-full font-bold">{results.planName} · ${results.planMonthly}/mo CAD</span>
                 </td>
                 <td className="p-4 text-right text-red-600 font-bold">-{formatCurrency(results.omisCost)}</td>
               </tr>

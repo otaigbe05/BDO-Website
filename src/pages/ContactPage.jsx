@@ -82,7 +82,7 @@ const ContactPage = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const industries = ["Tattoo & Piercing Studio", "Barbershop", "Auto Repair", "Spa & Wellness", "Restaurant", "Fitness", "Retail", "Cleaning", "Property Management", "Tutoring", "Other"];
+  const industries = ["Tattoo & Piercing Studio", "Barbershop", "Auto Repair Shop", "Spa or Salon", "Personal Training", "Restaurant", "Fitness", "Retail", "Cleaning", "Property Management", "Tutoring", "Other"];
 
   return (
     <div className="bg-slate-50 font-sans">

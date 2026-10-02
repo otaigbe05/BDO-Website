@@ -93,7 +93,7 @@ const AccountDeletionRequest = () => {
               </p>
               <div className="flex items-center gap-2 text-blue-600 font-bold text-lg">
                 <Mail className="w-6 h-6" />
-                <span>info@bdoanalytics.com</span>
+                <span>omis@bdoanalyticssolutions.com</span>
               </div>
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 font-mono text-sm text-slate-700">
                 Subject: Account Deletion Request - [Your Username]
@@ -101,7 +101,7 @@ const AccountDeletionRequest = () => {
             </div>
             
             <a 
-              href="mailto:info@bdoanalytics.com?subject=Account Deletion Request"
+              href="mailto:omis@bdoanalyticssolutions.com?subject=Account Deletion Request"
               className="bg-blue-600 text-white font-bold py-4 px-8 rounded-full hover:bg-blue-700 transition-all transform hover:scale-105 shadow-lg shadow-blue-200 flex items-center gap-2 whitespace-nowrap"
             >
               Send Request <ArrowRight className="w-4 h-4" />

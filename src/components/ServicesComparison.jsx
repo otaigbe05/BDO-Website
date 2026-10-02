@@ -113,7 +113,7 @@ const ServicesComparison = () => {
                     size="lg" 
                     className="bg-blue-700 hover:bg-blue-800 text-white font-bold text-xl px-10 h-16 rounded-full shadow-lg hover:shadow-xl transition-all hover:scale-105"
                 >
-                    <Link to="/book-demo">Talk to an Expert</Link>
+                    <Link to="/book-demo">Talk to Us</Link>
                 </Button>
             </div>
         </motion.div>

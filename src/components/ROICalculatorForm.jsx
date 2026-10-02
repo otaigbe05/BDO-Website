@@ -5,17 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { OMIS_PLANS, DEFAULT_PLAN } from '@/lib/roiCalculatorLogic';
 
 const PRESETS = {
   custom: { name: 'Custom Input', appointmentsPerWeek: 20, depositAmount: 30, noShowRate: 10, adminHoursPerWeek: 5, hourlyRate: 25 },
   tattoo: { name: 'Tattoo & Piercing Studio', appointmentsPerWeek: 20, depositAmount: 50, noShowRate: 15, adminHoursPerWeek: 8, hourlyRate: 30 },
   barber: { name: 'Barbershop', appointmentsPerWeek: 60, depositAmount: 15, noShowRate: 10, adminHoursPerWeek: 6, hourlyRate: 25 },
   auto: { name: 'Auto Repair Shop', appointmentsPerWeek: 25, depositAmount: 75, noShowRate: 12, adminHoursPerWeek: 10, hourlyRate: 30 },
+  salon: { name: 'Spa or Salon', appointmentsPerWeek: 40, depositAmount: 20, noShowRate: 10, adminHoursPerWeek: 6, hourlyRate: 25 },
+  training: { name: 'Personal Training', appointmentsPerWeek: 30, depositAmount: 25, noShowRate: 12, adminHoursPerWeek: 5, hourlyRate: 30 },
 };
 
 const ROICalculatorForm = ({ onCalculate }) => {
   const [preset, setPreset] = useState('custom');
   const [inputs, setInputs] = useState(PRESETS.custom);
+  const [plan, setPlan] = useState(DEFAULT_PLAN);
 
   const handlePresetChange = (e) => {
     const selected = e.target.value;
@@ -30,7 +34,7 @@ const ROICalculatorForm = ({ onCalculate }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onCalculate(inputs);
+    onCalculate({ ...inputs, plan });
   };
 
   return (
@@ -118,6 +122,20 @@ const ROICalculatorForm = ({ onCalculate }) => {
               min={0} max={40} step={1}
               onValueChange={(val) => handleInputChange('adminHoursPerWeek', val[0])}
             />
+          </div>
+
+          {/* OMIS Plan */}
+          <div className="space-y-4 md:col-span-2">
+            <Label className="text-sm font-bold text-slate-900 block">OMIS plan to compare against</Label>
+            <select
+              className="w-full h-11 px-4 rounded-xl border border-slate-300 bg-white text-slate-900 font-medium focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-all"
+              value={plan}
+              onChange={(e) => setPlan(e.target.value)}
+            >
+              {Object.entries(OMIS_PLANS).map(([key, p]) => (
+                <option key={key} value={key}>{p.name} — ${p.monthly}/month CAD</option>
+              ))}
+            </select>
           </div>
 
           {/* Hourly Rate */}

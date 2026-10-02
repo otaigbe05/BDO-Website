@@ -90,7 +90,7 @@ const Footer = () => {
               </p>
             </div>
             <div className="text-sm text-slate-800 font-medium md:text-right">
-              <p className="mb-2">Keywords: Data and analytics consulting, Power BI consulting, business intelligence for SMBs, booking and client-management software, appointment deposits, tattoo studio booking, barbershop booking, auto repair shop booking</p>
+              <p className="mb-2">Keywords: Data and analytics consulting, Power BI consulting, business intelligence for SMBs, booking and client-management software, appointment deposits, tattoo studio booking, barbershop booking, auto repair shop software, salon booking, personal trainer booking</p>
             </div>
           </div>
           <p className="text-slate-800 font-bold text-sm text-center">© 2026 BDO Analytics Solutions. All rights reserved. | *Performance statistics based on third-party research including McKinsey & Company, BlackLine, PwC, and EasyInsights. Results vary. Not a guarantee of individual outcomes.</p>

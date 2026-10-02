@@ -99,9 +99,11 @@ const Home = () => {
     ];
 
     const verticals = [
-        { name: "Tattoo & Piercing Studios", href: "https://www.omis-crm.com/tattoo" },
-        { name: "Barbershops", href: "https://www.omis-crm.com/barbers" },
-        { name: "Auto Repair Shops", href: "https://www.omis-crm.com/auto" },
+        { name: "Tattoo & Piercing", desc: "Deposits that stop no-shows, waivers signed before they sit down, a booking link for every artist", href: "https://www.omis-crm.com/tattoo" },
+        { name: "Barbershops", desc: "24/7 online booking, automatic reminders, a booking link for every barber", href: "https://www.omis-crm.com/barbers" },
+        { name: "Auto Repair Shops", desc: "Every job tracked from estimate to invoice, with reminders when customers are due back", href: "https://www.omis-crm.com/auto" },
+        { name: "Spas & Salons", desc: "24/7 online booking, automatic reminders, a booking link for every stylist", href: "https://www.omis-crm.com/spa" },
+        { name: "Personal Training", desc: "24/7 online booking, automatic reminders, a booking link for every trainer", href: "https://www.omis-crm.com/personal-training" },
     ];
 
     return (
@@ -170,11 +172,11 @@ const Home = () => {
                         <motion.div {...fadeInUp} className="max-w-4xl mx-auto text-center mb-16">
                             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Meet OMIS</h2>
                             <p className="text-xl text-slate-800 font-medium leading-relaxed">
-                                Our flagship product: online booking, deposits, digital waivers, and client management for appointment-based businesses. Live today for three industries.
+                                Our flagship product: booking, deposits, and waivers for appointment-based businesses. Built and supported by BDO Analytics Solutions, and live today across five industries in Ontario.
                             </p>
                         </motion.div>
 
-                        <div className="grid sm:grid-cols-3 gap-6 max-w-4xl mx-auto mb-12">
+                        <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto mb-12">
                             {verticals.map((v, i) => (
                                 <motion.a
                                     key={i}
@@ -185,10 +187,13 @@ const Home = () => {
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: i * 0.1 }}
-                                    className="bg-white p-6 rounded-2xl shadow-md border border-slate-300 hover:shadow-lg hover:border-blue-400 transition-all duration-300 flex items-center justify-between font-bold text-slate-900"
+                                    className="w-full sm:w-[calc(50%-12px)] lg:w-[calc(33.333%-16px)] bg-white p-6 rounded-2xl shadow-md border border-slate-300 hover:shadow-lg hover:border-blue-400 transition-all duration-300 flex flex-col gap-2 text-slate-900"
                                 >
-                                    {v.name}
-                                    <ExternalLink className="w-4 h-4 text-blue-700" />
+                                    <span className="flex items-center justify-between font-bold text-lg">
+                                        {v.name}
+                                        <ExternalLink className="w-4 h-4 text-blue-700 shrink-0 ml-2" />
+                                    </span>
+                                    <span className="text-sm font-medium text-slate-700 leading-relaxed">{v.desc}</span>
                                 </motion.a>
                             ))}
                         </div>

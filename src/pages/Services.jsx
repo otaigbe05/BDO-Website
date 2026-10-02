@@ -75,7 +75,7 @@ const Services = () => {
                                 </div>
                                 <h3 className="text-2xl font-bold text-white mb-3 relative z-10">OMIS Implementation</h3>
                                 <p className="text-slate-300 font-medium mb-8 flex-grow relative z-10">
-                                    Get set up on OMIS — online booking, deposits, digital waivers, and client management for appointment-based businesses. Live today for tattoo & piercing studios, barbershops, and auto repair shops.
+                                    Get set up on OMIS, our booking, deposit, and waiver platform for appointment-based businesses. Live today for tattoo and piercing studios, barbershops, auto repair shops, spas and salons, and personal trainers.
                                 </p>
                                 <Button asChild className="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-6 relative z-10 shadow-lg shadow-blue-900/50">
                                     <Link to="/omis-product">Get Started <ArrowRight className="ml-2 w-4 h-4" /></Link>

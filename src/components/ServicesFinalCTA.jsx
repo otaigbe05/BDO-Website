@@ -18,7 +18,7 @@ const ServicesFinalCTA = () => {
         >
             <h2 className="text-4xl md:text-6xl font-extrabold mb-8 text-slate-900 drop-shadow-sm tracking-tight">Ready to Transform Your Business?</h2>
             <p className="text-xl md:text-2xl text-slate-900 mb-12 leading-relaxed font-bold">
-                Talk to an expert at BDO Analytics Solutions and get a recommendation based on your data readiness. No pressure, just clarity.
+                Talk to BDO Analytics Solutions and get a recommendation based on your data readiness. No pressure, just clarity.
             </p>
             <Button asChild size="lg" className="bg-blue-700 hover:bg-blue-800 text-white font-extrabold h-16 px-12 rounded-full text-xl shadow-xl shadow-blue-900/20 transition-all hover:scale-105 hover:shadow-blue-700/40">
                 <Link to="/book-demo">

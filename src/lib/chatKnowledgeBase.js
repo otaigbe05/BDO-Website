@@ -5,7 +5,7 @@ export const knowledgeBase = {
   },
   leadership: {
     keywords: ["leadership", "leaders", "ceo", "who runs", "management team", "executives"],
-    response: "BDO Analytics Solutions is led by founder Otaigbe Ewoigbokhan, based in Ontario, Canada. You can read more on our /about page."
+    response: "BDO Analytics Solutions is an Ontario-based company that builds and supports OMIS and runs a data and analytics consulting practice. You can read more on our /about page."
   },
   services: {
     keywords: ["services", "what do you offer", "help with", "what can you do", "consulting", "training"],
@@ -13,7 +13,7 @@ export const knowledgeBase = {
   },
   features: {
     keywords: ["feature", "capability", "can omis do", "what does it do", "functions", "what is omis", "omis capabilities"],
-    response: "OMIS is our booking, deposits, and client-management platform for appointment-based businesses — online booking, deposits paid directly into your own Stripe account, digital waivers, SMS/email reminders, per-staff booking links, and a business dashboard. It's live today for tattoo & piercing studios, barbershops, and auto repair shops. Visit /omis-product for details."
+    response: "OMIS is our booking, deposit, and waiver platform for appointment-based businesses — online booking, deposits paid directly into your own Stripe account, digital waivers, automatic reminders, per-staff booking links, and a business dashboard. It's live today for tattoo & piercing studios, barbershops, auto repair shops, spas & salons, and personal trainers. Visit /omis-product for details."
   },
   pricing: {
     keywords: ["price", "cost", "pricing", "how much", "plans", "fee", "tiers"],
@@ -33,7 +33,7 @@ export const knowledgeBase = {
   },
   industries: {
     keywords: ["industry", "industries", "vertical", "retail", "finance", "manufacturing", "hospitality", "my business"],
-    response: "OMIS is live today for tattoo & piercing studios, barbershops, and auto repair shops. Our consulting services (Power BI, dashboards, reporting) serve small businesses more broadly. Tell us about your business and we'll let you know what fits."
+    response: "OMIS is live today for tattoo & piercing studios, barbershops, auto repair shops, spas & salons, and personal trainers. New industries are added regularly, so reach out if you don't see yours. Our consulting services (Power BI, dashboards, reporting) serve small businesses more broadly."
   },
   values_mission: {
     keywords: ["value", "mission", "vision", "different", "why choose", "core values"],
@@ -58,5 +58,5 @@ export const getBotResponse = (query) => {
   }
   
   // Default fallback
-  return "I'm not entirely sure about that specific detail, but our data experts would love to discuss it with you! Would you like to schedule a free consultation or book a demo to learn more?";
+  return "I'm not entirely sure about that specific detail, but we'd be glad to talk it through with you! Would you like to schedule a free consultation or book a demo to learn more?";
 };

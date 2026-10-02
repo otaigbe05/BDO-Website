@@ -25,7 +25,7 @@ const OmisDashboardScreens = () => {
       <div className="container mx-auto px-4 max-w-[1400px]">
         <div className="text-center max-w-3xl mx-auto mb-12">
             <h2 className="text-3xl md:text-5xl font-bold text-slate-900 mb-6 tracking-tight">Experience OMIS in Action</h2>
-            <p className="text-xl text-slate-600 font-medium">Explore the interactive screens below to see how OMIS transforms chaotic business data into clear, operational workflows.</p>
+            <p className="text-xl text-slate-600 font-medium">Explore the interactive screens below to see what running your bookings, clients, and calendar in OMIS looks like day to day.</p>
         </div>
 
         {/* Tab Navigation */}

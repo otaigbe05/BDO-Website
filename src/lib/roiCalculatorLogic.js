@@ -6,8 +6,13 @@
  * clients self-book instead of the owner/staff booking manually.
  */
 
-export const OMIS_MONTHLY_COST = 39;
-export const OMIS_ANNUAL_COST = OMIS_MONTHLY_COST * 12; // 468, plus applicable taxes
+// Public OMIS plans in CAD (source of truth: omis-crm.com/pricing). Month-to-month.
+export const OMIS_PLANS = {
+  starter: { name: 'Starter', monthly: 29 },
+  professional: { name: 'Professional', monthly: 79 },
+  enterprise: { name: 'Enterprise', monthly: 199 },
+};
+export const DEFAULT_PLAN = 'starter';
 
 export const calculateNoShowsPerWeek = (appointmentsPerWeek, noShowRatePercent) =>
   appointmentsPerWeek * (noShowRatePercent / 100);
@@ -23,7 +28,8 @@ export const calculateAnnualAdminCostSaved = (annualAdminHoursSaved, hourlyRate)
 
 export const calculateAllMetrics = (inputs) => {
   const { appointmentsPerWeek, depositAmount, noShowRate, adminHoursPerWeek, hourlyRate } = inputs;
-  const omisCost = OMIS_ANNUAL_COST;
+  const plan = OMIS_PLANS[inputs.plan] || OMIS_PLANS[DEFAULT_PLAN];
+  const omisCost = plan.monthly * 12;
 
   const noShowsPerWeek = calculateNoShowsPerWeek(appointmentsPerWeek, noShowRate);
   const annualDepositsRecovered = calculateAnnualDepositsRecovered(noShowsPerWeek, depositAmount);
@@ -42,6 +48,8 @@ export const calculateAllMetrics = (inputs) => {
     annualAdminHoursSaved,
     annualAdminCostSaved,
     totalAnnualValue,
+    planName: plan.name,
+    planMonthly: plan.monthly,
     omisCost,
     netAnnualValue,
     roi,

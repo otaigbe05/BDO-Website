@@ -193,7 +193,7 @@ const About = () => {
             >
               <h2 className="text-3xl md:text-4xl font-bold mb-6 tracking-tight">Why OMIS?</h2>
               <p className="text-lg text-slate-300 font-medium mb-8 leading-relaxed">
-                OMIS is our booking, deposits, and client-management platform, built specifically for appointment-based businesses — live today for tattoo & piercing studios, barbershops, and auto repair shops.
+                OMIS is our booking, deposit, and waiver platform for appointment-based businesses. It's live today, handling bookings and deposits for tattoo and piercing studios, barbershops, auto repair shops, spas and salons, and personal trainers across Ontario.
               </p>
               <ul className="space-y-6">
                 {[

@@ -65,8 +65,8 @@ const OmisProduct = () => {
     return (
         <div className="bg-white text-slate-900 font-sans min-h-screen">
             <Helmet>
-                <title>OMIS - Booking, Deposits & Client Management | BDO Analytics Solutions</title>
-                <meta name="description" content="OMIS is the booking, deposits, and client-management platform for appointment-based businesses. Live today for tattoo & piercing studios, barbershops, and auto repair shops." />
+                <title>OMIS - Booking, Deposits & Waivers | BDO Analytics Solutions</title>
+                <meta name="description" content="OMIS is a booking, deposit, and waiver platform for appointment-based businesses. Live today for tattoo and piercing studios, barbershops, auto repair shops, spas and salons, and personal trainers. Deposits go straight to your own Stripe account." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
@@ -78,7 +78,7 @@ const OmisProduct = () => {
                     <span>
                         OMIS: Booking, Deposits, <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
-                            and Client Management
+                            and Waivers
                         </span>
                     </span>
                 }
@@ -96,9 +96,11 @@ const OmisProduct = () => {
                     <p className="text-sm font-extrabold text-slate-500 uppercase tracking-wider mb-6">Live Today For</p>
                     <div className="flex flex-wrap justify-center gap-4">
                         {[
-                            { name: "Tattoo & Piercing Studios", href: "https://www.omis-crm.com/tattoo" },
+                            { name: "Tattoo & Piercing", href: "https://www.omis-crm.com/tattoo" },
                             { name: "Barbershops", href: "https://www.omis-crm.com/barbers" },
                             { name: "Auto Repair Shops", href: "https://www.omis-crm.com/auto" },
+                            { name: "Spas & Salons", href: "https://www.omis-crm.com/spa" },
+                            { name: "Personal Training", href: "https://www.omis-crm.com/personal-training" },
                         ].map((v) => (
                             <a
                                 key={v.name}
@@ -173,12 +175,37 @@ const OmisProduct = () => {
                 </div>
              </section>
 
+            {/* Trust: software, not a payment processor */}
+            <section className="py-20 bg-slate-900 text-white">
+                <div className="container mx-auto px-4 max-w-5xl">
+                    <div className="text-center mb-12">
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4 tracking-tight">We're software, not a middleman.</h2>
+                        <p className="text-slate-300 text-lg max-w-3xl mx-auto">
+                            OMIS is built and supported by BDO Analytics Solutions. Every deposit a client pays lands straight in your own Stripe account. We never hold your money, and we take no cut of deposits.
+                        </p>
+                    </div>
+                    <ul className="grid sm:grid-cols-2 gap-x-10 gap-y-5 max-w-4xl mx-auto">
+                        {[
+                            "Deposits are charged on your own Stripe account — OMIS never holds, routes, or touches the money.",
+                            "Card details never pass through OMIS; clients pay on Stripe's own hosted checkout page.",
+                            "Your data is hosted in Canada (AWS Canada Central, Montreal) and encrypted in transit and at rest.",
+                            "Your business data always belongs to you and is never sold.",
+                        ].map((item) => (
+                            <li key={item} className="flex items-start gap-3 text-slate-200 font-medium">
+                                <Check className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                                <span>{item}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            </section>
+
             {/* Pricing Section rendered via imported component */}
             <section className="py-24 bg-slate-50 border-t border-slate-100" id="pricing">
                 <div className="container mx-auto px-4">
                     <div className="text-center mb-16 max-w-3xl mx-auto">
-                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900">Simple, Founding-Rate Pricing</h2>
-                        <p className="text-lg text-slate-600">$39/month, locked for life, for the first 10 businesses per industry — plus applicable taxes.</p>
+                        <h2 className="text-3xl md:text-5xl font-bold mb-6 text-slate-900">Simple Pricing</h2>
+                        <p className="text-lg text-slate-600">Prices in CAD, month-to-month, no contract. 14-day free trial with full access — no credit card required to start.</p>
                     </div>
 
                     <OmisPricingTable />
