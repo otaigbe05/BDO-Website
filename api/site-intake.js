@@ -1,7 +1,7 @@
 // /api/site-intake
 //   GET  ?t=<intake token>  -> what we already know (to prefill the form) and the lead's state
 //   POST { t, data }        -> save the intake and start the build job
-import { intakeSchema, problems } from './_lib/schemas.js';
+import { intakeSchema, problems, photoProblems } from './_lib/schemas.js';
 import { db, startJob, reply, handle } from './_lib/services.js';
 
 const OPEN = ['new', 'intake_sent', 'failed'];
@@ -27,6 +27,8 @@ export default async function handler(req, res) {
     if (!parsed.success) return reply(res, 400, { ok: false, problems: problems(parsed.error) });
     // Photos must be ones this customer uploaded.
     if (parsed.data.photos.some((p) => !p.key.startsWith(`${lead.id}/`))) return reply(res, 400, { ok: false, problems: ['photos: please upload your photos again.'] });
+    const photoIssues = photoProblems(lead.template, parsed.data.photos);
+    if (photoIssues.length) return reply(res, 400, { ok: false, problems: photoIssues });
 
     await db.insert('intakes', { lead_id: lead.id, data: parsed.data });
     await db.update(lead.id, { status: 'intake_done', ...(parsed.data.domain ? { domain: parsed.data.domain } : {}) });

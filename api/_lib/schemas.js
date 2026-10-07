@@ -78,6 +78,20 @@ export const intakeSchema = z
   })
   .strict();
 
+// Designs that need a minimum number of work photos (keep in step with SiteIntake.jsx).
+export const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };
+
+/** Problems with the photos for this template, in plain words (empty when fine). */
+export function photoProblems(template, photos) {
+  if (!photos.length) return ['Photos: add at least one photo of your work or your space.'];
+  const need = PHOTO_NEEDS[template];
+  if (!need) return [];
+  const work = photos.filter((p) => p.kind === 'work');
+  if (work.length < need.work) return [`Photos: this design needs at least ${need.work} photos of your work.`];
+  if (need.priced && work.filter((p) => p.price).length < need.work) return [`Photos: add a price to at least ${need.work} work photos.`];
+  return [];
+}
+
 export const changeSchema = z.object({ t: z.string().regex(/^[0-9a-f]{48}$/), request: z.string().trim().min(3).max(3000) }).strict();
 
 /** Plain-English list of problems for the form. */

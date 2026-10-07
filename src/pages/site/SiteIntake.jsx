@@ -9,6 +9,9 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_NAMES = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
 const PROVINCES = ['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU'];
 const MAX_WORK = 40;
+// Designs built around the work need a minimum number of work photos (keep in step with
+// api/_lib/schemas.js PHOTO_NEEDS). priced: each needs a price (T01's flash wall).
+const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };
 const timeClass = inputClass.replace('px-4', 'px-2');
 
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
@@ -166,7 +169,7 @@ export default function SiteIntake() {
     const photos = [
       ...['logo', 'hero', 'about'].filter((k) => f.photos[k]).map((k) => ({ key: f.photos[k].key, kind: k })),
       ...team.filter((m) => m.photo).map((m) => ({ key: m.photo.key, kind: 'team', member: m.name.trim() })),
-      ...f.work.map((w) => clean({ key: w.key, kind: 'work', caption: w.caption, member: w.member })),
+      ...f.work.map((w) => clean({ key: w.key, kind: 'work', caption: w.caption, member: w.member, price: w.price })),
     ];
     return clean({
       domain: f.domain.trim().toLowerCase(),
@@ -188,6 +191,11 @@ export default function SiteIntake() {
   async function submit(e) {
     e.preventDefault();
     if (uploading) return setProblems(['Please wait for your photos to finish uploading.']);
+    const need = PHOTO_NEEDS[lead.template];
+    const photoCount = f.work.length + ['hero', 'about'].filter((k) => f.photos[k]).length + f.team.filter((m) => m.photo).length;
+    if (!photoCount) return setProblems(['Photos: add at least one photo of your work or your space. Your site is built around it.']);
+    if (need && f.work.length < need.work) return setProblems([`Photos: this design needs at least ${need.work} photos of your work.`]);
+    if (need?.priced && f.work.filter((w) => w.price?.trim()).length < need.work) return setProblems([`Photos: this design shows a price on each piece. Add a price to at least ${need.work} work photos.`]);
     if (f.reviews.some((r) => r.quote.trim()) && !f.reviewsReal) return setProblems(['Reviews: tick the box to confirm they are real reviews from your customers, or remove them.']);
     setBusy(true);
     setProblems([]);
@@ -336,7 +344,13 @@ export default function SiteIntake() {
         </Card>
 
         <Card title="Photos" intro="Your own photos work best. Please no photos with brand logos, licence plates, or children's faces; we leave those out.">
-          <PhotoSlot kind="hero" label="Main photo" hint="The big photo at the top. Your best shot of your work or your space." />
+          {PHOTO_NEEDS[lead.template] && (
+            <p className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-slate-800">
+              Your design shows your work up front: add at least <strong>{PHOTO_NEEDS[lead.template].work} work photos</strong>
+              {PHOTO_NEEDS[lead.template].priced ? ', each with a price' : ''}.
+            </p>
+          )}
+          <PhotoSlot kind="hero" label="Main photo" hint="The big photo at the top. Your best shot of your work or your space. If you skip it, we pick your strongest photo." />
           <PhotoSlot kind="logo" label="Logo" hint="Optional." />
           <PhotoSlot kind="about" label="Photo of you or your space" hint="Optional." />
           <Field label={`Your work (up to ${MAX_WORK})`} htmlFor="work" hint="Pick several at once.">
@@ -353,6 +367,9 @@ export default function SiteIntake() {
                 <li key={w.key} className="space-y-2">
                   <img src={w.preview} alt="" className="w-full aspect-square object-cover rounded-lg" />
                   <Text aria-label="Caption (optional)" placeholder="Caption (optional)" value={w.caption} onChange={(v) => set(`work.${i}.caption`, v)} />
+                  {PHOTO_NEEDS[lead.template]?.priced && (
+                    <Text aria-label="Price" placeholder="Price, e.g. $120" value={w.price} onChange={(v) => set(`work.${i}.price`, v)} />
+                  )}
                   {f.team.some((m) => m.name.trim()) && (
                     <select aria-label="Whose work" className={inputClass} value={w.member} onChange={(e) => set(`work.${i}.member`, e.target.value)}>
                       <option value="">Whose work?</option>
