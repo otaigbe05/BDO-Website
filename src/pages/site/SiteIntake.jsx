@@ -1,5 +1,7 @@
 // /site/intake/:token : everything we need to build the customer's site. Works on a phone.
 // Answers are kept in this browser while they type, so a closed tab does not lose them.
+// After a preview the same link reopens the form filled in with their answers ("edit" mode),
+// plus a box for anything else they want changed.
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
@@ -34,8 +36,51 @@ function initial(lead) {
     reviewsReal: false,
     omisUrl: '',
     domain: lead.domain ?? '',
+    consent: false,
   };
 }
+
+/** Saved answers -> form state (edit mode). photoUrls: short-lived links to their uploads. */
+function fromIntake(p, urls) {
+  const photo = (x) => (x ? { key: x.key, preview: urls[x.key] ?? '' } : null);
+  const byKind = (k) => p.photos.find((x) => x.kind === k);
+  const open = new Map(p.hours.map((h) => [h.day, h]));
+  const b = p.business;
+  return {
+    business: { name: b.name, tagline: b.tagline ?? '', phone: b.phone, email: b.email ?? '', street: b.street, city: b.city, province: b.province, postal: b.postal, instagram: b.instagram ?? '', googleBusinessUrl: b.googleBusinessUrl ?? '' },
+    hours: Object.fromEntries(DAYS.map((d) => [d, open.has(d) ? { open: true, from: open.get(d).open, to: open.get(d).close } : { open: false, from: '09:00', to: '17:00' }])),
+    hoursNote: p.hoursNote ?? '',
+    services: p.services.map((s) => ({ name: s.name, price: s.price, duration: s.duration ?? '', description: s.description ?? '' })),
+    team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
+    photos: { logo: photo(byKind('logo')), hero: photo(byKind('hero')), about: photo(byKind('about')) },
+    work: p.photos.filter((x) => x.kind === 'work').map((x) => ({ key: x.key, preview: urls[x.key] ?? '', caption: x.caption ?? '', member: x.member ?? '', price: x.price ?? '' })),
+    aboutNotes: p.aboutNotes ?? '',
+    policyNotes: p.policyNotes ?? '',
+    faqNotes: p.faqNotes ?? '',
+    extraNotes: p.extraNotes ?? '',
+    reviews: p.reviews.map((r) => ({ quote: r.quote, author: r.author, source: r.source ?? '' })),
+    reviewsReal: p.reviews.length > 0,
+    omisUrl: p.omisUrl ?? '',
+    domain: p.domain ?? '',
+    consent: false,
+    changeNotes: '',
+  };
+}
+
+/** "n1r1a1", "N1R-1A1", pasted spaces -> "N1R 1A1" (leaves anything else as typed). */
+function tidyPostal(v) {
+  const c = v.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(c) ? `${c.slice(0, 3)} ${c.slice(3)}` : v;
+}
+
+// The content release. Bump CONSENT_VERSION in api/_lib/schemas.js when this wording changes.
+const CONSENT_POINTS = [
+  'I own, or have permission to use, every photo, logo, and piece of text I send. None of it copies anyone else\'s work or trademark without permission.',
+  'Nothing I send is sexually explicit, hateful, defamatory, or unlawful.',
+  'People who can be recognized in my photos have agreed to appear on my website, and I have a parent\'s or guardian\'s permission for any child.',
+  'Any reviews I add are real, copied word for word, with the name the reviewer used.',
+  'BDO Analytics Solutions may store, crop, resize, and edit what I send, write site text from my answers, and publish it on my website.',
+];
 
 /** Shrink a photo in the browser (max 2000px) so uploads are fast and under the size limit. */
 async function shrink(file, keepPng) {
@@ -52,32 +97,37 @@ async function shrink(file, keepPng) {
 
 export default function SiteIntake() {
   const { token } = useParams();
-  const storeKey = `site-intake-${token}`;
   const [lead, setLead] = useState(null);
+  const [mode, setMode] = useState('first');
+  const [info, setInfo] = useState({});
   const [state, setState] = useState('loading');
   const [f, setF] = useState(null);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(0);
   const [problems, setProblems] = useState([]);
+  const storeKey = `site-intake-${token}-${mode}`;
 
   useEffect(() => {
     api(`/api/site-intake?t=${encodeURIComponent(token)}`).then((r) => {
       if (!r.ok) return setState('invalid');
       setLead(r.lead);
+      setInfo({ previewUrl: r.previewUrl, roundsLeft: r.roundsLeft, status: r.status });
       if (!r.open) return setState('closed');
+      setMode(r.mode);
       let saved = null;
       try {
-        saved = JSON.parse(localStorage.getItem(storeKey) || 'null');
+        saved = JSON.parse(localStorage.getItem(`site-intake-${token}-${r.mode}`) || 'null');
       } catch {
         saved = null;
       }
-      setF(saved ?? initial(r.lead));
+      const fresh = r.mode === 'edit' && r.previous ? fromIntake(r.previous, r.photoUrls ?? {}) : initial(r.lead);
+      setF(saved ?? fresh);
       setState('open');
     });
-  }, [token, storeKey]);
+  }, [token]);
 
   useEffect(() => {
-    if (!f) return;
+    if (!f || state !== 'open') return;
     try {
       localStorage.setItem(storeKey, JSON.stringify(f));
     } catch {
@@ -94,12 +144,22 @@ export default function SiteIntake() {
         </Notice>
       </Shell>
     );
+  if (state === 'closed' && info.status === 'live')
+    return (
+      <Shell title="Your site is live">
+        <Notice title="Your site is live">
+          <p>To change anything now, reply to any of our emails and tell us what to change.</p>
+        </Notice>
+      </Shell>
+    );
   if (state === 'closed' || state === 'sent')
     return (
       <Shell title="We are building your site">
-        <Notice title="We are building your preview">
-          <p>Thanks{lead ? `, ${lead.name.split(' ')[0]}` : ''}. We have your details and are building the {lead?.business} website now.</p>
-          <p>You will get an email with your preview link, usually within 30 minutes.</p>
+        <Notice title={mode === 'edit' && state === 'sent' ? 'Got your changes' : 'We are building your preview'}>
+          <p>
+            Thanks{lead ? `, ${lead.name.split(' ')[0]}` : ''}. {mode === 'edit' && state === 'sent' ? 'We are updating' : 'We have your details and are working on'} the {lead?.business} website now.
+          </p>
+          <p>You will get an email with your preview link, usually within the hour.</p>
         </Notice>
       </Shell>
     );
@@ -185,6 +245,8 @@ export default function SiteIntake() {
       faqNotes: f.faqNotes,
       extraNotes: f.extraNotes,
       reviews: f.reviewsReal ? f.reviews.filter((r) => r.quote.trim() && r.author.trim()).map(clean) : [],
+      // The server stamps the wording version and time.
+      consent: { accepted: f.consent === true },
     });
   }
 
@@ -197,9 +259,10 @@ export default function SiteIntake() {
     if (need && f.work.length < need.work) return setProblems([`Photos: this design needs at least ${need.work} photos of your work.`]);
     if (need?.priced && f.work.filter((w) => w.price?.trim()).length < need.work) return setProblems([`Photos: this design shows a price on each piece. Add a price to at least ${need.work} work photos.`]);
     if (f.reviews.some((r) => r.quote.trim()) && !f.reviewsReal) return setProblems(['Reviews: tick the box to confirm they are real reviews from your customers, or remove them.']);
+    if (!f.consent) return setProblems(['Content release: please read it and tick the box at the bottom of the form.']);
     setBusy(true);
     setProblems([]);
-    const r = await api('/api/site-intake', { method: 'POST', body: JSON.stringify({ t: token, data: toPayload() }) });
+    const r = await api('/api/site-intake', { method: 'POST', body: JSON.stringify({ t: token, data: toPayload(), ...(mode === 'edit' ? { changeNotes: f.changeNotes ?? '' } : {}) }) });
     setBusy(false);
     if (r.ok) {
       try {
@@ -230,11 +293,24 @@ export default function SiteIntake() {
     <Shell title="Your website details">
       <form onSubmit={submit} className="space-y-6">
         <header className="space-y-2">
-          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">Your website details</h1>
+          <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{mode === 'edit' ? 'Change your website' : 'Your website details'}</h1>
           <p className="text-lg text-slate-600">
-            For the {lead.business} website (design {lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.
+            {mode === 'edit'
+              ? `Your answers are filled in. Change anything below, add or remove photos, and tell us anything else in the box. Changes included: ${info.roundsLeft ?? 0} more.`
+              : `For the ${lead.business} website (design ${lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.`}
           </p>
         </header>
+
+        {mode === 'edit' && (
+          <Card title="Anything else to change?" intro="For things the form does not cover: wording, which photo goes first, what to leave out.">
+            {info.previewUrl && (
+              <p>
+                <a className="text-blue-700 underline font-medium" href={info.previewUrl} target="_blank" rel="noreferrer">Open your current preview</a> in another tab.
+              </p>
+            )}
+            <Area id="change-notes" rows={5} value={f.changeNotes} onChange={(v) => set('changeNotes', v)} maxLength={3000} placeholder="For example: make the about text shorter, use the photo of the chair as the main photo." />
+          </Card>
+        )}
 
         <Card title="Your business">
           <div className="grid sm:grid-cols-2 gap-5">
@@ -250,7 +326,7 @@ export default function SiteIntake() {
             <Field label="City" htmlFor="b-city" required>
               <Text id="b-city" value={b.city} onChange={(v) => set('business.city', v)} required />
             </Field>
-            <Field label="Province" htmlFor="b-prov" required>
+            <Field label="Province (Canada)" htmlFor="b-prov" required>
               <select id="b-prov" className={inputClass} value={b.province} onChange={(e) => set('business.province', e.target.value)}>
                 {PROVINCES.map((p) => (
                   <option key={p}>{p}</option>
@@ -258,7 +334,7 @@ export default function SiteIntake() {
               </select>
             </Field>
             <Field label="Postal code" htmlFor="b-postal" required>
-              <Text id="b-postal" value={b.postal} onChange={(v) => set('business.postal', v.toUpperCase())} required placeholder="N1R 1A1" />
+              <Text id="b-postal" value={b.postal} onChange={(v) => set('business.postal', v.toUpperCase())} onBlur={(e) => set('business.postal', tidyPostal(e.target.value))} required placeholder="N1R 1A1" autoComplete="postal-code" />
             </Field>
             <Field label="Email shown on the site" htmlFor="b-email">
               <Text id="b-email" type="email" value={b.email} onChange={(v) => set('business.email', v)} />
@@ -437,8 +513,26 @@ export default function SiteIntake() {
           </Field>
         </Card>
 
+        <Card title="Content release">
+          <p className="text-slate-700">By sending this form I confirm that:</p>
+          <ul className="list-disc pl-5 space-y-1.5 text-slate-700">
+            {CONSENT_POINTS.map((c) => (
+              <li key={c}>{c}</li>
+            ))}
+          </ul>
+          <p className="text-sm text-slate-600">
+            We may remove anything that breaks these points. This is part of our{' '}
+            <a className="text-blue-700 underline" href="/terms-of-service" target="_blank" rel="noreferrer">Terms of Service</a> (user content and acceptable use) and{' '}
+            <a className="text-blue-700 underline" href="/privacy-policy" target="_blank" rel="noreferrer">Privacy Policy</a>.
+          </p>
+          <label className="flex items-start gap-3 font-medium text-slate-900">
+            <input type="checkbox" className="mt-1 w-5 h-5" checked={f.consent === true} onChange={(e) => set('consent', e.target.checked)} required />
+            I confirm all of the above and agree to the Terms of Service.
+          </label>
+        </Card>
+
         <Problems list={problems} />
-        <Submit busy={busy || uploading > 0}>Send and build my preview</Submit>
+        <Submit busy={busy || uploading > 0}>{mode === 'edit' ? 'Send changes' : 'Send and build my preview'}</Submit>
       </form>
     </Shell>
   );

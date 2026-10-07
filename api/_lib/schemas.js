@@ -54,7 +54,12 @@ export const intakeSchema = z
         street: str(120),
         city: str(60),
         province: z.enum(['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU']),
-        postal: z.string().trim().toUpperCase().regex(/^[A-Z]\d[A-Z] ?\d[A-Z]\d$/, 'Postal code like "N1R 1A1".'),
+        // Accept any spacing or dashes from copy and paste; store as "N1R 1A1".
+        postal: z
+          .string()
+          .transform((v) => v.toUpperCase().replace(/[^A-Z0-9]/g, ''))
+          .pipe(z.string().regex(/^[A-Z]\d[A-Z]\d[A-Z]\d$/, 'Postal code: 3 letters and 3 numbers, like N1R 1A1.'))
+          .transform((v) => `${v.slice(0, 3)} ${v.slice(3)}`),
         instagram: handle,
         googleBusinessUrl: https,
         foundedYear: z.int().min(1900).max(new Date().getFullYear()).optional(),
@@ -75,8 +80,13 @@ export const intakeSchema = z
     faqNotes: opt(3000),
     extraNotes: opt(2000),
     reviews: z.array(z.object({ quote: str(400), author: str(60), source: opt(40) }).strict()).max(12).default([]),
+    // The content release (SiteIntake.jsx CONSENT_TEXT). The server stamps version and time.
+    consent: z.object({ accepted: z.literal(true, { error: 'Please tick the box to confirm the content release.' }), version: str(20), at: str(40) }).strict(),
   })
   .strict();
+
+// Bump when the release wording in SiteIntake.jsx changes, so each intake records what was agreed.
+export const CONSENT_VERSION = '2026-10-07';
 
 // Designs that need a minimum number of work photos (keep in step with SiteIntake.jsx).
 export const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };

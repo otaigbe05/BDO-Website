@@ -28,7 +28,7 @@ export default async function handler(req, res) {
   await handle(res, async () => {
     const lead = await db.leadByToken('intake_token', req.query.t);
     if (!lead) return reply(res, 404, { ok: false, error: 'This link is not valid.' });
-    if (!['new', 'intake_sent', 'failed'].includes(lead.status)) return reply(res, 409, { ok: false, error: 'Uploads are closed for this site.' });
+    if (!['new', 'intake_sent', 'failed', 'preview'].includes(lead.status)) return reply(res, 409, { ok: false, error: 'Uploads are closed for this site.' });
     const type = String(req.headers['content-type'] || '').split(';')[0];
     if (!TYPES[type]) return reply(res, 400, { ok: false, error: 'Please upload JPEG, PNG, or WebP photos.' });
     let body;

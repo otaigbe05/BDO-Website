@@ -42,7 +42,40 @@ export const db = {
   async upload(key, buffer, contentType) {
     await rest(`/storage/v1/object/intake/${key}`, { method: 'POST', headers: { 'Content-Type': contentType, 'x-upsert': 'false' }, body: buffer });
   },
+  async latestIntake(leadId) {
+    const rows = await (await rest(`/rest/v1/intakes?lead_id=eq.${leadId}&order=created_at.desc&limit=1&select=data`)).json();
+    return rows[0]?.data ?? null;
+  },
+  /** Short-lived links so the customer's own photos show again when they reopen the form. */
+  async photoUrls(keys) {
+    if (!keys.length) return {};
+    const res = await rest('/storage/v1/object/sign/intake', { method: 'POST', body: JSON.stringify({ expiresIn: 3600, paths: keys }) });
+    const out = {};
+    for (const r of await res.json()) if (r.signedURL) out[r.path] = `${env('SITES_SUPABASE_URL')}/storage/v1${r.signedURL}`;
+    return out;
+  },
 };
+
+const first = (name) => String(name).trim().split(/\s+/)[0];
+
+/** The customer's preview email (same wording as omis-sites/pipeline/job.mjs emailCustomer). */
+export async function emailCustomerPreview(lead) {
+  const round = lead.change_rounds > 0;
+  await sendEmail({
+    to: lead.email,
+    subject: round ? 'Your updated website preview is ready' : 'Your website preview is ready',
+    paragraphs: [
+      `Hi ${first(lead.name)},`,
+      round ? 'We made your changes. Here is the new preview.' : `Here is a preview of the ${lead.business} website, built from your answers.`,
+      'Take a look on your phone too. To change anything, open your form again: your answers are already filled in, and there is a box for anything else. When you are happy, press Publish.',
+    ],
+    links: [
+      { label: 'See your preview', url: lead.preview_url },
+      { label: 'Change something', url: `${siteUrl()}/site/intake/${lead.intake_token}` },
+      { label: 'Publish my site', url: `${siteUrl()}/site/publish/${lead.intake_token}` },
+    ],
+  });
+}
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 

@@ -44,7 +44,7 @@ export default function SitePublish() {
             </p>
           )}
           <p>
-            Want something changed first? <Link className="text-blue-700 underline" to={`/site/changes/${token}`}>Ask for changes</Link>.
+            Want something changed first? <Link className="text-blue-700 underline" to={`/site/intake/${token}`}>Change something</Link>.
           </p>
         </Notice>
         <Problems list={problems} />
