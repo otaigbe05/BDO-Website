@@ -4,7 +4,7 @@
     { "source": "/templates", "destination": "/templates/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/templates/:path*", "destination": "https://omis-showcase.pages.dev/templates/:path*" },
+    { "source": "/templates/(.*)", "destination": "https://omis-showcase.pages.dev/templates/$1" },
     { "source": "/((?!api/|templates/).*)", "destination": "/index.html" }
   ]
 }
