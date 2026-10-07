@@ -293,6 +293,10 @@ export default defineConfig({
 			'.app-preview.com',
 			'.app-preview.io',
 		],
+		// Local dev: /templates comes from the omis-sites showcase dev server (npm run showcase:dev).
+		proxy: {
+			'/templates': 'http://localhost:4321',
+		},
 	},
 	resolve: {
 		extensions: ['.jsx', '.js', '.tsx', '.ts', '.json', ],

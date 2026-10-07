@@ -1,8 +1,10 @@
 {
   "redirects": [
-    { "source": "/legal", "destination": "/privacy-policy", "permanent": true }
+    { "source": "/legal", "destination": "/privacy-policy", "permanent": true },
+    { "source": "/templates", "destination": "/templates/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/(.*)", "destination": "/index.html" }
+    { "source": "/templates/:path*", "destination": "https://omis-showcase.pages.dev/templates/:path*" },
+    { "source": "/((?!api/|templates/).*)", "destination": "/index.html" }
   ]
 }

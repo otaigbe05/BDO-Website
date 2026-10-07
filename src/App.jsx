@@ -24,6 +24,12 @@ const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const AccountDeletionRequest = lazy(() => import('@/pages/AccountDeletionRequest'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+// Client-website funnel (pick a template -> intake -> preview -> publish)
+const SiteStart = lazy(() => import('@/pages/site/SiteStart'));
+const SiteIntake = lazy(() => import('@/pages/site/SiteIntake'));
+const SiteChanges = lazy(() => import('@/pages/site/SiteChanges'));
+const SitePublish = lazy(() => import('@/pages/site/SitePublish'));
+const SiteApprove = lazy(() => import('@/pages/site/SiteApprove'));
 
 // Advanced ScrollToTop component handling both pathnames and hash links properly
 const ScrollToTop = () => {
@@ -59,6 +65,11 @@ const AnimatedRoutes = () => {
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
           <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
           <Route path="/account-deletion-request" element={<PageTransition><AccountDeletionRequest /></PageTransition>} />
+          <Route path="/site/start" element={<PageTransition><SiteStart /></PageTransition>} />
+          <Route path="/site/intake/:token" element={<PageTransition><SiteIntake /></PageTransition>} />
+          <Route path="/site/changes/:token" element={<PageTransition><SiteChanges /></PageTransition>} />
+          <Route path="/site/publish/:token" element={<PageTransition><SitePublish /></PageTransition>} />
+          <Route path="/site/approve/:id/:token" element={<PageTransition><SiteApprove /></PageTransition>} />
           <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
         </Routes>
       </Suspense>
