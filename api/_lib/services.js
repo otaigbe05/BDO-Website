@@ -54,7 +54,8 @@ export async function sendEmail({ to, subject, paragraphs, links = [] }) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: env('SITES_MAIL_FROM'), to: [to], subject, html, text }),
+    // Replies go to the owner's inbox (the From address does not need a real mailbox).
+    body: JSON.stringify({ from: env('SITES_MAIL_FROM'), to: [to], subject, html, text, ...(process.env.SITES_OWNER_EMAIL ? { reply_to: process.env.SITES_OWNER_EMAIL } : {}) }),
   });
   if (!res.ok) throw new Error(`Email failed: ${res.status} ${await res.text()}`);
 }
