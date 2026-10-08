@@ -27,12 +27,12 @@ export default function SiteApprove() {
   if (state)
     return (
       <Shell title="Done">
-        <Notice title={{ held: 'Held', publishing: 'Publishing', 'sent-to-customer': 'Sent to the customer', live: 'Already live' }[state] ?? 'Done'}>
+        <Notice title={{ held: 'Held', publishing: 'Publishing', 'approved-early': 'Approved', live: 'Already live' }[state] ?? 'Done'}>
           <p>
             {{
-              held: 'The customer will not see this preview until you send it.',
-              publishing: 'The customer had already pressed Publish, so the site is going live now.',
-              'sent-to-customer': 'The customer has the preview now. It goes live when they press Publish.',
+              held: 'It will not go live until you approve it. The customer can still make changes.',
+              publishing: 'Approved. The site is going live now; the customer gets an email with the link.',
+              'approved-early': 'Approved. It goes live as soon as the customer presses Publish.',
               live: 'This site is already live.',
             }[state]}
           </p>
@@ -73,7 +73,7 @@ export default function SiteApprove() {
         ) : (
           <div className="flex flex-wrap gap-3">
             <button type="button" disabled={busy || info.ownerOk} onClick={() => act('approve')} className="px-8 py-4 rounded-xl bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white font-bold text-lg">
-              {info.ownerOk ? 'Sent to customer' : info.status === 'preview' ? 'Approve' : 'Send to customer'}
+              {info.ownerOk ? 'Approved' : info.status === 'review' ? 'Approve and publish' : 'Approve'}
             </button>
             <button type="button" disabled={busy} onClick={() => act('hold')} className="px-8 py-4 rounded-xl border-2 border-slate-400 text-slate-900 font-bold text-lg">
               Hold

@@ -56,32 +56,12 @@ export const db = {
   },
 };
 
-const first = (name) => String(name).trim().split(/\s+/)[0];
-
-/** The customer's preview email (same wording as omis-sites/pipeline/job.mjs emailCustomer). */
-export async function emailCustomerPreview(lead) {
-  const round = lead.change_rounds > 0;
-  await sendEmail({
-    to: lead.email,
-    subject: round ? 'Your updated website preview is ready' : 'Your website preview is ready',
-    paragraphs: [
-      `Hi ${first(lead.name)},`,
-      round ? 'We made your changes. Here is the new preview.' : `Here is a preview of the ${lead.business} website, built from your answers.`,
-      'Take a look on your phone too. To change anything, open your form again: your answers are already filled in, and there is a box for anything else. When you are happy, press Publish.',
-    ],
-    links: [
-      { label: 'See your preview', url: lead.preview_url },
-      { label: 'Change something', url: `${siteUrl()}/site/intake/${lead.intake_token}` },
-      { label: 'Publish my site', url: `${siteUrl()}/site/publish/${lead.intake_token}` },
-    ],
-  });
-}
-
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 export async function sendEmail({ to, subject, paragraphs, links = [] }) {
-  const html = `<div style="font:16px/1.55 system-ui,sans-serif;color:#1a1a1a;max-width:560px">${paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}${links
-    .map((l) => `<p><a href="${esc(l.url)}" style="display:inline-block;background:#1a4fa0;color:#fff;padding:10px 18px;border-radius:6px;text-decoration:none">${esc(l.label)}</a></p>`)
+  // Plain, letter-like emails (no big buttons): Gmail files button-heavy mail under Promotions.
+  const html = `<div style="font:15px/1.55 Arial,sans-serif;color:#1a1a1a;max-width:560px">${paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}${links
+    .map((l) => `<p><a href="${esc(l.url)}" style="color:#1a4fa0">${esc(l.label)}</a></p>`)
     .join('')}</div>`;
   const text = [...paragraphs, ...links.map((l) => `${l.label}: ${l.url}`)].join('\n\n');
   const res = await fetch('https://api.resend.com/emails', {

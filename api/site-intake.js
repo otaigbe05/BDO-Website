@@ -8,7 +8,7 @@ import { intakeSchema, problems, photoProblems, CONSENT_VERSION } from './_lib/s
 import { db, startJob, reply, handle } from './_lib/services.js';
 
 const FIRST = ['new', 'intake_sent', 'failed'];
-const EDIT = ['preview'];
+const EDIT = ['preview', 'review'];
 const ROUNDS = 2;
 
 export default async function handler(req, res) {

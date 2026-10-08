@@ -6,7 +6,7 @@ import { Shell, Notice, Submit, Problems, api } from './ui';
 
 const MESSAGES = {
   publishing: 'Your site is being published. You will get an email with the link in a few minutes.',
-  'waiting-owner': 'Thanks. We do a final check of every site before it goes live; you will get an email when it is published, usually the same business day.',
+  'waiting-owner': 'Thanks. We do a quick final check before your site goes live. You will get an email with the link, usually the same business day. (Not in your inbox? Check Promotions or Spam.)',
   live: 'Your site is already live.',
 };
 

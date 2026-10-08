@@ -1,13 +1,14 @@
 // /api/site-golive
-//   GET  ?id=<lead id>&t=<approve token>                          -> owner's review summary
-//   POST { who: "owner", id, t: <approve token>, action }         -> "approve" (send to customer) or "hold"
+//   GET  ?id=<lead id>&t=<approve token>                          -> owner's summary
 //   POST { who: "customer", t: <intake token> }                   -> customer presses Publish
-// Every new preview waits in "review" for the owner. Approving sends the customer the preview;
-// the customer's Publish then puts the site live. (With AUTO_APPROVE on in the pipeline the
-// owner step is skipped.) Changes happen only on POST from a confirm button, never on a plain
-// link, so email link scanners cannot approve or publish by "clicking" it.
+//   POST { who: "owner", id, t: <approve token>, action }         -> "approve" or "hold"
+// The customer sees every preview straight away. When they press Publish, the owner gets ONE
+// email to approve going live (status "review"); approving publishes. An owner who approves
+// early just lets the customer's Publish go straight through. (AUTO_APPROVE in the pipeline
+// marks every preview owner-approved.) Changes happen only on POST from a confirm button,
+// never on a plain link, so email link scanners cannot approve or publish by "clicking" it.
 import { timingSafeEqual } from 'node:crypto';
-import { db, startJob, reply, handle, emailCustomerPreview } from './_lib/services.js';
+import { db, startJob, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
 
 async function ownerLead(id, token) {
   const lead = await db.leadById(id);
@@ -41,23 +42,33 @@ export default async function handler(req, res) {
         await db.insert('events', { lead_id: lead.id, kind: 'held' });
         return reply(res, 200, { ok: true, state: 'held' });
       }
-      const firstLook = lead.status !== 'preview';
-      await db.update(lead.id, { owner_ok: true, status: 'preview' });
+      await db.update(lead.id, { owner_ok: true, ...(lead.status === 'held' ? { status: lead.customer_ok ? 'review' : 'preview' } : {}) });
       await db.insert('events', { lead_id: lead.id, kind: 'owner_ok' });
       if (lead.customer_ok) {
         await startJob('publish', lead.id);
         return reply(res, 200, { ok: true, state: 'publishing' });
       }
-      if (firstLook) await emailCustomerPreview(lead);
-      return reply(res, 200, { ok: true, state: 'sent-to-customer' });
+      return reply(res, 200, { ok: true, state: 'approved-early' });
     }
 
+    if (lead.status === 'held') return reply(res, 409, { ok: false, error: 'We are checking a few things on your site first. We will email you shortly.' });
     if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
-    await db.update(lead.id, { customer_ok: true });
+    await db.update(lead.id, { customer_ok: true, ...(lead.owner_ok ? {} : { status: 'review' }) });
     await db.insert('events', { lead_id: lead.id, kind: 'customer_ok' });
     if (lead.owner_ok) {
       await startJob('publish', lead.id);
       return reply(res, 200, { ok: true, state: 'publishing' });
+    }
+    if (process.env.SITES_OWNER_EMAIL) {
+      await sendEmail({
+        to: process.env.SITES_OWNER_EMAIL,
+        subject: `[Sites] Ready to go live: ${lead.business}`,
+        paragraphs: [`${lead.business} pressed Publish. One click to approve and it goes live.`],
+        links: [
+          { label: 'Open preview', url: lead.preview_url },
+          { label: 'Approve or hold', url: `${siteUrl()}/site/approve/${lead.id}/${lead.approve_token}` },
+        ],
+      });
     }
     reply(res, 200, { ok: true, state: 'waiting-owner' });
   });

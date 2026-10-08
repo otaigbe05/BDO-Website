@@ -56,6 +56,7 @@ export default function SiteStart() {
               <p>When you send it, we build a preview of your site and email it to you.</p>
             </>
           )}
+          <p className="text-sm text-slate-500">Not in your inbox in a few minutes? Check your Promotions or Spam folder for an email from BDO Analytics Websites.</p>
         </Notice>
       </Shell>
     );

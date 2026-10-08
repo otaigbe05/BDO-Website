@@ -16,6 +16,15 @@ const MAX_WORK = 40;
 const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };
 const timeClass = inputClass.replace('px-4', 'px-2');
 
+// Examples in the form match the customer's trade (first letter of the template id).
+const TRADE = {
+  T: { tagline: 'Custom tattoos and walk-ins in downtown Hamilton.', role: 'Role, for example Fine line artist or Piercer', service: 'Service, for example Hourly rate', photo: 'use the photo of the sleeve as the main photo', rules: 'Deposits, cancellations, age and ID, aftercare, how you sterilize your tools.' },
+  B: { tagline: 'Fades and beard trims, walk-ins welcome.', role: 'Role, for example Barber or Senior barber', service: 'Service, for example Skin fade', photo: 'use the photo of the fade as the main photo', rules: 'Deposits, cancellations, lateness, walk-ins, payment.' },
+  A: { tagline: 'Honest brake, tire, and engine repair in Brantford.', role: 'Role, for example Licensed mechanic or Service advisor', service: 'Service, for example Brake pads and rotors', photo: 'use the photo of the shop as the main photo', rules: 'Estimates and approvals, drop-off and pickup, the warranty you offer, payment.' },
+  S: { tagline: 'Gel nails and lash extensions in a quiet studio.', role: 'Role, for example Nail tech or Lash artist', service: 'Service, for example Gel manicure', photo: 'use the nail art photo as the main photo', rules: 'Deposits, cancellations, lateness, patch tests, payment.' },
+  P: { tagline: 'Small-group strength training for adults.', role: 'Role, for example Personal trainer or Coach', service: 'Service, for example 1-on-1 session (60 min)', photo: 'use the group class photo as the main photo', rules: 'Cancellations, packages and when they expire, what to bring, payment.' },
+};
+
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
 const blankMember = () => ({ name: '', role: '', specialty: '', instagram: '', bookingUrl: '', photo: null });
 
@@ -160,6 +169,7 @@ export default function SiteIntake() {
             Thanks{lead ? `, ${lead.name.split(' ')[0]}` : ''}. {mode === 'edit' && state === 'sent' ? 'We are updating' : 'We have your details and are working on'} the {lead?.business} website now.
           </p>
           <p>You will get an email with your preview link, usually within the hour.</p>
+          <p className="text-sm text-slate-500">Not in your inbox? Check your Promotions or Spam folder for an email from BDO Analytics Websites.</p>
         </Notice>
       </Shell>
     );
@@ -174,6 +184,7 @@ export default function SiteIntake() {
       return next;
     });
   const b = f.business;
+  const trade = TRADE[lead.template[0]] ?? TRADE.B;
 
   async function upload(file, kind) {
     setUploading((n) => n + 1);
@@ -308,7 +319,7 @@ export default function SiteIntake() {
                 <a className="text-blue-700 underline font-medium" href={info.previewUrl} target="_blank" rel="noreferrer">Open your current preview</a> in another tab.
               </p>
             )}
-            <Area id="change-notes" rows={5} value={f.changeNotes} onChange={(v) => set('changeNotes', v)} maxLength={3000} placeholder="For example: make the about text shorter, use the photo of the chair as the main photo." />
+            <Area id="change-notes" rows={5} value={f.changeNotes} onChange={(v) => set('changeNotes', v)} maxLength={3000} placeholder={`For example: make the about text shorter, ${trade.photo}.`} />
           </Card>
         )}
 
@@ -343,7 +354,7 @@ export default function SiteIntake() {
               <Text id="b-ig" value={b.instagram} onChange={(v) => set('business.instagram', v)} />
             </Field>
           </div>
-          <Field label="One line about you" htmlFor="b-tag" hint="Optional. For example: Custom tattoos and walk-ins in downtown Hamilton.">
+          <Field label="One line about you" htmlFor="b-tag" hint={`Optional. For example: ${trade.tagline}`}>
             <Text id="b-tag" value={b.tagline} onChange={(v) => set('business.tagline', v)} maxLength={140} />
           </Field>
           <Field label="Google Business Profile link" htmlFor="b-gbp" hint="Optional. Used for the map button.">
@@ -373,7 +384,7 @@ export default function SiteIntake() {
           <div className="space-y-4">
             {f.services.map((s, i) => (
               <div key={i} className="grid sm:grid-cols-[2fr_1fr_1fr_auto] gap-3 items-start border-b border-slate-100 pb-4">
-                <Text aria-label="Service" placeholder="Service" value={s.name} onChange={(v) => set(`services.${i}.name`, v)} />
+                <Text aria-label="Service" placeholder={trade.service} value={s.name} onChange={(v) => set(`services.${i}.name`, v)} />
                 <Text aria-label="Price" placeholder="Price" value={s.price} onChange={(v) => set(`services.${i}.price`, v)} />
                 <Text aria-label="Time (optional)" placeholder="Time (optional)" value={s.duration} onChange={(v) => set(`services.${i}.duration`, v)} />
                 <button type="button" aria-label="Remove service" className="p-3 text-slate-500 hover:text-red-700" onClick={() => set('services', f.services.filter((_, j) => j !== i))}>
@@ -395,7 +406,7 @@ export default function SiteIntake() {
             <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
                 <Text aria-label="Name" placeholder="Name" value={m.name} onChange={(v) => set(`team.${i}.name`, v)} />
-                <Text aria-label="Role" placeholder="Role, for example Barber or Fine line artist" value={m.role} onChange={(v) => set(`team.${i}.role`, v)} />
+                <Text aria-label="Role" placeholder={trade.role} value={m.role} onChange={(v) => set(`team.${i}.role`, v)} />
                 <Text aria-label="What they are known for (optional)" placeholder="Known for (optional)" value={m.specialty} onChange={(v) => set(`team.${i}.specialty`, v)} />
                 <Text aria-label="Instagram (optional)" placeholder="Instagram (optional)" value={m.instagram} onChange={(v) => set(`team.${i}.instagram`, v)} />
               </div>
@@ -467,7 +478,7 @@ export default function SiteIntake() {
           <Field label="About your business" htmlFor="about" hint="How it started, what you are known for, who you serve.">
             <Area id="about" rows={5} value={f.aboutNotes} onChange={(v) => set('aboutNotes', v)} maxLength={3000} />
           </Field>
-          <Field label="Rules customers should know" htmlFor="policies" hint="Deposits, cancellations, lateness, age, payment, how you clean tools.">
+          <Field label="Rules customers should know" htmlFor="policies" hint={trade.rules}>
             <Area id="policies" value={f.policyNotes} onChange={(v) => set('policyNotes', v)} maxLength={2000} />
           </Field>
           <Field label="Questions customers ask you" htmlFor="faq" hint="With your answers.">
