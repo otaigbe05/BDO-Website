@@ -16,6 +16,7 @@ export default function SiteStart() {
   const opened = useRef(Date.now());
   const [catalog, setCatalog] = useState([]);
   const [f, setF] = useState({ template: params.get('template') ?? '', palette: 1, package: 'site-omis', name: '', email: '', phone: '', business: '', city: '', hasDomain: false, domain: '', website: '' });
+  const [country, setCountry] = useState('CA');
   const [busy, setBusy] = useState(false);
   const [problems, setProblems] = useState([]);
   const [done, setDone] = useState(null);
@@ -156,7 +157,19 @@ export default function SiteStart() {
             <Field label="City" htmlFor="city">
               <Text id="city" value={f.city} onChange={set('city')} autoComplete="address-level2" />
             </Field>
+            <Field label="Country" htmlFor="country">
+              <select id="country" className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white" value={country} onChange={(e) => setCountry(e.target.value)}>
+                <option value="CA">Canada</option>
+                <option value="US">United States</option>
+                <option value="other">Somewhere else</option>
+              </select>
+            </Field>
           </div>
+          {country === 'other' && (
+            <p className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-slate-800">
+              We build sites for businesses in Canada and the United States right now. Email us at info@bdoanalyticssolutions.com and we will see what we can do.
+            </p>
+          )}
           <label className="flex items-center gap-3 text-slate-900">
             <input type="checkbox" checked={f.hasDomain} onChange={(e) => set('hasDomain')(e.target.checked)} />I already own a web address (domain)
           </label>
@@ -173,7 +186,7 @@ export default function SiteStart() {
         </Card>
 
         <Problems list={problems} />
-        <Submit busy={busy}>Send</Submit>
+        <Submit busy={busy} disabled={busy || country === 'other'}>Send</Submit>
         <p className="text-sm text-slate-500">We use your details only to build your site and to contact you about it.</p>
       </form>
     </Shell>

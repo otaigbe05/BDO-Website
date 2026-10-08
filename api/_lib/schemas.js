@@ -10,6 +10,19 @@ const handle = z.string().trim().transform((v) => v.replace(/^@/, '')).pipe(z.st
 const https = z.string().trim().max(300).optional().transform((v) => (v ? v : undefined)).pipe(z.url({ protocol: /^https$/ }).optional());
 const phone = z.string().trim().refine((v) => v.replace(/\D/g, '').length >= 10, 'Phone needs at least 10 digits.');
 
+export const PROVINCES = ['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU'];
+export const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
+
+/** "n1r1a1", "N1R-1A1" -> "N1R 1A1"; "14201 1234" -> "14201-1234". Anything else is left as typed. */
+export function tidyPostal(country, v) {
+  if (country === 'US') {
+    const d = String(v).replace(/\D/g, '');
+    return d.length === 9 ? `${d.slice(0, 5)}-${d.slice(5)}` : d.length === 5 ? d : String(v).trim();
+  }
+  const c = String(v).toUpperCase().replace(/[^A-Z0-9]/g, '');
+  return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(c) ? `${c.slice(0, 3)} ${c.slice(3)}` : String(v).trim();
+}
+
 export const leadSchema = z
   .object({
     name: str(80),
@@ -53,18 +66,21 @@ export const intakeSchema = z
         email: z.email().optional(),
         street: str(120),
         city: str(60),
-        province: z.enum(['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU']),
-        // Accept any spacing or dashes from copy and paste; store as "N1R 1A1".
-        postal: z
-          .string()
-          .transform((v) => v.toUpperCase().replace(/[^A-Z0-9]/g, ''))
-          .pipe(z.string().regex(/^[A-Z]\d[A-Z]\d[A-Z]\d$/, 'Postal code: 3 letters and 3 numbers, like N1R 1A1.'))
-          .transform((v) => `${v.slice(0, 3)} ${v.slice(3)}`),
+        country: z.enum(['CA', 'US']).default('CA'),
+        province: z.enum([...PROVINCES, ...STATES]), // province or state code
+        postal: z.string(),
         instagram: handle,
         googleBusinessUrl: https,
         foundedYear: z.int().min(1900).max(new Date().getFullYear()).optional(),
       })
-      .strict(),
+      .strict()
+      // Accept any spacing or dashes from copy and paste; store as "N1R 1A1" or "14201".
+      .transform((b) => ({ ...b, postal: tidyPostal(b.country, b.postal) }))
+      .superRefine((b, ctx) => {
+        const ca = b.country === 'CA';
+        if (!(ca ? PROVINCES : STATES).includes(b.province)) ctx.addIssue({ code: 'custom', path: ['province'], message: ca ? 'Choose a province.' : 'Choose a state.' });
+        if (!(ca ? /^[A-Z]\d[A-Z] \d[A-Z]\d$/ : /^\d{5}(-\d{4})?$/).test(b.postal)) ctx.addIssue({ code: 'custom', path: ['postal'], message: ca ? 'Postal code: 3 letters and 3 numbers, like N1R 1A1.' : 'ZIP code: 5 numbers, like 14201.' });
+      }),
     hours: z.array(z.object({ day: z.enum(DAYS), open: z.string().regex(TIME_RE), close: z.string().regex(TIME_RE) }).strict()).min(1, 'Add at least one open day.'),
     hoursNote: opt(200),
     omisUrl: https,
