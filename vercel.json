@@ -1,10 +1,25 @@
 {
+  "cleanUrls": true,
   "redirects": [
-    { "source": "/legal", "destination": "/privacy-policy", "permanent": true },
-    { "source": "/templates", "destination": "/templates/", "permanent": false }
+    {
+      "source": "/legal",
+      "destination": "/privacy-policy",
+      "permanent": true
+    },
+    {
+      "source": "/templates",
+      "destination": "/templates/",
+      "permanent": false
+    }
   ],
   "rewrites": [
-    { "source": "/templates/(.*)", "destination": "https://omis-showcase.pages.dev/templates/$1" },
-    { "source": "/((?!api/|templates/).*)", "destination": "/index.html" }
+    {
+      "source": "/templates/(.*)",
+      "destination": "https://omis-showcase.pages.dev/templates/$1"
+    },
+    {
+      "source": "/((?!api/|templates/).*)",
+      "destination": "/index.html"
+    }
   ]
 }

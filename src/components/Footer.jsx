@@ -1,12 +1,21 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart2, ExternalLink, Mail, Phone, MapPin } from 'lucide-react';
+import { ExternalLink, Mail, Phone, MapPin } from 'lucide-react';
+import Logo from '@/components/Logo';
+import { TRADES } from '@/data/trades';
 
 const Footer = () => {
   const omisAppLink = "https://omis-crm.com/";
 
   // Audited links mapping perfectly to App.jsx routes
   const footerSections = [
+    {
+      title: "For Your Shop",
+      links: [
+        ...TRADES.map((t) => ({ text: t.label, to: `/for/${t.slug}` })),
+        { text: "Website Templates", href: "/templates/" },
+      ]
+    },
     {
       title: "Product & Tools",
       links: [
@@ -41,15 +50,14 @@ const Footer = () => {
   return (
     <footer className="bg-slate-100 text-slate-900 border-t-2 border-slate-200 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-12 mb-12">
           
           <div className="col-span-1 md:col-span-1">
             <Link to="/" className="flex items-center gap-2 mb-4" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-              <BarChart2 className="w-8 h-8 text-blue-700"/>
-              <span className="text-xl font-extrabold text-slate-900 tracking-tight">BDO Analytics Solutions</span>
+              <Logo />
             </Link>
             <p className="text-sm text-slate-800 font-medium leading-relaxed mb-6">
-              Ontario, Canada data and analytics consulting — and the builders of OMIS.
+              Websites and OMIS booking for appointment-based shops, plus data and analytics consulting. Ontario, Canada.
             </p>
           </div>
 
@@ -63,6 +71,8 @@ const Footer = () => {
                          <a href={link.external} target="_blank" rel="noopener noreferrer" className="text-blue-800 font-bold hover:text-blue-900 hover:underline transition-colors flex items-center gap-2">
                             {link.text} <ExternalLink className="w-3 h-3" />
                          </a>
+                    ) : link.href ? (
+                      <a href={link.href} className="text-slate-800 font-medium hover:text-blue-800 hover:font-bold hover:underline transition-all hover:translate-x-1 inline-block transform duration-200">{link.text}</a>
                     ) : (
                       <Link to={link.to} className="text-slate-800 font-medium hover:text-blue-800 hover:font-bold hover:underline transition-all hover:translate-x-1 inline-block transform duration-200">{link.text}</Link>
                     )}

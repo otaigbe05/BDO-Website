@@ -1,8 +1,63 @@
-import React, { useState } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import React, { useEffect, useRef, useState } from 'react';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { Button } from '@/components/ui/button';
-import { Menu, X, BarChart2, ArrowRight } from 'lucide-react';
+import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
+import Logo from '@/components/Logo';
+import { TRADES } from '@/data/trades';
+
+// "Industries": one page per trade, each from that owner's point of view.
+const IndustriesMenu = () => {
+    const [open, setOpen] = useState(false);
+    const box = useRef(null);
+    const { pathname } = useLocation();
+    useEffect(() => { setOpen(false); }, [pathname]);
+    useEffect(() => {
+        if (!open) return undefined;
+        const away = (e) => { if (!box.current?.contains(e.target)) setOpen(false); };
+        const esc = (e) => { if (e.key === 'Escape') { setOpen(false); box.current?.querySelector('button')?.focus(); } };
+        document.addEventListener('pointerdown', away);
+        document.addEventListener('keydown', esc);
+        return () => { document.removeEventListener('pointerdown', away); document.removeEventListener('keydown', esc); };
+    }, [open]);
+    const here = pathname.startsWith('/for/');
+    return (
+        <div ref={box} className="relative">
+            <button
+                type="button"
+                aria-expanded={open}
+                aria-controls="industries-menu"
+                onClick={() => setOpen((o) => !o)}
+                className={`inline-flex items-center gap-1 text-sm font-bold tracking-wide whitespace-nowrap transition-colors hover:text-blue-800 ${here ? 'text-blue-700' : 'text-slate-900'}`}
+            >
+                Industries <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+            </button>
+            <AnimatePresence>
+                {open && (
+                    <motion.div
+                        id="industries-menu"
+                        initial={{ opacity: 0, y: -6 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -6 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute -left-4 top-full z-50 mt-4 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl"
+                    >
+                        <ul>
+                            {TRADES.map((t) => (
+                                <li key={t.slug}>
+                                    <Link to={`/for/${t.slug}`} className="block rounded-xl px-3 py-2.5 hover:bg-blue-50">
+                                        <span className="block text-sm font-bold text-slate-900">{t.label}</span>
+                                        <span className="block text-xs text-slate-600">Your website and OMIS, for {t.plural}</span>
+                                    </Link>
+                                </li>
+                            ))}
+                        </ul>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -31,13 +86,13 @@ const Header = () => {
             <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-slate-300 supports-[backdrop-filter]:bg-white/95 font-sans shadow-sm">
                 <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex items-center justify-between gap-6 h-20">
-                        <Link to="/" className="flex shrink-0 items-center gap-2 whitespace-nowrap text-lg xl:text-xl font-extrabold text-slate-900 transition-transform hover:scale-105 tracking-tight">
-                           <BarChart2 className="w-7 h-7 text-blue-700"/>
-                           BDO Analytics Solutions
+                        <Link to="/" aria-label="BDO Analytics Solutions, home" className="flex shrink-0 items-center whitespace-nowrap transition-transform hover:scale-[1.03]">
+                           <Logo animate />
                         </Link>
                         
                         <div className="hidden lg:flex items-center gap-4 2xl:gap-7">
-                            {navLinks.map((link) => (
+                            <IndustriesMenu />
+                            {navLinks.filter((link) => link.to !== '/').map((link) => (
                                 <NavLink
                                     key={link.to}
                                     to={link.to}
@@ -100,6 +155,14 @@ const Header = () => {
                                     {link.title}
                                 </NavLink>
                             ))}
+                            <p className="px-4 pt-3 text-xs font-extrabold uppercase tracking-wider text-slate-600">For your shop</p>
+                            <div className="grid grid-cols-2 gap-1">
+                                {TRADES.map((t) => (
+                                    <Link key={t.slug} to={`/for/${t.slug}`} onClick={() => setIsMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-bold text-slate-900 hover:bg-blue-50 hover:text-blue-800">
+                                        {t.label}
+                                    </Link>
+                                ))}
+                            </div>
                             <a href="/templates/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-extrabold text-slate-900 hover:text-blue-800 hover:bg-blue-50 transition-colors">
                                 Website Templates
                                 <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider text-emerald-800">New</span>
