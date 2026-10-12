@@ -49,8 +49,57 @@ const photo = z
     service: opt(80),
     caption: opt(120),
     price: opt(40),
+    colour: opt(24), // work photos for colour-led designs (S12): which of the owner's colours
   })
   .strict();
+
+// Facts some designs need that the basic form does not cover. COPY of omis-sites/pipeline/
+// intake.mjs (extrasSchema, DESIGN_EXTRAS, extrasProblems); keep the two in step.
+const num = (min, max) => z.coerce.number().int().min(min).max(max);
+export const extrasSchema = z
+  .object({
+    classes: z.array(z.object({ day: z.enum(DAYS), time: z.string().regex(TIME_RE), name: str(40), minutes: num(10, 180), coach: opt(40) }).strict()).max(60).optional(),
+    steps: z.array(z.object({ title: str(40), text: str(260), time: z.string().regex(TIME_RE).optional() }).strict()).max(6).optional(),
+    packages: z.array(z.object({ name: str(60), price: str(40), length: opt(40), includes: opt(300) }).strict()).max(8).optional(),
+    makes: z.array(str(24)).max(24).optional(),
+    interval: z.object({ name: str(40), work: num(5, 600), rest: num(5, 600), rounds: num(1, 30), note: opt(160) }).strict().optional(),
+    blocks: z.object({ name: str(50), list: z.array(z.object({ name: str(30), weeks: num(1, 8), sessions: num(1, 6), focus: str(200) }).strict()).min(2).max(5) }).strict().optional(),
+    route: z.object({ name: str(50), distance: str(30), meet: str(160), stops: z.array(z.object({ name: str(50), note: str(140), distance: opt(20) }).strict()).min(3).max(7) }).strict().optional(),
+    colours: z.array(z.object({ name: str(24), hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/) }).strict()).max(8).optional(),
+  })
+  .strict();
+
+// Which designs ask which extra questions. 'required': the design cannot be built without it.
+export const DESIGN_EXTRAS = {
+  P03: { classes: 'optional' }, P07: { classes: 'optional' }, P10: { classes: 'optional' },
+  P11: { classes: 'required' }, P13: { classes: 'required' },
+  P12: { interval: 'required' }, P14: { blocks: 'required' }, P15: { route: 'required' },
+  A09: { makes: 'optional' }, A14: { makes: 'required' },
+  A10: { steps: 'optional' }, B03: { steps: 'optional' }, P02: { steps: 'optional' },
+  A13: { steps: 'required' }, T12: { steps: 'required' }, S15: { steps: 'required' },
+  A07: { packages: 'optional' }, S07: { packages: 'optional' }, P01: { packages: 'optional' }, P06: { packages: 'optional' }, P09: { packages: 'optional' },
+  S12: { colours: 'required' },
+};
+
+/** Plain-words problems when a design's required extra details are missing (empty when fine). */
+export function extrasProblems(template, extras = {}, photos = []) {
+  const need = DESIGN_EXTRAS[template] ?? {};
+  const out = [];
+  const req = (k) => need[k] === 'required';
+  if (req('classes') && (extras.classes?.length ?? 0) < 3) out.push('Class times: add at least 3 classes from your weekly timetable.');
+  if (req('steps') && (extras.steps?.length ?? 0) < 3) out.push('Steps: add at least 3 steps of how a visit or service goes.');
+  if (req('makes') && (extras.makes?.length ?? 0) < 3) out.push('Makes: list at least 3 makes you work on.');
+  if (req('interval') && !extras.interval) out.push('Interval: add your work time, rest time, and number of rounds.');
+  if (req('blocks') && !extras.blocks) out.push('Programme: add at least 2 blocks of your programme.');
+  if (req('route') && !extras.route) out.push('Route: add your meeting point and at least 3 stops.');
+  if (req('colours')) {
+    const names = new Set((extras.colours ?? []).map((c) => c.name));
+    const shown = new Set(photos.filter((p) => p.kind === 'work' && p.colour && names.has(p.colour)).map((p) => p.colour));
+    if (names.size < 3) out.push('Colours: add at least 3 colours you offer.');
+    else if (shown.size < 3) out.push('Colours: tag your work photos so at least 3 of your colours each have a photo.');
+  }
+  return out;
+}
 
 export const intakeSchema = z
   .object({
@@ -96,6 +145,8 @@ export const intakeSchema = z
     faqNotes: opt(3000),
     extraNotes: opt(2000),
     reviews: z.array(z.object({ quote: str(400), author: str(60), source: opt(40) }).strict()).max(12).default([]),
+    // Answers to the design's extra questions (DESIGN_EXTRAS).
+    extras: extrasSchema.default({}),
     // The content release (SiteIntake.jsx CONSENT_TEXT). The server stamps version and time.
     consent: z.object({ accepted: z.literal(true, { error: 'Please tick the box to confirm the content release.' }), version: str(20), at: str(40) }).strict(),
   })

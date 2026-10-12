@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass } from './ui';
+import DesignExtras from './DesignExtras';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_NAMES = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
@@ -25,6 +26,37 @@ const TRADE = {
   S: { tagline: 'Gel nails and lash extensions in a quiet studio.', role: 'Role, for example Nail tech or Lash artist', service: 'Service, for example Gel manicure', photo: 'use the nail art photo as the main photo', rules: 'Deposits, cancellations, lateness, patch tests, payment.' },
   P: { tagline: 'Small-group strength training for adults.', role: 'Role, for example Personal trainer or Coach', service: 'Service, for example 1-on-1 session (60 min)', photo: 'use the group class photo as the main photo', rules: 'Cancellations, packages and when they expire, what to bring, payment.' },
 };
+
+// Extra questions some designs need (keep in step with api/_lib/schemas.js DESIGN_EXTRAS).
+// 'required': the design cannot be built without the answer.
+const DESIGN_EXTRAS = {
+  P03: { classes: 'optional' }, P07: { classes: 'optional' }, P10: { classes: 'optional' },
+  P11: { classes: 'required' }, P13: { classes: 'required' },
+  P12: { interval: 'required' }, P14: { blocks: 'required' }, P15: { route: 'required' },
+  A09: { makes: 'optional' }, A14: { makes: 'required' },
+  A10: { steps: 'optional' }, B03: { steps: 'optional' }, P02: { steps: 'optional' },
+  A13: { steps: 'required', stepTimes: true }, T12: { steps: 'required' }, S15: { steps: 'required' },
+  A07: { packages: 'optional' }, S07: { packages: 'optional' }, P01: { packages: 'optional' }, P06: { packages: 'optional' }, P09: { packages: 'optional' },
+  S12: { colours: 'required' },
+};
+// What the steps are about, in the trade's words.
+const STEP_HINT = {
+  T: 'From the first message to healed: for example Consult, Drawing, Stencil, Session, Healed.',
+  A: 'A visit at your shop: for example Drop-off, We take a look, Quote by text, The repair, Pickup.',
+  B: 'How your signature service goes: for example Hot towel, Lather, First pass, Cold towel.',
+  S: 'Your signature treatment from arrival to rest: for example Arrive, Warm towels, Scrub, Rest.',
+  P: 'Your first month or first visit: for example Intro call, Movement check, Week 1, Check-in.',
+};
+const blankExtras = () => ({
+  classes: [],
+  steps: [],
+  packages: [],
+  makes: '',
+  interval: { name: '', work: '', rest: '', rounds: '', note: '' },
+  blocks: { name: '', list: [] },
+  route: { name: '', distance: '', meet: '', stops: [] },
+  colours: [],
+});
 
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
 const blankMember = () => ({ name: '', role: '', specialty: '', instagram: '', bookingUrl: '', photo: null });
@@ -46,6 +78,7 @@ function initial(lead) {
     reviewsReal: false,
     omisUrl: '',
     domain: lead.domain ?? '',
+    extras: blankExtras(),
     consent: false,
   };
 }
@@ -63,7 +96,7 @@ function fromIntake(p, urls) {
     services: p.services.map((s) => ({ name: s.name, price: s.price, duration: s.duration ?? '', description: s.description ?? '' })),
     team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
     photos: { logo: photo(byKind('logo')), hero: photo(byKind('hero')), about: photo(byKind('about')) },
-    work: p.photos.filter((x) => x.kind === 'work').map((x) => ({ key: x.key, preview: urls[x.key] ?? '', caption: x.caption ?? '', member: x.member ?? '', price: x.price ?? '' })),
+    work: p.photos.filter((x) => x.kind === 'work').map((x) => ({ key: x.key, preview: urls[x.key] ?? '', caption: x.caption ?? '', member: x.member ?? '', price: x.price ?? '', colour: x.colour ?? '' })),
     aboutNotes: p.aboutNotes ?? '',
     policyNotes: p.policyNotes ?? '',
     faqNotes: p.faqNotes ?? '',
@@ -72,9 +105,25 @@ function fromIntake(p, urls) {
     reviewsReal: p.reviews.length > 0,
     omisUrl: p.omisUrl ?? '',
     domain: p.domain ?? '',
+    extras: fromExtras(p.extras ?? {}),
     consent: false,
     changeNotes: '',
   };
+}
+
+/** Saved extra answers -> form state (numbers back to text fields). */
+function fromExtras(x) {
+  const e = blankExtras();
+  const txt = (v) => (v == null ? '' : String(v));
+  if (x.classes) e.classes = x.classes.map((c) => ({ day: c.day, time: c.time, name: c.name, minutes: txt(c.minutes), coach: c.coach ?? '' }));
+  if (x.steps) e.steps = x.steps.map((st) => ({ title: st.title, text: st.text, time: st.time ?? '' }));
+  if (x.packages) e.packages = x.packages.map((k) => ({ name: k.name, price: k.price, length: k.length ?? '', includes: k.includes ?? '' }));
+  if (x.makes) e.makes = x.makes.join(', ');
+  if (x.interval) e.interval = { name: x.interval.name, work: txt(x.interval.work), rest: txt(x.interval.rest), rounds: txt(x.interval.rounds), note: x.interval.note ?? '' };
+  if (x.blocks) e.blocks = { name: x.blocks.name, list: x.blocks.list.map((b) => ({ name: b.name, weeks: txt(b.weeks), sessions: txt(b.sessions), focus: b.focus })) };
+  if (x.route) e.route = { name: x.route.name, distance: x.route.distance, meet: x.route.meet, stops: x.route.stops.map((st) => ({ name: st.name, note: st.note, distance: st.distance ?? '' })) };
+  if (x.colours) e.colours = x.colours.map((c) => ({ name: c.name, hex: c.hex }));
+  return e;
 }
 
 /** "n1r1a1", "N1R-1A1" -> "N1R 1A1"; "14201 1234" -> "14201-1234" (anything else as typed). */
@@ -135,7 +184,7 @@ export default function SiteIntake() {
         saved = null;
       }
       const fresh = r.mode === 'edit' && r.previous ? fromIntake(r.previous, r.photoUrls ?? {}) : initial(r.lead);
-      setF(saved ?? fresh);
+      setF(saved ? { ...saved, extras: saved.extras ?? blankExtras() } : fresh);
       setState('open');
     });
   }, [token]);
@@ -190,6 +239,7 @@ export default function SiteIntake() {
     });
   const b = f.business;
   const trade = TRADE[lead.template[0]] ?? TRADE.B;
+  const need = DESIGN_EXTRAS[lead.template] ?? {};
   const us = b.country === 'US';
 
   async function upload(file, kind) {
@@ -240,13 +290,49 @@ export default function SiteIntake() {
     }
   }
 
+  /** Only the extra answers this design asks for, with empty rows left out. */
+  function extrasPayload() {
+    const clean = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== '' && v != null));
+    const x = f.extras;
+    const out = {};
+    if (need.classes) out.classes = x.classes.filter((c) => c.name.trim()).map((c) => clean({ ...c, minutes: Number(c.minutes) || '' }));
+    if (need.steps) out.steps = x.steps.filter((st) => st.title.trim() || st.text.trim()).map((st) => clean({ ...st, time: need.stepTimes ? st.time : '' }));
+    if (need.packages) out.packages = x.packages.filter((k) => k.name.trim()).map(clean);
+    if (need.makes) out.makes = x.makes.split(/[,\n]/).map((m) => m.trim()).filter(Boolean);
+    if (need.interval && (x.interval.work || x.interval.rest)) out.interval = clean({ ...x.interval, work: Number(x.interval.work) || '', rest: Number(x.interval.rest) || '', rounds: Number(x.interval.rounds) || '' });
+    if (need.blocks && x.blocks.list.some((b) => b.name.trim())) out.blocks = { name: x.blocks.name, list: x.blocks.list.filter((b) => b.name.trim()).map((b) => ({ ...b, weeks: Number(b.weeks) || '', sessions: Number(b.sessions) || '' })) };
+    if (need.route && x.route.stops.some((st) => st.name.trim())) out.route = { name: x.route.name, distance: x.route.distance, meet: x.route.meet, stops: x.route.stops.filter((st) => st.name.trim()).map(clean) };
+    if (need.colours) out.colours = x.colours.filter((c) => c.name.trim());
+    return Object.fromEntries(Object.entries(out).filter(([, v]) => !(Array.isArray(v) && v.length === 0)));
+  }
+
+  /** The same checks the server makes, so problems show before sending. */
+  function extrasIssues() {
+    const req = (k) => need[k] === 'required';
+    const x = extrasPayload();
+    const out = [];
+    if (req('classes') && (x.classes?.length ?? 0) < 3) out.push('Class times: add at least 3 classes from your weekly timetable.');
+    if (req('steps') && (x.steps?.length ?? 0) < 3) out.push('Steps: add at least 3 steps.');
+    if (req('makes') && (x.makes?.length ?? 0) < 3) out.push('Makes: list at least 3 makes you work on.');
+    if (req('interval') && !x.interval) out.push('Interval: add your work time, rest time, and number of rounds.');
+    if (req('blocks') && (x.blocks?.list.length ?? 0) < 2) out.push('Programme: add at least 2 blocks.');
+    if (req('route') && (x.route?.stops.length ?? 0) < 3) out.push('Route: add your meeting point and at least 3 stops.');
+    if (req('colours')) {
+      const names = new Set((x.colours ?? []).map((c) => c.name));
+      const shown = new Set(f.work.filter((w) => w.colour && names.has(w.colour)).map((w) => w.colour));
+      if (names.size < 3) out.push('Colours: add at least 3 colours you offer.');
+      else if (shown.size < 3) out.push('Colours: pick a colour for your work photos so at least 3 colours each have a photo.');
+    }
+    return out;
+  }
+
   function toPayload() {
     const clean = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== '' && v != null));
     const team = f.team.filter((m) => m.name.trim());
     const photos = [
       ...['logo', 'hero', 'about'].filter((k) => f.photos[k]).map((k) => ({ key: f.photos[k].key, kind: k })),
       ...team.filter((m) => m.photo).map((m) => ({ key: m.photo.key, kind: 'team', member: m.name.trim() })),
-      ...f.work.map((w) => clean({ key: w.key, kind: 'work', caption: w.caption, member: w.member, price: w.price })),
+      ...f.work.map((w) => clean({ key: w.key, kind: 'work', caption: w.caption, member: w.member, price: w.price, colour: need.colours ? w.colour : '' })),
     ];
     return clean({
       domain: f.domain.trim().toLowerCase(),
@@ -262,6 +348,7 @@ export default function SiteIntake() {
       faqNotes: f.faqNotes,
       extraNotes: f.extraNotes,
       reviews: f.reviewsReal ? f.reviews.filter((r) => r.quote.trim() && r.author.trim()).map(clean) : [],
+      extras: extrasPayload(),
       // The server stamps the wording version and time.
       consent: { accepted: f.consent === true },
     });
@@ -275,6 +362,8 @@ export default function SiteIntake() {
     if (!photoCount) return setProblems(['Photos: add at least one photo of your work or your space. Your site is built around it.']);
     if (need && f.work.length < need.work) return setProblems([`Photos: this design needs at least ${need.work} photos of your work.`]);
     if (need?.priced && f.work.filter((w) => w.price?.trim()).length < need.work) return setProblems([`Photos: this design shows a price on each piece. Add a price to at least ${need.work} work photos.`]);
+    const extraIssues = extrasIssues();
+    if (extraIssues.length) return setProblems(extraIssues);
     if (f.reviews.some((r) => r.quote.trim()) && !f.reviewsReal) return setProblems(['Reviews: tick the box to confirm they are real reviews from your customers, or remove them.']);
     if (!f.consent) return setProblems(['Content release: please read it and tick the box at the bottom of the form.']);
     setBusy(true);
@@ -474,6 +563,14 @@ export default function SiteIntake() {
                   {PHOTO_NEEDS[lead.template]?.priced && (
                     <Text aria-label="Price" placeholder="Price, e.g. $120" value={w.price} onChange={(v) => set(`work.${i}.price`, v)} />
                   )}
+                  {need.colours && f.extras.colours.some((c) => c.name.trim()) && (
+                    <select aria-label="Colour in this photo" className={inputClass} value={w.colour ?? ''} onChange={(e) => set(`work.${i}.colour`, e.target.value)}>
+                      <option value="">Which colour?</option>
+                      {f.extras.colours.filter((c) => c.name.trim()).map((c) => (
+                        <option key={c.name}>{c.name.trim()}</option>
+                      ))}
+                    </select>
+                  )}
                   {f.team.some((m) => m.name.trim()) && (
                     <select aria-label="Whose work" className={inputClass} value={w.member} onChange={(e) => set(`work.${i}.member`, e.target.value)}>
                       <option value="">Whose work?</option>
@@ -490,6 +587,8 @@ export default function SiteIntake() {
             </ul>
           )}
         </Card>
+
+        {Object.keys(need).length > 0 && <DesignExtras need={need} x={f.extras} set={set} stepHint={STEP_HINT[lead.template[0]] ?? ''} />}
 
         <Card title="In your own words" intro="Write it like you would say it. We turn it into the text on your site, using only what you tell us.">
           <Field label="About your business" htmlFor="about" hint="How it started, what you are known for, who you serve.">
