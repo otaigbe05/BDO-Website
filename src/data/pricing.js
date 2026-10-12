@@ -14,6 +14,7 @@ export const WEBSITE = {
   // One-time setup for a website on its own, plus monthly hosting and care.
   setupAlone: 449,
   careMonthly: 12,
+  careYearly: 120,
   // Online stores are quoted; this is the starting point shown.
   storeFrom: 1500,
 };

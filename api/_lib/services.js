@@ -42,6 +42,15 @@ export const db = {
   async upload(key, buffer, contentType) {
     await rest(`/storage/v1/object/intake/${key}`, { method: 'POST', headers: { 'Content-Type': contentType, 'x-upsert': 'false' }, body: buffer });
   },
+  async events(leadId, kind) {
+    const rows = await (await rest(`/rest/v1/events?lead_id=eq.${leadId}&kind=eq.${encodeURIComponent(kind)}&order=at.desc&select=kind,at,detail`)).json();
+    return rows;
+  },
+  /** Live sites ordered by this email (case-insensitive). */
+  async liveLeadsByEmail(email) {
+    if (!email) return [];
+    return (await rest(`/rest/v1/leads?email=ilike.${encodeURIComponent(email)}&status=eq.live&select=*`)).json();
+  },
   async latestIntake(leadId) {
     const rows = await (await rest(`/rest/v1/intakes?lead_id=eq.${leadId}&order=created_at.desc&limit=1&select=data`)).json();
     return rows[0]?.data ?? null;
