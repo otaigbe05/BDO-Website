@@ -4,9 +4,11 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink, CalendarCheck, Wallet, FileSignature, BellRing, Users2, LayoutDashboard, BarChart2, FileSpreadsheet, RefreshCw } from 'lucide-react';
-import HeroSection from '@/components/HeroSection';
+import HomeHero from '@/components/HomeHero';
 import TrustTicker from '@/components/TrustTicker';
 import TemplateShowcase from '@/components/TemplateShowcase';
+
+const MotionLink = motion(Link);
 
 const Home = () => {
     const siteUrl = "https://www.bdoanalyticssolutions.com";
@@ -100,80 +102,26 @@ const Home = () => {
     ];
 
     const verticals = [
-        { name: "Tattoo & Piercing", desc: "Deposits that stop no-shows, waivers signed before they sit down, a booking link for every artist", href: "https://www.omis-crm.com/tattoo" },
-        { name: "Barbershops", desc: "24/7 online booking, automatic reminders, a booking link for every barber", href: "https://www.omis-crm.com/barbers" },
-        { name: "Auto Repair Shops", desc: "Every job tracked from estimate to invoice, with reminders when customers are due back", href: "https://www.omis-crm.com/auto" },
-        { name: "Spas & Salons", desc: "24/7 online booking, automatic reminders, a booking link for every stylist", href: "https://www.omis-crm.com/spa" },
-        { name: "Personal Training", desc: "24/7 online booking, automatic reminders, a booking link for every trainer", href: "https://www.omis-crm.com/personal-training" },
+        { name: "Tattoo & Piercing", desc: "Deposits that stop no-shows, waivers signed before they sit down, a booking link for every artist", href: "/for/tattoo" },
+        { name: "Barbershops", desc: "24/7 online booking, automatic reminders, a booking link for every barber", href: "/for/barbers" },
+        { name: "Auto Repair Shops", desc: "Every job tracked from estimate to invoice, with reminders when customers are due back", href: "/for/auto" },
+        { name: "Spas & Salons", desc: "24/7 online booking, automatic reminders, a booking link for every stylist", href: "/for/spa" },
+        { name: "Personal Training", desc: "24/7 online booking, automatic reminders, a booking link for every trainer", href: "/for/personal-training" },
     ];
 
     return (
         <>
             <Helmet>
-                <title>Data & Analytics Consulting + OMIS | BDO Analytics Solutions</title>
-                <meta name="description" content="BDO Analytics Solutions is an Ontario, Canada data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses." />
+                <title>Websites and Online Booking for Ontario Shops | BDO Analytics Solutions</title>
+                <meta name="description" content="Website designs for barbershops, tattoo studios, auto shops, spas and personal trainers, with OMIS online booking, reminders and deposits built in. Plus data and analytics consulting. Ontario, Canada." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
             <div className="bg-white overflow-hidden font-sans">
-                <HeroSection
-                    headline={
-                        <span>
-                            We turn business data into <br className="hidden md:block" />
-                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-teal-700">
-                                better decisions.
-                            </span>
-                        </span>
-                    }
-                    subheadline="BDO Analytics Solutions is an Ontario, Canada data and analytics consulting practice — and the builder of OMIS, the booking, deposits, and client-management platform for appointment-based businesses."
-                    primaryCtaText="Book a Demo"
-                    primaryCtaLink="/book-demo"
-                    secondaryCtaText="Try OMIS Now"
-                    secondaryCtaLink="https://omis-crm.com/"
-                    showDashboardPreview={false}
-                    eyebrow={
-                        <a href="#templates" className="group inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/90 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:bg-white">
-                            <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-white">New</span>
-                            Website templates for your trade
-                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
-                        </a>
-                    }
-                />
+                <HomeHero />
 
                 <TrustTicker />
 
-                <section className="py-24 bg-white border-t border-slate-200">
-                    <div className="container mx-auto px-4">
-                        <motion.div {...fadeInUp} className="max-w-4xl mx-auto text-center mb-16">
-                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Our Consulting Practice</h2>
-                            <p className="text-xl text-slate-800 font-medium leading-relaxed">
-                                Before OMIS, there's the work we've always done: making sense of your business's numbers.
-                            </p>
-                        </motion.div>
-
-                        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-                            {consultingServices.map((item, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    whileInView={{ opacity: 1, y: 0 }}
-                                    viewport={{ once: true }}
-                                    transition={{ delay: i * 0.1 }}
-                                    className="bg-slate-50 p-8 rounded-2xl border border-slate-300"
-                                >
-                                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 border border-blue-100 text-blue-700">
-                                        {item.icon}
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-slate-900 mb-3">{item.title}</h3>
-                                    <p className="text-slate-800 font-medium mb-4">{item.desc}</p>
-                                    <Link to="/services" className="inline-flex items-center font-bold text-blue-700 hover:text-blue-800 transition-colors group">
-                                      See our services <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                                    </Link>
-                                </motion.div>
-                            ))}
-                        </div>
-                    </div>
-                </section>
 
                 <section className="py-24 bg-blue-50/50 border-y border-slate-200">
                     <div className="container mx-auto px-4">
@@ -186,11 +134,9 @@ const Home = () => {
 
                         <div className="flex flex-wrap justify-center gap-6 max-w-6xl mx-auto mb-12">
                             {verticals.map((v, i) => (
-                                <motion.a
+                                <MotionLink
                                     key={i}
-                                    href={v.href}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                    to={v.href}
                                     initial={{ opacity: 0, scale: 0.95 }}
                                     whileInView={{ opacity: 1, scale: 1 }}
                                     viewport={{ once: true }}
@@ -199,10 +145,10 @@ const Home = () => {
                                 >
                                     <span className="flex items-center justify-between font-bold text-lg">
                                         {v.name}
-                                        <ExternalLink className="w-4 h-4 text-blue-700 shrink-0 ml-2" />
+                                        <ArrowRight className="w-4 h-4 text-blue-700 shrink-0 ml-2" />
                                     </span>
                                     <span className="text-sm font-medium text-slate-700 leading-relaxed">{v.desc}</span>
-                                </motion.a>
+                                </MotionLink>
                             ))}
                         </div>
 
@@ -261,6 +207,39 @@ const Home = () => {
                     </div>
                 </section>
 
+
+                <section className="py-24 bg-white border-t border-slate-200">
+                    <div className="container mx-auto px-4">
+                        <motion.div {...fadeInUp} className="max-w-4xl mx-auto text-center mb-16">
+                            <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Data and Analytics Consulting</h2>
+                            <p className="text-xl text-slate-800 font-medium leading-relaxed">
+                                Not a shop? The work we started with still runs: making sense of your business's numbers, for any business.
+                            </p>
+                        </motion.div>
+
+                        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                            {consultingServices.map((item, i) => (
+                                <motion.div
+                                    key={i}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: i * 0.1 }}
+                                    className="bg-slate-50 p-8 rounded-2xl border border-slate-300"
+                                >
+                                    <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-5 border border-blue-100 text-blue-700">
+                                        {item.icon}
+                                    </div>
+                                    <h3 className="text-2xl font-bold text-slate-900 mb-3">{item.title}</h3>
+                                    <p className="text-slate-800 font-medium mb-4">{item.desc}</p>
+                                    <Link to="/services" className="inline-flex items-center font-bold text-blue-700 hover:text-blue-800 transition-colors group">
+                                      See our services <ArrowRight className="ml-1 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                                    </Link>
+                                </motion.div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
             </div>
         </>
     );

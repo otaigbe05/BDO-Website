@@ -24,6 +24,7 @@ const PrivacyPolicy = lazy(() => import('@/pages/PrivacyPolicy'));
 const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const AccountDeletionRequest = lazy(() => import('@/pages/AccountDeletionRequest'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
+const TradePage = lazy(() => import('@/pages/TradePage'));
 // Client-website funnel (pick a template -> intake -> preview -> publish)
 const SiteStart = lazy(() => import('@/pages/site/SiteStart'));
 const SiteIntake = lazy(() => import('@/pages/site/SiteIntake'));
@@ -50,6 +51,17 @@ const ScrollToTop = () => {
 // AnimatedRoutes wrapper to properly handle AnimatePresence with location
 const AnimatedRoutes = () => {
   const location = useLocation();
+  // index.html ships each page's tags for crawlers (data-seo). Once a page sets its own
+  // through Helmet, drop the shipped copy so later pages don't keep the first page's tags.
+  React.useEffect(() => {
+    const id = setTimeout(() => {
+      document.querySelectorAll('[data-seo]').forEach((el) => {
+        const key = ['name', 'property', 'rel'].find((k) => el.hasAttribute(k));
+        if (key && document.querySelector(`[data-rh][${key}="${el.getAttribute(key)}"]`)) el.remove();
+      });
+    }, 400);
+    return () => clearTimeout(id);
+  }, [location.pathname]);
   
   return (
     <AnimatePresence mode="wait">
@@ -65,6 +77,7 @@ const AnimatedRoutes = () => {
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
           <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
           <Route path="/account-deletion-request" element={<PageTransition><AccountDeletionRequest /></PageTransition>} />
+          <Route path="/for/:trade" element={<PageTransition><TradePage /></PageTransition>} />
           <Route path="/site/start" element={<PageTransition><SiteStart /></PageTransition>} />
           <Route path="/site/intake/:token" element={<PageTransition><SiteIntake /></PageTransition>} />
           <Route path="/site/changes/:token" element={<PageTransition><SiteChanges /></PageTransition>} />

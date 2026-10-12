@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /site/
+Disallow: /api/
+Disallow: /templates/view/
+
+Sitemap: https://www.bdoanalyticssolutions.com/sitemap.xml

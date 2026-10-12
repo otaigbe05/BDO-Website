@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { ArrowRight, Pause, Play, MousePointerClick, ClipboardList, Eye } from 'lucide-react';
+import { useCatalog } from '@/lib/useCatalog';
 
 // Home page: the website templates (served by the omis-sites gallery behind /templates).
 // Everything shown comes from /templates/catalog.json, so counts and names are always real.
@@ -20,21 +21,6 @@ const STEPS = [
   { icon: ClipboardList, title: 'Tell us about your business', text: 'Hours, prices, photos, your team. One form, on your phone.' },
   { icon: Eye, title: 'See your preview', text: 'Your own site, usually within the hour. Ask for changes, then publish.' },
 ];
-
-function useCatalog() {
-  const [state, setState] = useState({ status: 'loading', templates: [] });
-  useEffect(() => {
-    let live = true;
-    fetch('/templates/catalog.json')
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d) => live && setState({ status: 'ready', templates: d.templates ?? [] }))
-      .catch(() => live && setState({ status: 'error', templates: [] }));
-    return () => {
-      live = false;
-    };
-  }, []);
-  return state;
-}
 
 /** Spread the strips across trades: T, B, A, S, P, T, B, ... */
 function interleave(list) {
