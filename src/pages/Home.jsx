@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink, CalendarCheck, Wallet, FileSignature, BellRing, Users2, LayoutDashboard, BarChart2, FileSpreadsheet, RefreshCw } from 'lucide-react';
 import HeroSection from '@/components/HeroSection';
 import TrustTicker from '@/components/TrustTicker';
+import TemplateShowcase from '@/components/TemplateShowcase';
 
 const Home = () => {
     const siteUrl = "https://www.bdoanalyticssolutions.com";
@@ -130,6 +131,13 @@ const Home = () => {
                     secondaryCtaText="Try OMIS Now"
                     secondaryCtaLink="https://omis-crm.com/"
                     showDashboardPreview={false}
+                    eyebrow={
+                        <a href="#templates" className="group inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/90 px-4 py-2 text-sm font-bold text-emerald-800 shadow-sm backdrop-blur transition-colors hover:border-emerald-400 hover:bg-white">
+                            <span className="rounded-full bg-emerald-600 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-white">New</span>
+                            Website templates for your trade
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden="true" />
+                        </a>
+                    }
                 />
 
                 <TrustTicker />
@@ -208,6 +216,8 @@ const Home = () => {
                     </div>
                 </section>
 
+                <TemplateShowcase />
+
                 <section className="py-24 bg-white border-b border-slate-200 relative">
                     <div className="container mx-auto px-4">
                         <motion.div {...fadeInUp} className="text-center mb-16">
@@ -222,7 +232,12 @@ const Home = () => {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ delay: i * 0.08, duration: 0.5 }}
-                                    className={`relative group bg-white p-8 rounded-3xl border border-slate-300 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-[6px] hover:scale-[1.02] ${feature.hoverBorder} flex flex-col overflow-hidden z-10`}
+                                    onPointerMove={(e) => {
+                                        const r = e.currentTarget.getBoundingClientRect();
+                                        e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`);
+                                        e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`);
+                                    }}
+                                    className={`spotlight-card relative group bg-white p-8 rounded-3xl border border-slate-300 shadow-sm hover:shadow-2xl transition-all duration-300 hover:-translate-y-[6px] hover:scale-[1.02] ${feature.hoverBorder} flex flex-col overflow-hidden z-10`}
                                 >
                                     <div className={`absolute inset-0 bg-gradient-to-br ${feature.glowColor} opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-[-1]`} />
                                     
