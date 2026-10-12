@@ -46,7 +46,7 @@ const PricingPage = () => {
       price: money(WEBSITE.setupAlone),
       unit: 'one-time setup',
       plus: `plus ${money(WEBSITE.careMonthly)}/month hosting and care`,
-      points: ['Your website on the design you pick', 'The Book button calls your phone', 'Hosting, security certificate and small edits', 'Add OMIS any time'],
+      points: ['Your website on the design you pick', 'The Book button calls your phone', 'Hosting, security certificate and small edits', 'Stop any time and take your site with you'],
       cta: ['Pick your design', '/templates/'],
     },
     {
@@ -148,6 +148,26 @@ const PricingPage = () => {
                 Compare every OMIS feature <ExternalLink className="h-4 w-4" aria-hidden="true" />
               </a>
             </p>
+          </div>
+        </section>
+
+        {/* Plain answers: no contract, and the site is theirs */}
+        <section className="border-b border-slate-200 bg-slate-50 py-20">
+          <div className="container mx-auto max-w-3xl px-4">
+            <h2 className="mb-8 text-center text-3xl font-bold text-slate-900 md:text-4xl">No contract. Your site is yours.</h2>
+            <dl className="divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white">
+              {[
+                ['Is there a contract?', 'No. The website setup is paid once, when you publish. OMIS and website care are month to month, and you can stop either one any time.'],
+                ['What happens to my website if I stop OMIS?', `Your choice. Keep it online with us for ${money(WEBSITE.careMonthly)}/month, which covers hosting and small edits, or take it with you: we hand over your site's files and you host it wherever you like. Either way, the Book button changes to call your phone.`],
+                ['Who owns the website?', 'You do. Your name, your photos, your words. If you ever want to leave, we hand it over.'],
+                ['When do I pay for the website?', 'After you have seen it. You get a preview of your own site, ask for changes, and pay when you press Publish.'],
+              ].map(([q, a]) => (
+                <div key={q} className="p-6">
+                  <dt className="font-bold text-slate-900">{q}</dt>
+                  <dd className="mt-2 text-slate-700">{a}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
         </section>
 
