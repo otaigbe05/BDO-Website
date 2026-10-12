@@ -6,7 +6,7 @@ import Breadcrumbs from '@/components/Breadcrumbs';
 
 const TermsOfService = () => {
   const siteUrl = "https://www.bdoanalyticssolutions.com/terms-of-service";
-  const lastUpdated = "July 28, 2026";
+  const lastUpdated = "October 12, 2026";
   const COMPANY = "BDO Analytics Solutions";
   const EMAIL = "info@bdoanalyticssolutions.com";
   const PHONE = "+1 (416) 477-9893";
@@ -19,10 +19,10 @@ const TermsOfService = () => {
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
-            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of this website (bdoanalyticssolutions.com) and our data and analytics consulting services (Power BI dashboards, data audit and cleanup, automated reporting) (collectively, the "Services").
+            These Terms of Service ("Terms") constitute a legally binding agreement between you ("User," "you," or "your") and {COMPANY} ("we," "us," or "our") governing your access to and use of this website (bdoanalyticssolutions.com) our website design and hosting services for businesses ("Website Services"), and our data and analytics consulting services (Power BI dashboards, data audit and cleanup, automated reporting) (collectively, the "Services").
           </p>
           <p>
-            Use of the OMIS platform (omis-crm.com) is governed separately by OMIS's own <a href="https://www.omis-crm.com/terms" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Terms of Service</a>, not by these Terms. These Terms apply only to this website and to {COMPANY}'s non-OMIS consulting services.
+            Use of the OMIS platform (omis-crm.com) is governed separately by OMIS's own <a href="https://www.omis-crm.com/terms" className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">Terms of Service</a>, not by these Terms. These Terms apply only to this website and to {COMPANY}'s non-OMIS services: Website Services and consulting.
           </p>
           <p>
             By accessing or using any of our Services, you confirm that you are at least 18 years of age, have the legal authority to enter into these Terms on behalf of yourself or your organization, and agree to be bound by these Terms and our Privacy Policy.
@@ -97,9 +97,30 @@ const TermsOfService = () => {
       )
     },
     {
+      id: "websites",
+      icon: Globe,
+      title: "5. Website Services",
+      content: (
+        <div className="space-y-4 text-slate-600">
+          <p>
+            These terms apply when we build and host a website for your business. Current prices are on our <a href="/pricing" className="text-blue-600 hover:underline">pricing page</a>.
+          </p>
+          <ul className="list-disc pl-5 space-y-2">
+            <li><strong>Preview before payment:</strong> You see a preview of your own website and may ask for changes before you pay. The one-time setup fee is charged when you choose to publish.</li>
+            <li><strong>Refunds:</strong> The setup fee is refundable in full if you ask before your website goes live. Once your website is live, the setup fee is not refundable.</li>
+            <li><strong>Website care:</strong> Website care (hosting, the security certificate and small edits) is billed monthly or yearly and has no minimum term. You may stop it at any time; it ends at the close of the period already paid, and that period is not refunded. Website care is included at no extra charge while you hold an active OMIS plan.</li>
+            <li><strong>If your OMIS plan ends:</strong> Your website stays online and we will ask whether you want to keep it online with website care or take it with you. If we do not hear from you within 30 days, we will send you your website's files and take it offline.</li>
+            <li><strong>Your domain:</strong> Domain names are not included in our prices. You register your domain in your own name, with a registrar of your choice, and you pay for and renew it. We connect it to your website. We will only change the website settings of your domain and never its email settings.</li>
+            <li><strong>Ownership:</strong> Your business name, logo, photos, prices and words remain yours. When you leave, we hand over your website's files, and you may keep using that website for your business, hosted wherever you like, without further charge. The underlying template design remains ours, and you may not resell it or offer it to others.</li>
+            <li><strong>Your content:</strong> You confirm that you have the right to use the photos, text and other material you give us, and that it does not make claims you cannot support.</li>
+          </ul>
+        </div>
+      )
+    },
+    {
       id: "content",
       icon: Database,
-      title: "5. Business Data & Content",
+      title: "6. Business Data & Content",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -120,7 +141,7 @@ const TermsOfService = () => {
     {
       id: "security",
       icon: ShieldCheck,
-      title: "6. Data Security",
+      title: "7. Data Security",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -138,7 +159,7 @@ const TermsOfService = () => {
     {
       id: "availability",
       icon: ServerCrash,
-      title: "7. Service Availability",
+      title: "8. Service Availability",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -158,7 +179,7 @@ const TermsOfService = () => {
     {
       id: "acceptable",
       icon: Ban,
-      title: "8. Acceptable Use",
+      title: "9. Acceptable Use",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>You agree not to use the Services to:</p>
@@ -180,7 +201,7 @@ const TermsOfService = () => {
     {
       id: "termination",
       icon: UserX,
-      title: "9. Termination",
+      title: "10. Termination",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -198,7 +219,7 @@ const TermsOfService = () => {
     {
       id: "ip",
       icon: Copyright,
-      title: "10. Intellectual Property",
+      title: "11. Intellectual Property",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -208,7 +229,7 @@ const TermsOfService = () => {
             Our trademarks, logos, and trade dress may not be used in connection with any product or service without the prior written consent of {COMPANY}. Any feedback, suggestions, or ideas you provide regarding the Services may be used by us without any obligation of compensation or attribution.
           </p>
           <p>
-            Nothing in these Terms transfers any intellectual property rights to you. The license granted under these Terms is limited to using the Services as intended and does not include any right to sublicense, modify, or create derivative works.
+            Except as set out for websites in Section 5 (Website Services), nothing in these Terms transfers any intellectual property rights to you. The license granted under these Terms is limited to using the Services as intended and does not include any right to sublicense, modify, or create derivative works.
           </p>
         </div>
       )
@@ -216,7 +237,7 @@ const TermsOfService = () => {
     {
       id: "liability",
       icon: AlertOctagon,
-      title: "11. Limitation of Liability & Disclaimer",
+      title: "12. Limitation of Liability & Disclaimer",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -240,7 +261,7 @@ const TermsOfService = () => {
     {
       id: "indemnification",
       icon: Globe,
-      title: "12. Indemnification",
+      title: "13. Indemnification",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -258,7 +279,7 @@ const TermsOfService = () => {
     {
       id: "changes",
       icon: RefreshCw,
-      title: "13. Changes to the Terms",
+      title: "14. Changes to the Terms",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>
@@ -277,7 +298,7 @@ const TermsOfService = () => {
     {
       id: "contact",
       icon: Mail,
-      title: "14. Contact Us",
+      title: "15. Contact Us",
       content: (
         <div className="space-y-4 text-slate-600">
           <p>If you have any questions about these Terms, please contact us:</p>

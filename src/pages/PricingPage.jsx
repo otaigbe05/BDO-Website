@@ -27,7 +27,7 @@ const PricingPage = () => {
       price: money(WEBSITE.setupWithOmis),
       unit: 'one-time setup',
       plus: `plus your OMIS plan, from ${money(starter.monthly)}/month`,
-      points: ['Your website on the design you pick', 'A Book button that takes bookings, deposits and reminders through OMIS', 'Hosting and care included while you are on OMIS', 'See your site before you pay'],
+      points: ['Your website on the design you pick', 'A Book button that takes bookings, deposits and reminders through OMIS', 'Hosting and care included while you are on OMIS', 'We connect your own domain'],
       cta: ['Pick your design', '/templates/'],
       highlight: true,
     },
@@ -117,7 +117,7 @@ const PricingPage = () => {
                 </motion.li>
               ))}
             </ul>
-            <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-slate-600">Prices in Canadian dollars. Taxes extra where they apply. You see your website before you pay for it.</p>
+            <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-slate-600">Prices in Canadian dollars. Taxes extra where they apply. Domain names are registered in your name and paid separately. You see your website before you pay for it.</p>
           </div>
         </section>
 
@@ -157,10 +157,12 @@ const PricingPage = () => {
             <h2 className="mb-8 text-center text-3xl font-bold text-slate-900 md:text-4xl">No contract. Your site is yours.</h2>
             <dl className="divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white">
               {[
-                ['Is there a contract?', 'No. The website setup is paid once, when you publish. OMIS and website care are month to month, and you can stop either one any time.'],
+                ['Is there a contract?', 'No. The website setup is paid once, when you publish. OMIS and website care are month to month (or yearly, if you choose), and you can stop either one any time.'],
                 ['What happens to my website if I stop OMIS?', `Your choice. Keep it online with us for ${money(WEBSITE.careMonthly)}/month, which covers hosting and small edits, or take it with you: we hand over your site's files and you host it wherever you like. Either way, the Book button changes to call your phone.`],
                 ['Who owns the website?', 'You do. Your name, your photos, your words. If you ever want to leave, we hand it over.'],
                 ['When do I pay for the website?', 'After you have seen it. You get a preview of your own site, ask for changes, and pay when you press Publish.'],
+                ['Is a domain included?', 'No, and that is on purpose. You register your domain (like yourshop.ca) in your own name, so it is always yours. It usually costs about $15 to $30 a year. We connect it to your site, and we never touch your email settings.'],
+                ['Can I get a refund?', `Yes, in full, if you ask before your site goes live. Once it is live, the setup fee is not refundable. Website care can be stopped any time and ends at the close of the period you have paid for.`],
               ].map(([q, a]) => (
                 <div key={q} className="p-6">
                   <dt className="font-bold text-slate-900">{q}</dt>
@@ -168,6 +170,7 @@ const PricingPage = () => {
                 </div>
               ))}
             </dl>
+            <p className="mt-6 text-center text-sm text-slate-600">The full details are in section 5 of our <Link className="font-bold text-blue-700 underline" to="/terms-of-service">Terms of Service</Link>.</p>
           </div>
         </section>
 
