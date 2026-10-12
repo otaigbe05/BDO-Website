@@ -20,7 +20,7 @@ const ContactPage = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const siteUrl = "https://www.bdoanalyticssolutions.com/contact";
-  const ogImageUrl = `https://www.bdoanalyticssolutions.com/og-image.jpg`;
+  const ogImageUrl = `https://www.bdoanalyticssolutions.com/og.png`;
   const omisAppLink = "https://omis-crm.com/";
 
   const jsonLd = {
@@ -38,14 +38,12 @@ const ContactPage = () => {
         "name": "BDO Analytics Solutions",
         "logo": {
             "@type": "ImageObject",
-            "url": "https://www.bdoanalyticssolutions.com/og-image.jpg"
+            "url": "https://www.bdoanalyticssolutions.com/logo-512.png"
         },
         "address": {
             "@type": "PostalAddress",
-            "streetAddress": "1025 King Street East, Unit 107 #1737",
             "addressLocality": "Cambridge",
             "addressRegion": "ON",
-            "postalCode": "N3H 3P5",
             "addressCountry": "CA"
         }
       }

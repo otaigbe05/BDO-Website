@@ -112,8 +112,8 @@ const Home = () => {
     return (
         <>
             <Helmet>
-                <title>Websites and Online Booking for Ontario Shops | BDO Analytics Solutions</title>
-                <meta name="description" content="Website designs for barbershops, tattoo studios, auto shops, spas and personal trainers, with OMIS online booking, reminders and deposits built in. Plus data and analytics consulting. Ontario, Canada." />
+                <title>Websites, Booking Software and Data Analytics | BDO Analytics Solutions</title>
+                <meta name="description" content="Websites for businesses that run on appointments, with OMIS online booking, reminders and deposits built in, plus data and analytics consulting. For barbershops, tattoo studios, auto shops, spas, salons and personal trainers. Built in Canada." />
                 <link rel="canonical" href={siteUrl} />
             </Helmet>
 
