@@ -25,6 +25,7 @@ const TermsOfService = lazy(() => import('@/pages/TermsOfService'));
 const AccountDeletionRequest = lazy(() => import('@/pages/AccountDeletionRequest'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const TradePage = lazy(() => import('@/pages/TradePage'));
+const PricingPage = lazy(() => import('@/pages/PricingPage'));
 // Client-website funnel (pick a template -> intake -> preview -> publish)
 const SiteStart = lazy(() => import('@/pages/site/SiteStart'));
 const SiteIntake = lazy(() => import('@/pages/site/SiteIntake'));
@@ -77,6 +78,7 @@ const AnimatedRoutes = () => {
           <Route path="/privacy-policy" element={<PageTransition><PrivacyPolicy /></PageTransition>} />
           <Route path="/terms-of-service" element={<PageTransition><TermsOfService /></PageTransition>} />
           <Route path="/account-deletion-request" element={<PageTransition><AccountDeletionRequest /></PageTransition>} />
+          <Route path="/pricing" element={<PageTransition><PricingPage /></PageTransition>} />
           <Route path="/for/:trade" element={<PageTransition><TradePage /></PageTransition>} />
           <Route path="/site/start" element={<PageTransition><SiteStart /></PageTransition>} />
           <Route path="/site/intake/:token" element={<PageTransition><SiteIntake /></PageTransition>} />

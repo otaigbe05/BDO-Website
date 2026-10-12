@@ -2,28 +2,31 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { OMIS_PLANS, money } from '@/data/pricing';
+
+const P = Object.fromEntries(OMIS_PLANS.map((p) => [p.name, p]));
 
 const plans = [
   {
     name: "Starter",
-    monthly: "$29",
-    annual: "$290",
+    monthly: money(P.Starter.monthly),
+    annual: money(P.Starter.annual),
     summary: "1 user · up to 200 clients · 1 location",
     features: ["Appointments and calendar", "Invoice management", "Basic reporting", "Email support"],
     highlight: false,
   },
   {
     name: "Professional",
-    monthly: "$79",
-    annual: "$790",
+    monthly: money(P.Professional.monthly),
+    annual: money(P.Professional.annual),
     summary: "Up to 5 users · unlimited clients · up to 5 locations",
     features: ["Advanced analytics and reports", "SMS reminders", "Bulk data import", "API access", "Priority support"],
     highlight: true,
   },
   {
     name: "Enterprise",
-    monthly: "$199",
-    annual: "$1,990",
+    monthly: money(P.Enterprise.monthly),
+    annual: money(P.Enterprise.annual),
     summary: "Unlimited users, clients, and locations",
     features: ["Custom integrations", "Dedicated account manager", "24/7 support"],
     highlight: false,

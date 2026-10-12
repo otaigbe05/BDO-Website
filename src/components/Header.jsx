@@ -69,7 +69,7 @@ const Header = () => {
         { title: 'Home', to: '/' },
         { title: 'OMIS Product', to: '/omis-product' },
         { title: 'Services', to: '/services' },
-        { title: 'ROI Calculator', to: '/roi-calculator' },
+        { title: 'Pricing', to: '/pricing' },
         { title: 'About', to: '/about' },
         { title: 'Contact', to: '/contact' },
     ];
