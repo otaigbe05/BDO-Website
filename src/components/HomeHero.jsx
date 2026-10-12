@@ -28,7 +28,7 @@ const HomeHero = () => {
       <div className="container relative mx-auto grid items-center gap-14 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:px-8 lg:pb-28 lg:pt-20">
         <div className="min-w-0">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
-            Websites + OMIS booking &middot; Ontario, Canada
+            Websites &middot; Booking software &middot; Data &amp; analytics
           </p>
 
           <h1 className="min-h-[2.3em] text-white text-4xl font-black leading-[1.08] tracking-tight text-balance sm:text-5xl xl:text-6xl">
@@ -47,7 +47,7 @@ const HomeHero = () => {
           </h1>
 
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-200">
-            {trade ? trade.pitch : 'Pick a design made for your trade and see your own site before you pay. Its Book button runs on OMIS: online booking, reminders and deposits, built by us in Ontario.'}
+            {trade ? trade.pitch : 'We design websites for businesses that run on appointments, and build OMIS, the booking software behind them. When you want your numbers to make sense too, we do data and analytics.'}
           </p>
 
           <fieldset className="mt-8">
@@ -98,7 +98,7 @@ const HomeHero = () => {
             )}
           </div>
           <p className="mt-4 text-sm text-slate-300">
-            OMIS: 14 days free, no credit card, from $29/month CAD. Need dashboards or reporting instead?{' '}
+            See your own site before you pay. OMIS is 14 days free, no credit card. Need dashboards or reporting?{' '}
             <Link to="/services" className="font-bold text-teal-200 underline underline-offset-4 hover:text-white">See our data consulting</Link>.
           </p>
         </div>

@@ -96,7 +96,7 @@ const Footer = () => {
               </p>
               <p className="text-sm text-slate-800 font-medium flex items-start gap-2 mt-2">
                 <MapPin className="w-4 h-4 text-slate-700 mt-0.5 shrink-0" />
-                <span className="font-bold">1025 King Street East, Unit 107 #1737, Cambridge, ON N3H 3P5</span>
+                <span><span className="font-bold">Mailing address:</span> 1025 King Street East, Unit 107 #1737, Cambridge, ON N3H 3P5</span>
               </p>
               <p className="text-sm text-slate-800 font-medium flex items-center gap-2 mt-2">
                 <ExternalLink className="w-4 h-4 text-slate-700" />
