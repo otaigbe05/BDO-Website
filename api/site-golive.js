@@ -8,7 +8,9 @@
 // marks every preview owner-approved.) Changes happen only on POST from a confirm button,
 // never on a plain link, so email link scanners cannot approve or publish by "clicking" it.
 import { timingSafeEqual } from 'node:crypto';
-import { db, startJob, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
+import { db, startJob, reply, handle } from './_lib/services.js';
+import { customerPublished } from './_lib/publish.js';
+import { paymentsOn, paidEvent } from './_lib/stripe.js';
 
 async function ownerLead(id, token) {
   const lead = await db.leadById(id);
@@ -53,23 +55,10 @@ export default async function handler(req, res) {
 
     if (lead.status === 'held') return reply(res, 409, { ok: false, error: 'We are checking a few things on your site first. We will email you shortly.' });
     if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
-    await db.update(lead.id, { customer_ok: true, ...(lead.owner_ok ? {} : { status: 'review' }) });
-    await db.insert('events', { lead_id: lead.id, kind: 'customer_ok' });
-    if (lead.owner_ok) {
-      await startJob('publish', lead.id);
-      return reply(res, 200, { ok: true, state: 'publishing' });
+    // With payments on, the customer pays first; the Stripe webhook then calls customerPublished.
+    if (paymentsOn() && lead.package !== 'store' && !(await paidEvent(lead.id, 'paid'))) {
+      return reply(res, 402, { ok: false, needsPayment: true, error: 'Payment is needed before publishing.' });
     }
-    if (process.env.SITES_OWNER_EMAIL) {
-      await sendEmail({
-        to: process.env.SITES_OWNER_EMAIL,
-        subject: `[Sites] Ready to go live: ${lead.business}`,
-        paragraphs: [`${lead.business} pressed Publish. One click to approve and it goes live.`],
-        links: [
-          { label: 'Open preview', url: lead.preview_url },
-          { label: 'Approve or hold', url: `${siteUrl()}/site/approve/${lead.id}/${lead.approve_token}` },
-        ],
-      });
-    }
-    reply(res, 200, { ok: true, state: 'waiting-owner' });
+    reply(res, 200, { ok: true, state: await customerPublished(lead) });
   });
 }
