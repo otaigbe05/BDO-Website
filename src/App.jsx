@@ -2,7 +2,7 @@ import React, { Suspense, lazy } from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
 import { Toaster } from '@/components/ui/toaster';
-import { AnimatePresence, motion } from 'framer-motion';
+import { AnimatePresence, MotionConfig, motion } from 'framer-motion';
 
 // Components
 import Header from '@/components/Header';
@@ -80,6 +80,8 @@ const AnimatedRoutes = () => {
 function App() {
   return (
     <HelmetProvider>
+      {/* Visitors who ask for less motion get the still version of every animation. */}
+      <MotionConfig reducedMotion="user">
       <Router>
         <ScrollToTop />
         <Toaster />
@@ -96,6 +98,7 @@ function App() {
           <Footer />
         </div>
       </Router>
+      </MotionConfig>
     </HelmetProvider>
   );
 }

@@ -114,3 +114,38 @@ h1, h2, h3, h4, h5, h6 {
   background-color: hsl(var(--omis-banner-bg));
   background-image: radial-gradient(circle at top right, hsl(var(--primary) / 0.15), transparent 400px);
 }
+/* Scrolling strips (TrustTicker, template strip): CSS only, paused on hover, focus, or by the
+   pause button; still and wrapped when the visitor asks for less motion. */
+@keyframes strip-left { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes strip-right { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+.trust-ticker__track { animation: strip-left 45s linear infinite; }
+.trust-ticker:hover .trust-ticker__track,
+.trust-ticker:focus-within .trust-ticker__track,
+.trust-ticker.is-paused .trust-ticker__track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .trust-ticker__track { animation: none; width: auto; flex-wrap: wrap; padding: 0 1rem; }
+  .trust-ticker__row { flex-wrap: wrap; gap: 0.5rem 2rem; }
+  .trust-ticker__row[aria-hidden="true"], .trust-ticker__toggle { display: none; }
+}
+.template-strip { overflow: hidden; }
+.template-strip__track--left { animation: strip-left 90s linear infinite; }
+.template-strip__track--right { animation: strip-right 90s linear infinite; }
+.template-strip:hover .template-strip__track,
+.template-strip:focus-within .template-strip__track,
+.template-strip.is-paused .template-strip__track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .template-strip { overflow-x: auto; scroll-snap-type: x mandatory; padding: 0 1rem 0.75rem; }
+  .template-strip__track--left, .template-strip__track--right { animation: none; }
+  .template-strip__copy { display: none; }
+  .template-strip__row > li { scroll-snap-align: start; }
+}
+
+/* A soft light that follows the pointer across a card (fine pointers only). */
+.spotlight-card::after {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background: radial-gradient(240px circle at var(--mx, 50%) var(--my, 50%), rgb(59 130 246 / 0.12), transparent 70%);
+  transition: opacity 0.3s ease;
+}
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .spotlight-card:hover::after { opacity: 1; }
+}

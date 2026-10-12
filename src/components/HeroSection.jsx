@@ -35,7 +35,8 @@ const HeroSection = ({
   backgroundImage = "https://images.unsplash.com/photo-1516383274235-5f42d6c6426d?auto=format&fit=crop&q=80&w=2000",
   showDashboardPreview = false,
   dashboardImage = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=2000",
-  minHeight = "min-h-[85vh]"
+  minHeight = "min-h-[85vh]",
+  eyebrow = null
 }) => {
   const ref = useRef(null);
   const { scrollYProgress } = useScroll({
@@ -107,8 +108,13 @@ const HeroSection = ({
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="max-w-5xl mx-auto"
+ className="max-w-5xl mx-auto"
         >
+            {eyebrow && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mb-6 flex justify-center">
+                {eyebrow}
+              </motion.div>
+            )}
             <motion.h1 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
