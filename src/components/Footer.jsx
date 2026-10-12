@@ -21,7 +21,7 @@ const Footer = () => {
       links: [
         { text: "OMIS Product", to: "/omis-product" },
         { text: "Try OMIS Now", external: omisAppLink },
-        { text: "Pricing", to: "/omis-product#pricing" },
+        { text: "Pricing", to: "/pricing" },
         { text: "ROI Calculator", to: "/roi-calculator" },
       ]
     },

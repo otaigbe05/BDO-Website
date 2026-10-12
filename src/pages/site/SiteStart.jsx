@@ -3,12 +3,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Shell, Card, Field, Text, Submit, Problems, Notice, api, loadCatalog } from './ui';
+import { WEBSITE, money } from '@/data/pricing';
 
-// Prices are shown only once the owner sets them (null = hidden).
+// Prices come from src/data/pricing.js (null = hidden).
 export const PACKAGES = [
-  { id: 'site', name: 'Website', price: null, text: 'Your site on this design with your own name, photos, prices, and hours. Booking button calls your phone.' },
-  { id: 'site-omis', name: 'Website + online booking (OMIS)', price: null, text: 'The same site, with a Book button that takes appointments and deposits through OMIS.' },
-  { id: 'store', name: 'Website + online store', price: null, text: 'Built to order for shops that sell products online. We will contact you to plan it.' },
+  { id: 'site', name: 'Website', price: `${money(WEBSITE.setupAlone)} once + ${money(WEBSITE.careMonthly)}/month`, text: 'Your site on this design with your own name, photos, prices, and hours. Booking button calls your phone.' },
+  { id: 'site-omis', name: 'Website + online booking (OMIS)', price: `${money(WEBSITE.setupWithOmis)} once + OMIS from $29/month`, text: 'The same site, with a Book button that takes appointments and deposits through OMIS.' },
+  { id: 'store', name: 'Website + online store', price: `From ${money(WEBSITE.storeFrom)}, quoted`, text: 'Built to order for shops that sell products online. We will contact you to plan it.' },
 ];
 
 export default function SiteStart() {

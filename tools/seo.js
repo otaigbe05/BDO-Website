@@ -32,6 +32,7 @@ const PAGES = [
   ['/account-deletion-request', 'AccountDeletionRequest.jsx', 0.1],
 ].map(([route, file, priority]) => ({ route, priority, ...fromPage(file) }));
 
+PAGES.push({ route: '/pricing', priority: 0.9, ...fromPage('PricingPage.jsx') });
 for (const t of TRADES) PAGES.push({ route: `/for/${t.slug}`, priority: 0.9, title: t.title, description: t.description });
 
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
