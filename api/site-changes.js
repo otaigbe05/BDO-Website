@@ -17,9 +17,10 @@ export default async function handler(req, res) {
 
     const parsed = changeSchema.safeParse(req.body ?? {});
     if (!parsed.success) return reply(res, 400, { ok: false, problems: problems(parsed.error) });
-    if (!['preview', 'changes_requested'].includes(lead.status)) return reply(res, 409, { ok: false, error: lead.status === 'live' ? 'Your site is already live. Reply to our email for changes.' : 'Your site is being updated. Please wait for the next email.' });
+    if (!['preview', 'changes_requested', 'live'].includes(lead.status)) return reply(res, 409, { ok: false, error: 'Your site is being updated. Please wait for the next email.' });
     await db.insert('change_requests', { lead_id: lead.id, request: parsed.data.request });
-    await db.update(lead.id, { status: 'changes_requested' });
+    // On a live site the owner checks the update again before it replaces the live one.
+    await db.update(lead.id, { status: 'changes_requested', ...(lead.status === 'live' ? { customer_ok: false, owner_ok: false } : {}) });
     await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { length: parsed.data.request.length } });
     // Over the included rounds, the job emails the owner instead of rebuilding.
     await startJob('changes', lead.id);

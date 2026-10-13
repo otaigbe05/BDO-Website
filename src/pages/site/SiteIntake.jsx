@@ -402,7 +402,9 @@ export default function SiteIntake() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{mode === 'edit' ? 'Change your website' : 'Your website details'}</h1>
           <p className="text-lg text-slate-600">
             {mode === 'edit'
-              ? `Your answers are filled in. Change anything below, add or remove photos, and tell us anything else in the box. Changes included: ${info.roundsLeft ?? 0} more.`
+              ? info.status === 'live'
+                ? 'Your site stays online while we prepare the update. Change anything below and tell us anything else in the box. You get a preview to check, then publish it; there is no extra charge.'
+                : `Your answers are filled in. Change anything below, add or remove photos, and tell us anything else in the box. Changes included: ${info.roundsLeft ?? 0} more.`
               : `For the ${lead.business} website (design ${lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.`}
           </p>
         </header>

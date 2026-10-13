@@ -49,7 +49,7 @@ export const db = {
   /** Live sites ordered by this email (case-insensitive). */
   async liveLeadsByEmail(email) {
     if (!email) return [];
-    return (await rest(`/rest/v1/leads?email=ilike.${encodeURIComponent(email)}&status=eq.live&select=*`)).json();
+    return (await rest(`/rest/v1/leads?email=ilike.${encodeURIComponent(email)}&live_url=not.is.null&select=*`)).json();
   },
   async latestIntake(leadId) {
     const rows = await (await rest(`/rest/v1/intakes?lead_id=eq.${leadId}&order=created_at.desc&limit=1&select=data`)).json();

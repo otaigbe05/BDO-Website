@@ -84,7 +84,7 @@ export default async function handler(req, res) {
     }
 
     if (purpose === 'care' || purpose === 'handover') {
-      if (lead.status !== 'live') return reply(res, 409, { ok: false, error: 'This site is not live.' });
+      if (!lead.live_url) return reply(res, 409, { ok: false, error: 'This site is not live.' });
       if (await paidEvent(lead.id, 'care')) return reply(res, 200, { ok: true, state: 'care' });
       if (purpose === 'handover') {
         await db.insert('events', { lead_id: lead.id, kind: 'handover' });
