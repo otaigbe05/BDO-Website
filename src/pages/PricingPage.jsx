@@ -46,7 +46,7 @@ const PricingPage = () => {
       price: money(WEBSITE.setupAlone),
       unit: 'one-time setup',
       plus: `plus ${money(WEBSITE.careMonthly)}/month hosting and care`,
-      points: ['Your website on the design you pick', 'The Book button calls your phone', 'Hosting, security certificate and small edits', 'Stop any time and take your site with you'],
+      points: ['Your website on the design you pick', 'The Book button calls your phone', 'Hosting, security certificate and up to 3 updates a month', 'Stop any time and take your site with you'],
       cta: ['Pick your design', '/templates/'],
     },
     {
@@ -158,7 +158,7 @@ const PricingPage = () => {
             <dl className="divide-y divide-slate-200 rounded-3xl border border-slate-200 bg-white">
               {[
                 ['Is there a contract?', 'No. The website setup is paid once, when you publish. OMIS and website care are month to month (or yearly, if you choose), and you can stop either one any time.'],
-                ['What happens to my website if I stop OMIS?', `Your choice. Keep it online with us for ${money(WEBSITE.careMonthly)}/month, which covers hosting and small edits, or take it with you: we hand over your site's files and you host it wherever you like. Either way, the Book button changes to call your phone.`],
+                ['What happens to my website if I stop OMIS?', `Your choice. Keep it online with us for ${money(WEBSITE.careMonthly)}/month, which covers hosting and up to 3 updates a month, or take it with you: we hand over your site's files and you host it wherever you like. Either way, the Book button changes to call your phone.`],
                 ['Who owns the website?', 'You do. Your name, your photos, your words. If you ever want to leave, we hand it over.'],
                 ['When do I pay for the website?', 'After you have seen it. You get a preview of your own site, ask for changes, and pay when you press Publish.'],
                 ['Do I get a web address?', 'Yes. Every site goes live at a free address like yourshop.bizsite.ca, ready the moment you publish. Want your own domain, like yourshop.ca? Register it in your own name (usually $15 to $30 a year) and we connect it. We never touch your email settings.'],

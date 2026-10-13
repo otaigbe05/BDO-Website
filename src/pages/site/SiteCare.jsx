@@ -39,7 +39,7 @@ export default function SiteCare() {
         <div className="grid gap-4 sm:grid-cols-2">
           <button type="button" disabled={Boolean(busy)} onClick={() => choose('care', 'month')} className={`${btn} border-blue-700 hover:bg-blue-50`}>
             <span className="block text-lg font-extrabold text-slate-900">Keep it online</span>
-            <span className="block text-slate-700">{money(WEBSITE.careMonthly)}/month for hosting, the security certificate and small edits. Stop any time.</span>
+            <span className="block text-slate-700">{money(WEBSITE.careMonthly)}/month for hosting, the security certificate and up to 3 updates a month. Stop any time.</span>
             {busy === 'caremonth' && <span className="mt-2 block text-sm text-slate-600">Opening Stripe...</span>}
           </button>
           <button type="button" disabled={Boolean(busy)} onClick={() => choose('handover')} className={`${btn} border-slate-300 hover:border-slate-500`}>

@@ -60,7 +60,7 @@ async function subscriptionEnded(sub) {
       subject: `Your ${lead.business} website`,
       paragraphs: [
         `Hi ${lead.name}, your OMIS plan has ended. Your website is still yours, and it is still online.`,
-        'You can keep it online with us for $12 a month (hosting and small edits, cancel any time), or take it with you: we send you the site files and you host it wherever you like.',
+        'You can keep it online with us for $12 a month (hosting and up to 3 updates a month, cancel any time), or take it with you: we send you the site files and you host it wherever you like.',
         'Pick one with the link below. If we do not hear from you in 30 days, we will send you the files and take the site offline.',
       ],
       links: [{ label: 'Choose what happens to my website', url: `${siteUrl()}/site/care/${lead.intake_token}` }],

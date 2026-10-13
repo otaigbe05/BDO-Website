@@ -46,6 +46,11 @@ export const db = {
     const rows = await (await rest(`/rest/v1/events?lead_id=eq.${leadId}&kind=eq.${encodeURIComponent(kind)}&order=at.desc&select=kind,at,detail`)).json();
     return rows;
   },
+  /** How many events of this kind since a time; extra is a PostgREST filter like "&detail->>live=eq.true". */
+  async countEvents(leadId, kind, sinceIso, extra = '') {
+    const rows = await (await rest(`/rest/v1/events?lead_id=eq.${leadId}&kind=eq.${encodeURIComponent(kind)}&at=gte.${encodeURIComponent(sinceIso)}${extra}&select=id`)).json();
+    return rows.length;
+  },
   /** Live sites ordered by this email (case-insensitive). */
   async liveLeadsByEmail(email) {
     if (!email) return [];
@@ -91,6 +96,29 @@ export async function startJob(command, leadId) {
     body: JSON.stringify({ ref: process.env.SITES_GITHUB_REF || 'main', inputs: { command, lead_id: leadId } }),
   });
   if (!res.ok) throw new Error(`Could not start ${command}: ${res.status} ${await res.text()}`);
+}
+
+// Updates included each calendar month once a site is live (website care, or included with OMIS).
+export const UPDATES_PER_MONTH = 3;
+const monthStart = () => { const d = new Date(); return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1)).toISOString(); };
+
+/** Updates left this month for a live site: each started update counts once, not each round. */
+export async function updatesLeft(lead) {
+  const used = await db.countEvents(lead.id, 'change_request', monthStart(), '&detail->>live=eq.true');
+  return Math.max(0, UPDATES_PER_MONTH - used);
+}
+
+/** Over the monthly allowance: keep the request, tell the owner, build nothing. */
+export async function updateOverLimit(lead, request) {
+  await db.insert('change_requests', { lead_id: lead.id, request });
+  await db.insert('events', { lead_id: lead.id, kind: 'update_over_limit', detail: { length: request.length } });
+  if (process.env.SITES_OWNER_EMAIL) {
+    await sendEmail({
+      to: process.env.SITES_OWNER_EMAIL,
+      subject: `[Sites] Update over the monthly limit: ${lead.business}`,
+      paragraphs: [`${lead.business} asked for another update this month (${UPDATES_PER_MONTH} are included). Nothing was built. Their request:`, request],
+    });
+  }
 }
 
 export const siteUrl = () => process.env.SITES_PUBLIC_URL || 'https://www.bdoanalyticssolutions.com';

@@ -24,6 +24,9 @@ export default function SitePublish() {
   const [interval, setCycle] = useState('month');
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
+  const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [codeNote, setCodeNote] = useState('');
   const [problems, setProblems] = useState([]);
   const [state, setState] = useState(params.get('paid') ? 'paid' : null);
 
@@ -32,11 +35,38 @@ export default function SitePublish() {
     api(`/api/site-checkout?t=${encodeURIComponent(token)}`).then((r) => setPay(r.ok ? r : r.unavailable ? { payments: true, unavailable: true, error: r.error } : { payments: false }));
   }, [token]);
 
-  async function recheck() {
+  const quoteFor = (email) => api(`/api/site-checkout?t=${encodeURIComponent(token)}&omisEmail=${encodeURIComponent(email)}`);
+
+  // A different OMIS email is confirmed with a code sent to it; their own email needs none.
+  async function sendCode() {
     setChecking(true);
-    const r = await api(`/api/site-checkout?t=${encodeURIComponent(token)}&omisEmail=${encodeURIComponent(omisEmail)}`);
+    setCodeNote('');
+    const q = await quoteFor(omisEmail);
+    if (q.ok && !q.needsCode) {
+      setChecking(false);
+      setPay(q);
+      if (!q.omis) setCodeNote('We could not find an OMIS plan for that email.');
+      return;
+    }
+    const r = await api('/api/site-checkout', { method: 'POST', body: JSON.stringify({ t: token, purpose: 'omis-code', omisEmail }) });
     setChecking(false);
-    if (r.ok) setPay(r);
+    if (r.ok) {
+      setCodeSent(true);
+      setCodeNote(`If ${omisEmail} has an OMIS plan, we just emailed it a 6-digit code. Enter it below.`);
+    } else setCodeNote(r.error ?? 'Something went wrong.');
+  }
+
+  async function verifyCode() {
+    setChecking(true);
+    const r = await api('/api/site-checkout', { method: 'POST', body: JSON.stringify({ t: token, purpose: 'omis-verify', omisEmail, code }) });
+    if (!r.ok) {
+      setChecking(false);
+      return setCodeNote(r.error ?? 'Something went wrong.');
+    }
+    const q = await quoteFor(omisEmail);
+    setChecking(false);
+    if (q.ok) setPay(q);
+    setCodeNote(q.omis ? '' : 'Confirmed, but that OMIS plan is not active.');
   }
 
   async function publish(e) {
@@ -92,7 +122,7 @@ export default function SitePublish() {
               </>
             ) : (
               <>
-                <p className="text-slate-700">Website setup: <span className="font-bold">{pay.setup}</span>, paid once, plus website care (hosting, security certificate and small edits):</p>
+                <p className="text-slate-700">Website setup: <span className="font-bold">{pay.setup}</span>, paid once, plus website care (hosting, security certificate and up to 3 updates a month):</p>
                 <div className="flex flex-wrap gap-3">
                   <label className={`flex items-center gap-2 rounded-xl border px-4 py-3 cursor-pointer ${interval === 'month' ? 'border-blue-700 ring-2 ring-blue-700' : 'border-slate-300'}`}>
                     <input type="radio" name="interval" checked={interval === 'month'} onChange={() => setCycle('month')} />
@@ -115,13 +145,26 @@ export default function SitePublish() {
                   <div className="flex flex-wrap items-end gap-2">
                     <div className="flex-1 min-w-[12rem]">
                       <Field label="Your OMIS email" htmlFor="omis-email">
-                        <Text id="omis-email" type="email" value={omisEmail} onChange={setOmisEmail} autoComplete="email" />
+                        <Text id="omis-email" type="email" value={omisEmail} onChange={(v) => { setOmisEmail(v); setCodeSent(false); setCodeNote(''); }} autoComplete="email" />
                       </Field>
                     </div>
-                    <button type="button" onClick={recheck} disabled={checking || !omisEmail} className="h-11 rounded-xl border border-slate-400 px-4 font-bold text-slate-900 disabled:opacity-50">
-                      {checking ? 'Checking...' : 'Check'}
+                    <button type="button" onClick={sendCode} disabled={checking || !omisEmail} className="h-11 rounded-xl border border-slate-400 px-4 font-bold text-slate-900 disabled:opacity-50">
+                      {checking && !codeSent ? 'Checking...' : codeSent ? 'Send a new code' : 'Check'}
                     </button>
                   </div>
+                  {codeSent && (
+                    <div className="flex flex-wrap items-end gap-2">
+                      <div className="w-40">
+                        <Field label="6-digit code" htmlFor="omis-code">
+                          <Text id="omis-code" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={code} onChange={setCode} />
+                        </Field>
+                      </div>
+                      <button type="button" onClick={verifyCode} disabled={checking || code.replace(/\D/g, '').length !== 6} className="h-11 rounded-xl bg-slate-900 px-4 font-bold text-white disabled:opacity-50">
+                        {checking ? 'Checking...' : 'Confirm'}
+                      </button>
+                    </div>
+                  )}
+                  {codeNote && <p className="text-sm text-slate-700" role="status">{codeNote}</p>}
                 </div>
               </>
             )}

@@ -222,6 +222,15 @@ export default function SiteIntake() {
         </Notice>
       </Shell>
     );
+  if (state === 'over-limit')
+    return (
+      <Shell title="We have your request">
+        <Notice title="We have your request">
+          <p>Your plan includes {info.updatesPerMonth ?? 3} website updates a month, and this month's are used. Your live site stays as it is.</p>
+          <p>We have passed your request to our team, and we will get back to you about it. Your included updates start again on the 1st of next month.</p>
+        </Notice>
+      </Shell>
+    );
   if (state === 'closed' || state === 'sent')
     return (
       <Shell title="We are building your site">
@@ -385,7 +394,7 @@ export default function SiteIntake() {
       } catch {
         /* ignore */
       }
-      setState('sent');
+      setState(r.overLimit ? 'over-limit' : 'sent');
       window.scrollTo(0, 0);
     } else setProblems(r.problems ?? [r.error ?? 'Something went wrong.']);
   }
@@ -412,7 +421,7 @@ export default function SiteIntake() {
           <p className="text-lg text-slate-600">
             {mode === 'edit'
               ? info.status === 'live'
-                ? 'Your site stays online while we prepare the update. Change anything below and tell us anything else in the box. You get a preview to check, then publish it; there is no extra charge.'
+                ? `Your site stays online while we prepare the update. Change anything below and tell us anything else in the box. You get a preview to check, then publish it; there is no extra charge.${info.updatesLeft !== undefined ? ` Updates left this month: ${info.updatesLeft} of ${info.updatesPerMonth}.` : ''}`
                 : `Your answers are filled in. Change anything below, add or remove photos, and tell us anything else in the box. Changes included: ${info.roundsLeft ?? 0} more.`
               : `For the ${lead.business} website (design ${lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.`}
           </p>
