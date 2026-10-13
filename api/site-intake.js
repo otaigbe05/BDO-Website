@@ -4,6 +4,7 @@
 //   POST { t, data, changeNotes } -> first time: save the intake and start the build job
 //                                   edit mode (after a preview): save the updated answers plus the
 //                                   customer's notes and start the changes job
+import { summarize } from './_lib/sample.js';
 import { intakeSchema, problems, photoProblems, extrasProblems, CONSENT_VERSION } from './_lib/schemas.js';
 import { db, startJob, reply, handle } from './_lib/services.js';
 
@@ -34,6 +35,7 @@ export default async function handler(req, res) {
         status: lead.status,
         roundsLeft: Math.max(0, ROUNDS - lead.change_rounds),
         previewUrl: lead.preview_url,
+        have: summarize(lead.client),
         lead: { name: lead.name, email: lead.email, phone: lead.phone, business: lead.business, city: lead.city, template: lead.template, palette: lead.palette, package: lead.package, domain: lead.domain },
         previous,
         photoUrls,

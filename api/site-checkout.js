@@ -61,7 +61,21 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       if (await paidEvent(lead.id, 'paid')) return reply(res, 200, { ok: true, payments: true, paid: true });
-      const q = await quote(lead, req.query.omisEmail);
+      let q;
+      try {
+        q = await quote(lead, req.query.omisEmail);
+      } catch (err) {
+        console.error(err);
+        // Tell the owner, at most once every 6 hours per customer.
+        const last = (await db.events(lead.id, 'payment_error'))[0];
+        if (!last || Date.now() - new Date(last.at).getTime() > 6 * 3600 * 1000) {
+          await db.insert('events', { lead_id: lead.id, kind: 'payment_error', detail: { message: String(err.message).slice(0, 300) } });
+          if (process.env.SITES_OWNER_EMAIL) {
+            await sendEmail({ to: process.env.SITES_OWNER_EMAIL, subject: `[Sites] Payment not working: ${lead.business}`, paragraphs: [`${lead.business} tried to publish but Stripe answered: ${String(err.message).slice(0, 300)}`, 'Check the Stripe key in Vercel: https://www.bdoanalyticssolutions.com/api/site-checkout?check=1'] });
+          }
+        }
+        return reply(res, 503, { ok: false, payments: true, unavailable: true, error: 'Payment is not available right now. Please try again in a little while; we have been told.' });
+      }
       return reply(res, 200, { ok: true, payments: true, paid: false, email: q.email, omis: q.omis, setup: q.setup, care: q.care, package: lead.package });
     }
     if (req.method !== 'POST') return reply(res, 405, { ok: false, error: 'GET or POST only' });
