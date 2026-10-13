@@ -7,6 +7,7 @@ import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass } from './ui';
 import DesignGuide from './DesignGuide';
+import { designProblems } from '../../../api/_lib/design-rules.js';
 import DesignExtras from './DesignExtras';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -16,7 +17,7 @@ const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA'
 const MAX_WORK = 40;
 // Designs built around the work need a minimum number of work photos (keep in step with
 // api/_lib/schemas.js PHOTO_NEEDS). priced: each needs a price (T01's flash wall).
-const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };
+const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, T13: { work: 4 }, T14: { work: 4 }, T15: { work: 3 }, S09: { work: 3 }, S14: { work: 4 }, B12: { work: 4 } };
 const timeClass = inputClass.replace('px-4', 'px-2');
 
 // Examples in the form match the customer's trade (first letter of the template id).
@@ -184,7 +185,7 @@ export default function SiteIntake() {
       } catch {
         saved = null;
       }
-      const fresh = r.mode === 'edit' && r.previous ? fromIntake(r.previous, r.photoUrls ?? {}) : initial(r.lead);
+      const fresh = r.previous ? fromIntake(r.previous, r.photoUrls ?? {}) : initial(r.lead);
       setF(saved ? { ...saved, extras: saved.extras ?? blankExtras() } : fresh);
       setState('open');
     });
@@ -363,6 +364,8 @@ export default function SiteIntake() {
     if (!photoCount) return setProblems(['Photos: add at least one photo of your work or your space. Your site is built around it.']);
     if (need && f.work.length < need.work) return setProblems([`Photos: this design needs at least ${need.work} photos of your work.`]);
     if (need?.priced && f.work.filter((w) => w.price?.trim()).length < need.work) return setProblems([`Photos: this design shows a price on each piece. Add a price to at least ${need.work} work photos.`]);
+    const designIssues = designProblems(lead.template, { team: f.team, services: f.services });
+    if (designIssues.length) return setProblems(designIssues);
     const extraIssues = extrasIssues();
     if (extraIssues.length) return setProblems(extraIssues);
     if (f.reviews.some((r) => r.quote.trim()) && !f.reviewsReal) return setProblems(['Reviews: tick the box to confirm they are real reviews from your customers, or remove them.']);

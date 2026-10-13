@@ -5,7 +5,7 @@
 //                                   edit mode (after a preview): save the updated answers plus the
 //                                   customer's notes and start the changes job
 import { summarize } from './_lib/sample.js';
-import { intakeSchema, problems, photoProblems, extrasProblems, CONSENT_VERSION } from './_lib/schemas.js';
+import { intakeSchema, problems, photoProblems, designProblems, extrasProblems, CONSENT_VERSION } from './_lib/schemas.js';
 import { db, startJob, reply, handle } from './_lib/services.js';
 
 const FIRST = ['new', 'intake_sent', 'failed'];
@@ -24,7 +24,8 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       let previous = null;
       let photoUrls = {};
-      if (mode === 'edit') {
+      // Edit mode, or a first form reopened after we asked for more photos: their answers come back.
+      if (mode === 'edit' || mode === 'first') {
         previous = await db.latestIntake(lead.id);
         photoUrls = previous ? await db.photoUrls(previous.photos.map((p) => p.key)) : {};
       }
@@ -52,7 +53,7 @@ export default async function handler(req, res) {
     if (!parsed.success) return reply(res, 400, { ok: false, problems: problems(parsed.error) });
     // Photos must be ones this customer uploaded.
     if (parsed.data.photos.some((p) => !p.key.startsWith(`${lead.id}/`))) return reply(res, 400, { ok: false, problems: ['photos: please upload your photos again.'] });
-    const photoIssues = [...photoProblems(lead.template, parsed.data.photos), ...extrasProblems(lead.template, parsed.data.extras, parsed.data.photos)];
+    const photoIssues = [...photoProblems(lead.template, parsed.data.photos), ...designProblems(lead.template, parsed.data), ...extrasProblems(lead.template, parsed.data.extras, parsed.data.photos)];
     if (photoIssues.length) return reply(res, 400, { ok: false, problems: photoIssues });
 
     await db.insert('intakes', { lead_id: lead.id, data: parsed.data });
