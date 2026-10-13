@@ -3,6 +3,7 @@
 //   POST { t, request }           -> save the request and start the changes job
 import { changeSchema, problems } from './_lib/schemas.js';
 import { db, startJob, reply, handle } from './_lib/services.js';
+import { summarize } from './_lib/sample.js';
 
 const ROUNDS = 2;
 
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
     const lead = await db.leadByToken('intake_token', token);
     if (!lead) return reply(res, 404, { ok: false, error: 'This link is not valid. Check the email we sent you.' });
     const left = Math.max(0, ROUNDS - lead.change_rounds);
-    if (req.method === 'GET') return reply(res, 200, { ok: true, business: lead.business, status: lead.status, previewUrl: lead.preview_url, liveUrl: lead.live_url, roundsLeft: left });
+    if (req.method === 'GET') return reply(res, 200, { ok: true, business: lead.business, status: lead.status, previewUrl: lead.preview_url, liveUrl: lead.live_url, roundsLeft: left, template: lead.template, have: summarize(lead.client) });
     if (req.method !== 'POST') return reply(res, 405, { ok: false, error: 'GET or POST only' });
 
     const parsed = changeSchema.safeParse(req.body ?? {});

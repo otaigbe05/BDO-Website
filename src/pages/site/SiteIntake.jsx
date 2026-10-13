@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass } from './ui';
+import DesignGuide from './DesignGuide';
 import DesignExtras from './DesignExtras';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -408,6 +409,8 @@ export default function SiteIntake() {
               : `For the ${lead.business} website (design ${lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.`}
           </p>
         </header>
+
+        {mode === 'edit' && <DesignGuide token={token} template={lead.template} previewUrl={info.previewUrl} have={info.have} showLink={false} />}
 
         {mode === 'edit' && (
           <Card title="Anything else to change?" intro="For things the form does not cover: wording, which photo goes first, what to leave out.">

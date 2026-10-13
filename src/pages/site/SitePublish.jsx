@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link } from 'react-router-dom';
 import { Shell, Notice, Submit, Problems, Field, Text, api } from './ui';
 import { WEBSITE, money } from '@/data/pricing';
+import DesignGuide from './DesignGuide';
 
 const MESSAGES = {
   publishing: 'Your site is being published. You will get an email with the link in a few minutes.',
@@ -28,7 +29,7 @@ export default function SitePublish() {
 
   useEffect(() => {
     api(`/api/site-changes?t=${encodeURIComponent(token)}`).then((r) => setInfo(r.ok ? r : { invalid: true }));
-    api(`/api/site-checkout?t=${encodeURIComponent(token)}`).then((r) => setPay(r.ok ? r : { payments: false }));
+    api(`/api/site-checkout?t=${encodeURIComponent(token)}`).then((r) => setPay(r.ok ? r : r.unavailable ? { payments: true, unavailable: true, error: r.error } : { payments: false }));
   }, [token]);
 
   async function recheck() {
@@ -49,14 +50,18 @@ export default function SitePublish() {
     if (r.url) return window.location.assign(r.url);
     setBusy(false);
     if (r.ok) setState(r.paid ? 'paid' : r.state);
-    else setProblems([r.error ?? 'Something went wrong.']);
+    else if (r.needsPayment) {
+      // Payment was switched on after this page loaded: fetch the price and show it.
+      const q = await api(`/api/site-checkout?t=${encodeURIComponent(token)}`);
+      setPay(q.ok ? q : { payments: true, unavailable: true, error: q.error });
+    } else setProblems([r.error ?? 'Something went wrong.']);
   }
 
   if (!info || !pay) return <Shell title="Publish"><p className="text-slate-600">Loading...</p></Shell>;
   if (info.invalid) return <Shell title="Link not valid"><Notice title="This link is not valid"><p>Check the email we sent you.</p></Notice></Shell>;
   if (state || info.status === 'live') return <Shell title="Publish"><Notice title="Thank you"><p>{MESSAGES[state ?? 'live']}</p></Notice></Shell>;
 
-  const charge = pay.payments && !pay.paid && pay.package !== 'store';
+  const charge = pay.payments && !pay.paid && !pay.unavailable && pay.package !== 'store';
 
   return (
     <Shell title="Publish your site">
@@ -71,6 +76,12 @@ export default function SitePublish() {
             Want something changed first? <Link className="text-blue-700 underline" to={`/site/intake/${token}`}>Change something</Link>.
           </p>
         </Notice>
+
+        {pay.unavailable && (
+          <Notice title="Payment is not available right now">
+            <p>Please try again in a little while; we have been told. Your preview is saved, so nothing is lost.</p>
+          </Notice>
+        )}
 
         {charge && (
           <section className="rounded-2xl border border-slate-300 bg-white p-5 space-y-4" aria-live="polite">
@@ -118,9 +129,11 @@ export default function SitePublish() {
           </section>
         )}
 
+        <DesignGuide token={token} template={info.template} previewUrl={info.previewUrl} have={info.have} />
+
         <Problems list={problems} />
         <div className="text-center">
-          <Submit busy={busy}>{charge ? 'Pay and publish my site' : 'Yes, publish my site'}</Submit>
+          <Submit busy={busy} disabled={busy || pay.unavailable}>{charge ? 'Pay and publish my site' : 'Yes, publish my site'}</Submit>
         </div>
       </form>
     </Shell>
