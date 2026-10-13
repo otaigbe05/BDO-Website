@@ -136,7 +136,9 @@ export default async function handler(req, res) {
       await db.insert('events', { lead_id: lead.id, kind: 'omis_verified', detail: { email: e } });
       return reply(res, 200, { ok: true, verified: true });
     }
-    const tax = process.env.SITES_STRIPE_TAX === '1' ? { automatic_tax: { enabled: true } } : {};
+    // SITES_STRIPE_TAX=1 once Stripe Tax is set up: Stripe works out HST/GST from the customer's
+    // address (asked for on its checkout page) and adds it to the bill.
+    const tax = process.env.SITES_STRIPE_TAX === '1' ? { automatic_tax: { enabled: true }, billing_address_collection: 'required' } : {};
 
     if (purpose === 'setup') {
       if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
@@ -146,7 +148,7 @@ export default async function handler(req, res) {
       const care = interval === 'year' && q.p[KEYS.careYearly] ? q.p[KEYS.careYearly] : q.p[KEYS.careMonthly];
       const session = await stripe('checkout/sessions', {
         ...(q.omis
-          ? { mode: 'payment', line_items: [{ price: q.p[KEYS.withOmis].id, quantity: 1 }], customer: q.customer, payment_intent_data: { metadata: meta } }
+          ? { mode: 'payment', line_items: [{ price: q.p[KEYS.withOmis].id, quantity: 1 }], customer: q.customer, payment_intent_data: { metadata: meta }, ...(tax.automatic_tax ? { customer_update: { address: 'auto', name: 'auto' } } : {}) }
           : { mode: 'subscription', line_items: [{ price: q.p[KEYS.alone].id, quantity: 1 }, { price: care.id, quantity: 1 }], customer_email: lead.email, subscription_data: { metadata: meta } }),
         metadata: meta,
         client_reference_id: lead.id,
