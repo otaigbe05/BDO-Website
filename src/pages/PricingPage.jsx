@@ -27,7 +27,7 @@ const PricingPage = () => {
       price: money(WEBSITE.setupWithOmis),
       unit: 'one-time setup',
       plus: `plus your OMIS plan, from ${money(starter.monthly)}/month`,
-      points: ['Your website on the design you pick', 'A Book button that takes bookings, deposits and reminders through OMIS', 'Hosting and care included while you are on OMIS', 'We connect your own domain'],
+      points: ['Your website on the design you pick', 'A Book button that takes bookings, deposits and reminders through OMIS', 'Hosting and care included while you are on OMIS', 'A free yourshop.bizsite.ca address, or your own domain'],
       cta: ['Pick your design', '/templates/'],
       highlight: true,
     },
@@ -117,7 +117,7 @@ const PricingPage = () => {
                 </motion.li>
               ))}
             </ul>
-            <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-slate-600">Prices in Canadian dollars. Taxes extra where they apply. Domain names are registered in your name and paid separately. You see your website before you pay for it.</p>
+            <p className="mx-auto mt-8 max-w-3xl text-center text-sm text-slate-600">Prices in Canadian dollars. Taxes extra where they apply. Every site includes a free yourshop.bizsite.ca address; your own domain is optional and registered in your name. You see your website before you pay for it.</p>
           </div>
         </section>
 
@@ -161,7 +161,7 @@ const PricingPage = () => {
                 ['What happens to my website if I stop OMIS?', `Your choice. Keep it online with us for ${money(WEBSITE.careMonthly)}/month, which covers hosting and small edits, or take it with you: we hand over your site's files and you host it wherever you like. Either way, the Book button changes to call your phone.`],
                 ['Who owns the website?', 'You do. Your name, your photos, your words. If you ever want to leave, we hand it over.'],
                 ['When do I pay for the website?', 'After you have seen it. You get a preview of your own site, ask for changes, and pay when you press Publish.'],
-                ['Is a domain included?', 'No, and that is on purpose. You register your domain (like yourshop.ca) in your own name, so it is always yours. It usually costs about $15 to $30 a year. We connect it to your site, and we never touch your email settings.'],
+                ['Do I get a web address?', 'Yes. Every site goes live at a free address like yourshop.bizsite.ca, ready the moment you publish. Want your own domain, like yourshop.ca? Register it in your own name (usually $15 to $30 a year) and we connect it. We never touch your email settings.'],
                 ['Can I get a refund?', `Yes, in full, if you ask before your site goes live. Once it is live, the setup fee is not refundable. Website care can be stopped any time and ends at the close of the period you have paid for.`],
               ].map(([q, a]) => (
                 <div key={q} className="p-6">
