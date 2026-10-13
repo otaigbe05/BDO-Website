@@ -8,7 +8,9 @@ import { intakeSchema, problems, photoProblems, extrasProblems, CONSENT_VERSION 
 import { db, startJob, reply, handle } from './_lib/services.js';
 
 const FIRST = ['new', 'intake_sent', 'failed'];
-const EDIT = ['preview', 'review'];
+// A live site can be edited too: the update is built as a new preview while the live site stays
+// up, and goes live after the customer publishes it and the owner approves (no new payment).
+const EDIT = ['preview', 'review', 'live'];
 const ROUNDS = 2;
 
 export default async function handler(req, res) {
@@ -60,8 +62,8 @@ export default async function handler(req, res) {
     }
     const notes = String(req.body?.changeNotes ?? '').trim().slice(0, 3000);
     await db.insert('change_requests', { lead_id: lead.id, request: notes.length >= 3 ? notes : 'Updated details in the form.' });
-    await db.update(lead.id, { status: 'changes_requested', customer_ok: false });
-    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { notes: notes.length, photos: parsed.data.photos.length } });
+    await db.update(lead.id, { status: 'changes_requested', customer_ok: false, ...(lead.status === 'live' ? { owner_ok: false } : {}) });
+    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { notes: notes.length, photos: parsed.data.photos.length, live: lead.status === 'live' } });
     await startJob('changes', lead.id);
     reply(res, 200, { ok: true, mode, roundsLeft: Math.max(0, ROUNDS - lead.change_rounds) });
   });
