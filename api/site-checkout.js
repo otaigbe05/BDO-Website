@@ -31,7 +31,14 @@ export default async function handler(req, res) {
     // ?check=1 : is Stripe set up? Says which prices were found and whether the webhook secret
     // is present. Shows no secrets and no customer data.
     if (req.method === 'GET' && req.query.check === '1') {
-      const out = { ok: true, payments: paymentsOn(), webhookSecret: Boolean(process.env.SITES_STRIPE_WEBHOOK_SECRET), prices: {} };
+      const state = (v) => (v === undefined ? 'missing' : v.trim() === '' ? 'empty' : 'set');
+      const out = {
+        ok: true,
+        payments: paymentsOn(),
+        webhookSecret: Boolean(process.env.SITES_STRIPE_WEBHOOK_SECRET),
+        settings: { SITES_STRIPE_KEY: state(process.env.SITES_STRIPE_KEY), SITES_STRIPE_WEBHOOK_SECRET: state(process.env.SITES_STRIPE_WEBHOOK_SECRET), env: process.env.VERCEL_ENV ?? 'unknown' },
+        prices: {},
+      };
       if (out.payments) {
         try {
           const { data } = await stripe('prices', { lookup_keys: Object.values(KEYS), active: true, limit: 10 }, 'GET');
