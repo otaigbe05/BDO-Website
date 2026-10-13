@@ -5,9 +5,9 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
-import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass } from './ui';
+import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass, loadCatalog } from './ui';
 import DesignGuide from './DesignGuide';
-import { designProblems } from '../../../api/_lib/design-rules.js';
+import { designProblems, TEAM_NEEDS } from '../../../api/_lib/design-rules.js';
 import DesignExtras from './DesignExtras';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -165,6 +165,11 @@ export default function SiteIntake() {
   const [lead, setLead] = useState(null);
   const [mode, setMode] = useState('first');
   const [info, setInfo] = useState({});
+  // How many work photos the design's sample shows, so the form can say what looks best, not just the minimum.
+  const [sample, setSample] = useState(null);
+  useEffect(() => {
+    if (lead?.template) loadCatalog().then((list) => setSample(list.find((t) => t.id === lead.template)?.sample ?? null));
+  }, [lead?.template]);
   const [state, setState] = useState('loading');
   const [f, setF] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -515,7 +520,7 @@ export default function SiteIntake() {
           </button>
         </Card>
 
-        <Card title="Your team" intro="Everyone customers can book with. Add as many as you have; skip this if it is just the business.">
+        <Card title="Your team" intro={TEAM_NEEDS[lead.template] ? `Everyone customers can book with. This design is built around your team, so add at least ${TEAM_NEEDS[lead.template] === 1 ? 'one person' : `${TEAM_NEEDS[lead.template]} people`}, with a photo of each if you can.` : 'Everyone customers can book with. Add as many as you have; skip this if it is just the business.'}>
           {f.team.map((m, i) => (
             <div key={i} className="rounded-xl border border-slate-200 p-4 space-y-3">
               <div className="grid sm:grid-cols-2 gap-3">
@@ -545,12 +550,19 @@ export default function SiteIntake() {
         </Card>
 
         <Card title="Photos" intro="Your own photos work best. Please no photos with brand logos, licence plates, or children's faces; we leave those out.">
-          {PHOTO_NEEDS[lead.template] && (
-            <p className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-slate-800">
-              Your design shows your work up front: add at least <strong>{PHOTO_NEEDS[lead.template].work} work photos</strong>
-              {PHOTO_NEEDS[lead.template].priced ? ', each with a price' : ''}.
-            </p>
-          )}
+          {(() => {
+            const need = PHOTO_NEEDS[lead.template]?.work ?? 1;
+            const shown = sample?.galleryPhotos ?? 0;
+            const best = Math.max(need + 1, shown, 4);
+            return (
+              <p className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-slate-800">
+                {PHOTO_NEEDS[lead.template]
+                  ? <>This design needs at least <strong>{need} photos of your work</strong>{PHOTO_NEEDS[lead.template].priced ? ', each with a price' : ''} to work at all. </>
+                  : <>One photo is enough to build your site. </>}
+                It looks best with <strong>{best} or more</strong>{shown >= best ? ', like the design sample' : ''}: different jobs, close-ups, and your space. Add as many good ones as you have.
+              </p>
+            );
+          })()}
           <PhotoSlot kind="hero" label="Main photo" hint="The big photo at the top. Your best shot of your work or your space. If you skip it, we pick your strongest photo." />
           <PhotoSlot kind="logo" label="Logo" hint="Optional." />
           <PhotoSlot kind="about" label="Photo of you or your space" hint="Optional." />
