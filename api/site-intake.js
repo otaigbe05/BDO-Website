@@ -6,7 +6,7 @@
 //                                   customer's notes and start the changes job
 import { summarize } from './_lib/sample.js';
 import { intakeSchema, problems, photoProblems, designProblems, extrasProblems, CONSENT_VERSION } from './_lib/schemas.js';
-import { db, startJob, reply, handle } from './_lib/services.js';
+import { db, startJob, reply, handle, updatesLeft, updateOverLimit, UPDATES_PER_MONTH } from './_lib/services.js';
 
 const FIRST = ['new', 'intake_sent', 'failed'];
 // A live site can be edited too: the update is built as a new preview while the live site stays
@@ -37,6 +37,7 @@ export default async function handler(req, res) {
         roundsLeft: Math.max(0, ROUNDS - lead.change_rounds),
         previewUrl: lead.preview_url,
         have: summarize(lead.client),
+        ...(lead.status === 'live' ? { updatesLeft: await updatesLeft(lead), updatesPerMonth: UPDATES_PER_MONTH } : {}),
         lead: { name: lead.name, email: lead.email, phone: lead.phone, business: lead.business, city: lead.city, template: lead.template, palette: lead.palette, package: lead.package, domain: lead.domain },
         previous,
         photoUrls,
@@ -64,6 +65,10 @@ export default async function handler(req, res) {
       return reply(res, 200, { ok: true, mode });
     }
     const notes = String(req.body?.changeNotes ?? '').trim().slice(0, 3000);
+    if (lead.status === 'live' && (await updatesLeft(lead)) === 0) {
+      await updateOverLimit(lead, notes.length >= 3 ? notes : 'Updated details in the form.');
+      return reply(res, 200, { ok: true, mode, overLimit: true, updatesPerMonth: UPDATES_PER_MONTH });
+    }
     await db.insert('change_requests', { lead_id: lead.id, request: notes.length >= 3 ? notes : 'Updated details in the form.' });
     await db.update(lead.id, { status: 'changes_requested', customer_ok: false, ...(lead.status === 'live' ? { owner_ok: false } : {}) });
     await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { notes: notes.length, photos: parsed.data.photos.length, live: lead.status === 'live' } });

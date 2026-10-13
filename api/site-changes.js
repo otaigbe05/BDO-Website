@@ -2,7 +2,7 @@
 //   GET  ?t=<intake token>        -> preview link and how many change rounds are left
 //   POST { t, request }           -> save the request and start the changes job
 import { changeSchema, problems } from './_lib/schemas.js';
-import { db, startJob, reply, handle } from './_lib/services.js';
+import { db, startJob, reply, handle, updatesLeft, updateOverLimit, UPDATES_PER_MONTH } from './_lib/services.js';
 import { summarize } from './_lib/sample.js';
 
 const ROUNDS = 2;
@@ -19,10 +19,14 @@ export default async function handler(req, res) {
     const parsed = changeSchema.safeParse(req.body ?? {});
     if (!parsed.success) return reply(res, 400, { ok: false, problems: problems(parsed.error) });
     if (!['preview', 'changes_requested', 'live'].includes(lead.status)) return reply(res, 409, { ok: false, error: 'Your site is being updated. Please wait for the next email.' });
+    if (lead.status === 'live' && (await updatesLeft(lead)) === 0) {
+      await updateOverLimit(lead, parsed.data.request);
+      return reply(res, 200, { ok: true, overLimit: true, updatesPerMonth: UPDATES_PER_MONTH });
+    }
     await db.insert('change_requests', { lead_id: lead.id, request: parsed.data.request });
     // On a live site the owner checks the update again before it replaces the live one.
     await db.update(lead.id, { status: 'changes_requested', ...(lead.status === 'live' ? { customer_ok: false, owner_ok: false } : {}) });
-    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { length: parsed.data.request.length } });
+    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { length: parsed.data.request.length, live: lead.status === 'live' } });
     // Over the included rounds, the job emails the owner instead of rebuilding.
     await startJob('changes', lead.id);
     reply(res, 200, { ok: true, roundsLeft: left });
