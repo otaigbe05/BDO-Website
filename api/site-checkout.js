@@ -4,6 +4,7 @@
 //   POST { t, purpose: "setup", omisEmail?, interval? }   -> Checkout link for Publish
 //   POST { t, purpose: "care", interval }                 -> Checkout link to keep the site online
 //   POST { t, purpose: "handover" }                       -> customer takes their site instead
+//   GET  ?check=1                  -> setup check for the owner (prices found, webhook secret set)
 // The Stripe webhook (/api/stripe-webhook) records the payment and carries on with Publish.
 import { db, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
 import { paymentsOn, prices, omisPlan, paidEvent, stripe, KEYS } from './_lib/stripe.js';
@@ -27,6 +28,24 @@ async function quote(lead, omisEmail) {
 
 export default async function handler(req, res) {
   await handle(res, async () => {
+    // ?check=1 : is Stripe set up? Says which prices were found and whether the webhook secret
+    // is present. Shows no secrets and no customer data.
+    if (req.method === 'GET' && req.query.check === '1') {
+      const out = { ok: true, payments: paymentsOn(), webhookSecret: Boolean(process.env.SITES_STRIPE_WEBHOOK_SECRET), prices: {} };
+      if (out.payments) {
+        try {
+          const { data } = await stripe('prices', { lookup_keys: Object.values(KEYS), active: true, limit: 10 }, 'GET');
+          for (const k of Object.values(KEYS)) {
+            const p = data.find((x) => x.lookup_key === k);
+            out.prices[k] = p ? `${(p.unit_amount / 100).toFixed(2)} ${p.currency.toUpperCase()}${p.recurring ? `/${p.recurring.interval}` : ' once'}` : 'NOT FOUND';
+          }
+        } catch (err) {
+          out.ok = false;
+          out.error = err.message;
+        }
+      }
+      return reply(res, 200, out);
+    }
     const t = req.method === 'GET' ? req.query.t : req.body?.t;
     const lead = await db.leadByToken('intake_token', t);
     if (!lead) return reply(res, 404, { ok: false, error: 'This link is not valid. Check the email we sent you.' });
@@ -55,6 +74,7 @@ export default async function handler(req, res) {
           : { mode: 'subscription', line_items: [{ price: q.p[KEYS.alone].id, quantity: 1 }, { price: care.id, quantity: 1 }], customer_email: lead.email, subscription_data: { metadata: meta } }),
         metadata: meta,
         client_reference_id: lead.id,
+        allow_promotion_codes: true,
         success_url: `${back}/publish/${lead.intake_token}?paid=1`,
         cancel_url: `${back}/publish/${lead.intake_token}`,
         ...tax,
@@ -87,6 +107,7 @@ export default async function handler(req, res) {
         subscription_data: { metadata: meta },
         metadata: meta,
         client_reference_id: lead.id,
+        allow_promotion_codes: true,
         success_url: `${back}/care/${lead.intake_token}?paid=1`,
         cancel_url: `${back}/care/${lead.intake_token}`,
         ...tax,
