@@ -71,13 +71,20 @@ export default function SiteApprove() {
         {info.status === 'live' ? (
           <p className="text-slate-700">This site is live{info.liveUrl ? <>: <a className="text-blue-700 underline" href={info.liveUrl}>{info.liveUrl}</a></> : ''}.</p>
         ) : (
+          <div className="space-y-3">
+          {info.ownerOk && (
+            <p className="rounded-xl bg-emerald-50 p-4 text-slate-800">
+              You already approved this version. {info.customerOk ? 'It is going live now.' : 'It goes live as soon as the customer presses Publish (and pays, if payment is due). Nothing else to do.'} To stop it, press Hold.
+            </p>
+          )}
           <div className="flex flex-wrap gap-3">
             <button type="button" disabled={busy || info.ownerOk} onClick={() => act('approve')} className="px-8 py-4 rounded-xl bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white font-bold text-lg">
-              {info.ownerOk ? 'Approved' : info.status === 'review' ? 'Approve and publish' : 'Approve'}
+              {info.ownerOk ? 'Already approved' : info.status === 'review' ? 'Approve and publish' : 'Approve'}
             </button>
             <button type="button" disabled={busy} onClick={() => act('hold')} className="px-8 py-4 rounded-xl border-2 border-slate-400 text-slate-900 font-bold text-lg">
               Hold
             </button>
+          </div>
           </div>
         )}
       </div>
