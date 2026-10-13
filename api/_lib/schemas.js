@@ -156,9 +156,11 @@ export const intakeSchema = z
 export const CONSENT_VERSION = '2026-10-07';
 
 // Designs that need a minimum number of work photos (keep in step with SiteIntake.jsx).
-export const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, S09: { work: 3 } };
+export const PHOTO_NEEDS = { T01: { work: 4, priced: true }, T04: { work: 2 }, T13: { work: 4 }, T14: { work: 4 }, T15: { work: 3 }, S09: { work: 3 }, S14: { work: 4 }, B12: { work: 4 } };
 
 /** Problems with the photos for this template, in plain words (empty when fine). */
+export { TEAM_NEEDS, designProblems } from './design-rules.js';
+
 export function photoProblems(template, photos) {
   if (!photos.length) return ['Photos: add at least one photo of your work or your space.'];
   const need = PHOTO_NEEDS[template];
