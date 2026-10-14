@@ -168,7 +168,7 @@ export default function SitePublish() {
                 </div>
               </>
             )}
-            <p className="text-sm text-slate-600">Prices in Canadian dollars. You pay on Stripe&rsquo;s secure page.</p>
+            <p className="text-sm text-slate-600">Prices in Canadian dollars, plus HST/GST, which is worked out from your address on the payment page. You pay on Stripe&rsquo;s secure page.</p>
           </section>
         )}
 

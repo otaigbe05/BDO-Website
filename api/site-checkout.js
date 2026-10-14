@@ -17,6 +17,7 @@ import { paymentsOn, prices, omisPlan, paidEvent, stripe, KEYS } from './_lib/st
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const money = (cents) => `$${(cents / 100).toLocaleString('en-CA', { minimumFractionDigits: 0 })}`;
 
+const taxOn = () => process.env.SITES_STRIPE_TAX !== '0';
 const norm = (e) => String(e ?? '').trim().toLowerCase();
 const codeHash = (lead, email, code) => createHash('sha256').update(`${lead.intake_token}:${email}:${code}`).digest('hex');
 const CODE_MINUTES = 15;
@@ -54,6 +55,7 @@ export default async function handler(req, res) {
         ok: true,
         payments: paymentsOn(),
         webhookSecret: Boolean(process.env.SITES_STRIPE_WEBHOOK_SECRET),
+        tax: taxOn() ? 'added by Stripe Tax' : 'off',
         settings: { SITES_STRIPE_KEY: state(process.env.SITES_STRIPE_KEY), SITES_STRIPE_WEBHOOK_SECRET: state(process.env.SITES_STRIPE_WEBHOOK_SECRET), env: process.env.VERCEL_ENV ?? 'unknown' },
         prices: {},
       };
@@ -136,9 +138,9 @@ export default async function handler(req, res) {
       await db.insert('events', { lead_id: lead.id, kind: 'omis_verified', detail: { email: e } });
       return reply(res, 200, { ok: true, verified: true });
     }
-    // SITES_STRIPE_TAX=1 once Stripe Tax is set up: Stripe works out HST/GST from the customer's
-    // address (asked for on its checkout page) and adds it to the bill.
-    const tax = process.env.SITES_STRIPE_TAX === '1' ? { automatic_tax: { enabled: true }, billing_address_collection: 'required' } : {};
+    // Stripe Tax works out HST/GST from the customer's address (asked for on its checkout page)
+    // and adds it on top. On by default (BDO is registered); SITES_STRIPE_TAX=0 turns it off.
+    const tax = taxOn() ? { automatic_tax: { enabled: true }, billing_address_collection: 'required' } : {};
 
     if (purpose === 'setup') {
       if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
