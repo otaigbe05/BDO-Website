@@ -3,7 +3,7 @@
 // After a preview the same link reopens the form filled in with their answers ("edit" mode),
 // plus a box for anything else they want changed.
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass, loadCatalog } from './ui';
 import DesignGuide from './DesignGuide';
@@ -162,13 +162,17 @@ async function shrink(file, keepPng) {
 
 export default function SiteIntake() {
   const { token } = useParams();
+  // Arrived from "Choose this design" in the preview (/site/design): say what changed.
+  const [query] = useSearchParams();
+  const switchedTo = query.get('design');
   const [lead, setLead] = useState(null);
   const [mode, setMode] = useState('first');
   const [info, setInfo] = useState({});
   // How many work photos the design's sample shows, so the form can say what looks best, not just the minimum.
   const [sample, setSample] = useState(null);
+  const [designName, setDesignName] = useState('');
   useEffect(() => {
-    if (lead?.template) loadCatalog().then((list) => setSample(list.find((t) => t.id === lead.template)?.sample ?? null));
+    if (lead?.template) loadCatalog().then((list) => { const t = list.find((x) => x.id === lead.template); setSample(t?.sample ?? null); setDesignName(t?.name ?? ''); });
   }, [lead?.template]);
   const [state, setState] = useState('loading');
   const [f, setF] = useState(null);
@@ -427,6 +431,12 @@ export default function SiteIntake() {
           </p>
         </header>
 
+        {mode === 'edit' && switchedTo && switchedTo === lead.template && (
+          <div role="status" className="rounded-2xl border border-blue-200 bg-blue-50 p-5 text-slate-800">
+            <p className="font-semibold">Your design is now {designName || switchedTo}.</p>
+            <p>Your answers are all here. Add anything this design asks for below, then press Send at the bottom to get your new preview.</p>
+          </div>
+        )}
         {mode === 'edit' && <DesignGuide token={token} template={lead.template} previewUrl={info.previewUrl} have={info.have} showLink={false} />}
 
         {mode === 'edit' && (

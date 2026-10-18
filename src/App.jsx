@@ -30,6 +30,7 @@ const PricingPage = lazy(() => import('@/pages/PricingPage'));
 const SiteStart = lazy(() => import('@/pages/site/SiteStart'));
 const SiteIntake = lazy(() => import('@/pages/site/SiteIntake'));
 const SiteChanges = lazy(() => import('@/pages/site/SiteChanges'));
+const SiteDesign = lazy(() => import('@/pages/site/SiteDesign'));
 const SitePublish = lazy(() => import('@/pages/site/SitePublish'));
 const SiteApprove = lazy(() => import('@/pages/site/SiteApprove'));
 const SiteCare = lazy(() => import('@/pages/site/SiteCare'));
@@ -84,6 +85,7 @@ const AnimatedRoutes = () => {
           <Route path="/site/start" element={<PageTransition><SiteStart /></PageTransition>} />
           <Route path="/site/intake/:token" element={<PageTransition><SiteIntake /></PageTransition>} />
           <Route path="/site/changes/:token" element={<PageTransition><SiteChanges /></PageTransition>} />
+          <Route path="/site/design/:token" element={<PageTransition><SiteDesign /></PageTransition>} />
           <Route path="/site/publish/:token" element={<PageTransition><SitePublish /></PageTransition>} />
           <Route path="/site/care/:token" element={<PageTransition><SiteCare /></PageTransition>} />
           <Route path="/site/approve/:id/:token" element={<PageTransition><SiteApprove /></PageTransition>} />
