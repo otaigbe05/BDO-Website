@@ -37,6 +37,8 @@ export const leadSchema = z
     package: z.enum(['site', 'site-omis', 'store']),
     hasDomain: z.boolean().optional(),
     domain: z.string().trim().toLowerCase().regex(/^[a-z0-9.-]+\.[a-z]{2,}$/).optional().or(z.literal('').transform(() => undefined)),
+    // A new address they would like us to buy in their business name (bought when the site goes live).
+    wantDomain: z.string().trim().toLowerCase().transform((v) => v.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '')).pipe(z.string().regex(/^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}$/)).optional(),
     // Spam checks: a hidden field people never fill, and how long the form was open.
     website: z.string().max(0).optional(),
     openedMs: z.number().min(3000),

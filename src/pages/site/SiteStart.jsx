@@ -12,11 +12,17 @@ export const PACKAGES = [
   { id: 'store', name: 'Website + online store', price: `From ${money(WEBSITE.storeFrom)}, quoted`, text: 'Built to order for shops that sell products online. We will contact you to plan it.' },
 ];
 
+/** "Joe's Barber Shop" -> "joesbarbershop.ca" (a starting idea the customer can change). */
+const suggestDomain = (name) => {
+  const base = String(name ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]/g, '').slice(0, 40);
+  return base ? `${base}.ca` : '';
+};
+
 export default function SiteStart() {
   const [params] = useSearchParams();
   const opened = useRef(Date.now());
   const [catalog, setCatalog] = useState([]);
-  const [f, setF] = useState({ template: params.get('template') ?? '', palette: 1, package: 'site-omis', name: '', email: '', phone: '', business: '', city: '', hasDomain: false, domain: '', website: '' });
+  const [f, setF] = useState({ template: params.get('template') ?? '', palette: 1, package: 'site-omis', name: '', email: '', phone: '', business: '', city: '', hasDomain: false, domain: '', buyDomain: false, wantDomain: '', website: '' });
   const [country, setCountry] = useState('CA');
   const [busy, setBusy] = useState(false);
   const [problems, setProblems] = useState([]);
@@ -47,7 +53,7 @@ export default function SiteStart() {
     e.preventDefault();
     setBusy(true);
     setProblems([]);
-    const body = { ...f, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, designs: others.length ? [f.template, ...others] : undefined, openedMs: Date.now() - opened.current };
+    const body = { ...f, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, buyDomain: undefined, wantDomain: !f.hasDomain && f.buyDomain && f.wantDomain ? f.wantDomain : undefined, designs: others.length ? [f.template, ...others] : undefined, openedMs: Date.now() - opened.current };
     const r = await api('/api/site-lead', { method: 'POST', body: JSON.stringify(body) });
     setBusy(false);
     if (r.ok) setDone(r.store ? 'store' : 'site');
@@ -216,6 +222,17 @@ export default function SiteStart() {
           {f.hasDomain && (
             <Field label="Your domain" htmlFor="domain" hint="For example: yourshop.ca">
               <Text id="domain" value={f.domain} onChange={set('domain')} placeholder="yourshop.ca" />
+            </Field>
+          )}
+          {!f.hasDomain && (
+            <label className="flex items-center gap-3 text-slate-900">
+              <input type="checkbox" checked={f.buyDomain} onChange={(e) => setF((s) => ({ ...s, buyDomain: e.target.checked, wantDomain: s.wantDomain || suggestDomain(s.business) }))} />
+              Buy me a web address (we register it in your business name and connect it)
+            </label>
+          )}
+          {!f.hasDomain && f.buyDomain && (
+            <Field label="The address you would like" htmlFor="wantDomain" hint="For example: yourshop.ca. If it is taken, we email you before buying anything else.">
+              <Text id="wantDomain" value={f.wantDomain} onChange={set('wantDomain')} placeholder="yourshop.ca" />
             </Field>
           )}
           {/* Hidden from people; bots fill it in. */}
