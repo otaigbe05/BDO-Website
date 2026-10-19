@@ -2,6 +2,8 @@
 // project, never OMIS), Resend email, and starting GitHub pipeline jobs.
 // Keys live only in Vercel environment variables.
 
+import { emailHtml, emailText } from './email-design.js';
+
 function env(name) {
   const v = process.env[name];
   if (!v) throw new Error(`Missing server setting ${name}`);
@@ -70,19 +72,29 @@ export const db = {
   },
 };
 
-const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
-
+/**
+ * Send one email in BDO's designed layout (navy banner with the BDO name, the subject as a
+ * kicker, the message, links as buttons, dark footer). Same design as the build pipeline's
+ * emails (api/_lib/email-design.js). paragraphs: plain strings; links: [{ label, url }].
+ */
 export async function sendEmail({ to, subject, paragraphs, links = [] }) {
-  // Plain, letter-like emails (no big buttons): Gmail files button-heavy mail under Promotions.
-  const html = `<div style="font:15px/1.55 Arial,sans-serif;color:#1a1a1a;max-width:560px">${paragraphs.map((p) => `<p>${esc(p)}</p>`).join('')}${links
-    .map((l) => `<p><a href="${esc(l.url)}" style="color:#1a4fa0">${esc(l.label)}</a></p>`)
-    .join('')}</div>`;
-  const text = [...paragraphs, ...links.map((l) => `${l.label}: ${l.url}`)].join('\n\n');
+  const o = {
+    site: 'BDO Analytics Solutions',
+    siteUrl: siteUrl(),
+    brand: '#0F172A',
+    glow: '#60A5FA',
+    title: subject.replace(/^\[Sites\]\s*/, ''),
+    intro: paragraphs.join('\n\n'),
+    rows: [],
+    buttons: links,
+    credit: { name: 'BDO Analytics Solutions', url: 'https://www.bdoanalyticssolutions.com' },
+    footer: '#020617',
+  };
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${env('RESEND_API_KEY')}`, 'Content-Type': 'application/json' },
     // Replies go to the owner's inbox (the From address does not need a real mailbox).
-    body: JSON.stringify({ from: env('SITES_MAIL_FROM'), to: [to], subject, html, text, ...(process.env.SITES_OWNER_EMAIL ? { reply_to: process.env.SITES_OWNER_EMAIL } : {}) }),
+    body: JSON.stringify({ from: env('SITES_MAIL_FROM'), to: [to], subject, html: emailHtml(o), text: emailText(o), ...(process.env.SITES_OWNER_EMAIL ? { reply_to: process.env.SITES_OWNER_EMAIL } : {}) }),
   });
   if (!res.ok) throw new Error(`Email failed: ${res.status} ${await res.text()}`);
 }
