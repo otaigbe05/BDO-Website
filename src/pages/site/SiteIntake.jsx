@@ -242,8 +242,10 @@ export default function SiteIntake() {
           <p>
             Thanks{lead ? `, ${lead.name.split(' ')[0]}` : ''}. {mode === 'edit' && state === 'sent' ? 'We are updating' : 'We have your details and are working on'} the {lead?.business} website now.
           </p>
-          <p>You will get an email with your preview link, usually within the hour.</p>
-          <p className="text-sm text-slate-500">Not in your inbox? Check your Promotions or Spam folder for an email from BDO Analytics Websites.</p>
+          <p>Your private preview link arrives by email, usually within 20 minutes.</p>
+          <p className="text-sm text-slate-500">
+            Nothing after 20 minutes? Check your Promotions, Spam or Junk folder for an email from BDO Analytics Websites, and mark it "Not spam" so the next ones reach you. Still nothing? Reply to our earlier email and we will sort it out.
+          </p>
         </Notice>
       </Shell>
     );
