@@ -31,6 +31,8 @@ export const leadSchema = z
     business: str(80),
     city: opt(60),
     template: z.string().regex(/^[TBASP]\d{2}$/),
+    // The shortlist to preview (favourite first), same trade, up to 10.
+    designs: z.array(z.string().regex(/^[TBASP]\d{2}$/)).max(10).optional(),
     palette: z.coerce.number().int().min(1).max(3).default(1),
     package: z.enum(['site', 'site-omis', 'store']),
     hasDomain: z.boolean().optional(),

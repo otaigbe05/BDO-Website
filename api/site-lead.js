@@ -15,6 +15,9 @@ export default async function handler(req, res) {
       status: f.package === 'store' ? 'new' : 'intake_sent',
     });
     await db.insert('events', { lead_id: lead.id, kind: 'lead', detail: { template: f.template, package: f.package } });
+    // The designs to build the preview in (read by the build pipeline, omis-sites pipeline/job.mjs).
+    const designs = [...new Set([f.template, ...(f.designs ?? [])])].filter((id) => id[0] === f.template[0]).slice(0, 10);
+    if (designs.length > 1) await db.insert('events', { lead_id: lead.id, kind: 'shortlist', detail: { designs } });
 
     const first = f.name.split(/\s+/)[0];
     if (f.package === 'store') {
@@ -40,7 +43,7 @@ export default async function handler(req, res) {
       await sendEmail({
         to: process.env.SITES_OWNER_EMAIL,
         subject: `[Sites] New lead: ${f.business} (${f.template}, ${f.package})`,
-        paragraphs: [`${f.name} <${f.email}> ${f.phone ?? ''}`, `${f.business}, ${f.city ?? ''}`, `Template ${f.template}, palette ${f.palette}, package ${f.package}, domain: ${f.domain ?? (f.hasDomain ? 'has one' : 'none yet')}`],
+        paragraphs: [`${f.name} <${f.email}> ${f.phone ?? ''}`, `${f.business}, ${f.city ?? ''}`, `Template ${f.template}${f.designs?.length > 1 ? ` (preview in ${f.designs.length}: ${f.designs.join(', ')})` : ''}, palette ${f.palette}, package ${f.package}, domain: ${f.domain ?? (f.hasDomain ? 'has one' : 'none yet')}`],
       });
     }
     reply(res, 200, { ok: true, store: f.package === 'store' });

@@ -22,11 +22,21 @@ export default function SiteStart() {
   const [problems, setProblems] = useState([]);
   const [done, setDone] = useState(null);
   const set = (k) => (v) => setF((s) => ({ ...s, [k]: v }));
+  // The shortlist from the gallery hearts (?designs=, or remembered on this device), up to 10.
+  const [shortlist, setShortlist] = useState(() => {
+    const fromUrl = (params.get('designs') ?? '').split(',').filter((id) => /^[TBASP]\d{2}$/.test(id));
+    if (fromUrl.length) return fromUrl;
+    try { return JSON.parse(localStorage.getItem('omis-shortlist') || 'null')?.ids ?? []; } catch { return []; }
+  });
 
   useEffect(() => {
     loadCatalog().then(setCatalog);
   }, []);
   const chosen = useMemo(() => catalog.find((t) => t.id === f.template), [catalog, f.template]);
+  // Other designs of the same trade to preview with the favourite.
+  const others = useMemo(() => shortlist.filter((id) => id !== f.template && id[0] === f.template[0]).slice(0, 9), [shortlist, f.template]);
+  const sameTrade = useMemo(() => catalog.filter((t) => t.id[0] === f.template[0] && t.id !== f.template && !others.includes(t.id)), [catalog, f.template, others]);
+  const nameOf = (id) => catalog.find((t) => t.id === id)?.name ?? id;
   const byVertical = useMemo(() => {
     const groups = new Map();
     for (const t of catalog) groups.set(t.verticalName, [...(groups.get(t.verticalName) ?? []), t]);
@@ -37,7 +47,7 @@ export default function SiteStart() {
     e.preventDefault();
     setBusy(true);
     setProblems([]);
-    const body = { ...f, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, openedMs: Date.now() - opened.current };
+    const body = { ...f, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, designs: others.length ? [f.template, ...others] : undefined, openedMs: Date.now() - opened.current };
     const r = await api('/api/site-lead', { method: 'POST', body: JSON.stringify(body) });
     setBusy(false);
     if (r.ok) setDone(r.store ? 'store' : 'site');
@@ -102,6 +112,35 @@ export default function SiteStart() {
               <Text id="template" value={f.template} onChange={(v) => set('template')(v.toUpperCase())} required pattern="[TBASP][0-9]{2}" />
             )}
           </Field>
+          {chosen && (
+            <div className="space-y-2">
+              <p className="text-sm font-bold text-slate-900">Also show me my site in</p>
+              {others.length ? (
+                <ul className="flex flex-wrap gap-2">
+                  {others.map((id) => (
+                    <li key={id} className="inline-flex items-center gap-1 rounded-full border border-slate-300 pl-3 pr-1 py-1 text-sm">
+                      {id} {nameOf(id)}
+                      <button type="button" className="min-w-9 min-h-9 rounded-full hover:bg-slate-100" aria-label={`Remove ${nameOf(id)}`} onClick={() => setShortlist((l) => l.filter((x) => x !== id))}>
+                        &times;
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-600">4 more designs we pick for your trade. Or add the ones you like (up to 10 in all):</p>
+              )}
+              {others.length < 9 && sameTrade.length > 0 && (
+                <select aria-label="Add a design to your preview" className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white" value="" onChange={(e) => e.target.value && setShortlist((l) => [...l.filter((x) => x[0] === f.template[0]), e.target.value])}>
+                  <option value="">Add a design</option>
+                  {sameTrade.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.id} {t.name}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
           {chosen && (
             <fieldset className="space-y-2">
               <legend className="text-sm font-bold text-slate-900">Colours</legend>
