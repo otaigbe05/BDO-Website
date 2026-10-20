@@ -6,7 +6,11 @@ import { Menu, X, ArrowRight, ChevronDown } from 'lucide-react';
 import Logo from '@/components/Logo';
 import { TRADES } from '@/data/trades';
 
-// "Industries": one page per trade, each from that owner's point of view.
+// "Websites": all designs, then one page per trade (each from that owner's point of view).
+// Each product in the menu carries its colour dot (blue websites, green OMIS, purple analytics),
+// matching the home page.
+const Dot = ({ color }) => <span className={`h-2 w-2 rounded-full ${color}`} aria-hidden="true" />;
+
 const IndustriesMenu = () => {
     const [open, setOpen] = useState(false);
     const box = useRef(null);
@@ -30,7 +34,7 @@ const IndustriesMenu = () => {
                 onClick={() => setOpen((o) => !o)}
                 className={`inline-flex items-center gap-1 text-sm font-bold tracking-wide whitespace-nowrap transition-colors hover:text-blue-800 ${here ? 'text-blue-700' : 'text-slate-900'}`}
             >
-                Industries <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
+                <Dot color="bg-blue-600" />Websites <ChevronDown className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} aria-hidden="true" />
             </button>
             <AnimatePresence>
                 {open && (
@@ -42,6 +46,11 @@ const IndustriesMenu = () => {
                         transition={{ duration: 0.15 }}
                         className="absolute -left-4 top-full z-50 mt-4 w-72 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl"
                     >
+                        <a href="/templates/" className="block rounded-xl px-3 py-2.5 hover:bg-blue-50">
+                            <span className="block text-sm font-bold text-blue-800">See all the designs</span>
+                            <span className="block text-xs text-slate-600">75 website designs for 5 trades</span>
+                        </a>
+                        <p className="px-3 pt-2 text-[11px] font-extrabold uppercase tracking-wider text-slate-500">By trade</p>
                         <ul>
                             {TRADES.map((t) => (
                                 <li key={t.slug}>
@@ -67,8 +76,8 @@ const Header = () => {
 
     const navLinks = [
         { title: 'Home', to: '/' },
-        { title: 'OMIS Product', to: '/omis-product' },
-        { title: 'Services', to: '/services' },
+        { title: 'OMIS booking', to: '/omis-product', dot: 'bg-emerald-600' },
+        { title: 'Data & analytics', to: '/services', dot: 'bg-violet-600' },
         { title: 'Pricing', to: '/pricing' },
         { title: 'About', to: '/about' },
         { title: 'Contact', to: '/contact' },
@@ -97,28 +106,19 @@ const Header = () => {
                                     key={link.to}
                                     to={link.to}
                                     end={link.to === '/'}
-                                    className="text-slate-900 hover:text-blue-800 hover:underline underline-offset-4 transition-colors text-sm font-bold tracking-wide whitespace-nowrap"
+                                    className="inline-flex items-center gap-1.5 text-slate-900 hover:text-blue-800 hover:underline underline-offset-4 transition-colors text-sm font-bold tracking-wide whitespace-nowrap"
                                     style={({ isActive }) => isActive ? activeLinkStyle : {}}
                                 >
-                                    {link.title}
+                                    {link.dot && <Dot color={link.dot} />}{link.title}
                                 </NavLink>
                             ))}
-                            {/* The template gallery is its own app behind /templates, so a normal link. */}
-                            <a href="/templates/" className="group inline-flex items-center gap-1.5 text-slate-900 hover:text-blue-800 hover:underline underline-offset-4 transition-colors text-sm font-bold tracking-wide whitespace-nowrap">
-                                Templates
-                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-emerald-800 no-underline">New</span>
-                            </a>
                         </div>
 
                         <div className="flex items-center gap-3">
+                           {/* One button for all three products; each card on the home page carries its own. */}
                            <div className="hidden xl:flex items-center gap-3">
-                                <Button asChild className="bg-blue-700 hover:bg-blue-800 text-white font-bold shadow-md shadow-blue-600/20 rounded-xl transition-all hover:scale-105 ml-2">
-                                    <Link to="/book-demo">Book a Demo</Link>
-                                </Button>
-                                <Button asChild variant="outline" className="hidden 2xl:inline-flex font-bold shadow-sm rounded-xl border-blue-700 text-blue-800 hover:bg-blue-50 transition-all">
-                                    <a href="https://omis-crm.com" target="_blank" rel="noopener noreferrer">
-                                        Try OMIS Now <ArrowRight className="ml-2 w-4 h-4" />
-                                    </a>
+                                <Button asChild className="bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md rounded-xl transition-all hover:scale-105 ml-2">
+                                    <Link to="/contact">Book a call</Link>
                                 </Button>
                            </div>
                             <div className="lg:hidden flex items-center gap-2">
@@ -152,10 +152,10 @@ const Header = () => {
                                     className="block px-4 py-3 rounded-xl text-base font-extrabold text-slate-900 hover:text-blue-800 hover:bg-blue-50 transition-colors"
                                     style={({ isActive }) => (isActive ? { ...activeLinkStyle, backgroundColor: '#F0F9FF' } : {})}
                                 >
-                                    {link.title}
+                                    <span className="inline-flex items-center gap-2">{link.dot && <Dot color={link.dot} />}{link.title}</span>
                                 </NavLink>
                             ))}
-                            <p className="px-4 pt-3 text-xs font-extrabold uppercase tracking-wider text-slate-600">For your shop</p>
+                            <p className="px-4 pt-3 text-xs font-extrabold uppercase tracking-wider text-blue-700 inline-flex items-center gap-2"><Dot color="bg-blue-600" />Websites, by trade</p>
                             <div className="grid grid-cols-2 gap-1">
                                 {TRADES.map((t) => (
                                     <Link key={t.slug} to={`/for/${t.slug}`} onClick={() => setIsMenuOpen(false)} className="rounded-xl px-4 py-3 text-sm font-bold text-slate-900 hover:bg-blue-50 hover:text-blue-800">
@@ -164,16 +164,15 @@ const Header = () => {
                                 ))}
                             </div>
                             <a href="/templates/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-2 px-4 py-3 rounded-xl text-base font-extrabold text-slate-900 hover:text-blue-800 hover:bg-blue-50 transition-colors">
-                                Website Templates
-                                <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-extrabold uppercase tracking-wider text-emerald-800">New</span>
+                                See all the website designs
                             </a>
                             <div className="pt-4 flex flex-col gap-3 px-1">
-                                <Button asChild className="w-full bg-blue-700 hover:bg-blue-800 text-white font-bold shadow-md rounded-xl py-6">
-                                    <Link to="/book-demo" onClick={() => setIsMenuOpen(false)}>Book a Demo</Link>
+                                <Button asChild className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold shadow-md rounded-xl py-6">
+                                    <Link to="/contact" onClick={() => setIsMenuOpen(false)}>Book a call</Link>
                                 </Button>
-                                <Button asChild variant="outline" className="w-full border-blue-700 text-blue-800 hover:bg-blue-50 font-bold rounded-xl py-6">
+                                <Button asChild variant="outline" className="w-full border-emerald-700 text-emerald-800 hover:bg-emerald-50 font-bold rounded-xl py-6">
                                      <a href="https://omis-crm.com" target="_blank" rel="noopener noreferrer" onClick={() => setIsMenuOpen(false)}>
-                                        Try OMIS Now <ArrowRight className="ml-2 w-4 h-4" />
+                                        Try OMIS free <ArrowRight className="ml-2 w-4 h-4" />
                                     </a>
                                 </Button>
                             </div>

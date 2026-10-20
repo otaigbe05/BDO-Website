@@ -10,23 +10,26 @@ const Footer = () => {
   // Audited links mapping perfectly to App.jsx routes
   const footerSections = [
     {
-      title: "For Your Shop",
+      title: "Websites",
+      dot: "bg-blue-600",
       links: [
+        { text: "All website designs", href: "/templates/" },
         ...TRADES.map((t) => ({ text: t.label, to: `/for/${t.slug}` })),
-        { text: "Website Templates", href: "/templates/" },
       ]
     },
     {
-      title: "Product & Tools",
+      title: "OMIS booking",
+      dot: "bg-emerald-600",
       links: [
-        { text: "OMIS Product", to: "/omis-product" },
-        { text: "Try OMIS Now", external: omisAppLink },
+        { text: "How OMIS works", to: "/omis-product" },
+        { text: "Try OMIS free", external: omisAppLink },
         { text: "Pricing", to: "/pricing" },
         { text: "ROI Calculator", to: "/roi-calculator" },
       ]
     },
     {
-      title: "Services",
+      title: "Data & analytics",
+      dot: "bg-violet-600",
       links: [
         { text: "Power BI Consulting", to: "/services" },
         { text: "Data Cleanup", to: "/services" },
@@ -39,7 +42,7 @@ const Footer = () => {
       links: [
         { text: "About Us", to: "/about" },
         { text: "Contact", to: "/contact" },
-        { text: "Book a Demo", to: "/book-demo" },
+        { text: "Book an OMIS demo", to: "/book-demo" },
         { text: "Privacy Policy", to: "/privacy-policy" },
         { text: "Terms of Service", to: "/terms-of-service" },
         { text: "Account Deletion", to: "/account-deletion-request" },
@@ -63,7 +66,7 @@ const Footer = () => {
 
           {footerSections.map(section => (
             <div key={section.title}>
-              <p className="font-extrabold text-slate-900 mb-4 text-sm uppercase tracking-wider">{section.title}</p>
+              <p className="font-extrabold text-slate-900 mb-4 text-sm uppercase tracking-wider inline-flex items-center gap-2">{section.dot && <span className={`h-2.5 w-2.5 rounded-full ${section.dot}`} aria-hidden="true" />}{section.title}</p>
               <ul className="space-y-3 text-sm">
                 {section.links.map(link => (
                   <li key={link.text}>

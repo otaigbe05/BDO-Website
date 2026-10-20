@@ -89,10 +89,10 @@ export default function TemplateShowcase() {
           transition={{ duration: 0.6, ease: 'easeOut' }}
           className="mx-auto mb-12 max-w-3xl text-center"
         >
-          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-4 py-1.5 text-sm font-bold text-emerald-800">
+          <span className="mb-5 inline-flex items-center gap-2 rounded-full border border-blue-200 bg-blue-50 px-4 py-1.5 text-sm font-bold text-blue-800">
             <span className="relative flex h-2 w-2" aria-hidden="true">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-500 opacity-60 motion-reduce:hidden" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-blue-500 opacity-60 motion-reduce:hidden" />
+              <span className="relative inline-flex h-2 w-2 rounded-full bg-blue-600" />
             </span>
             New: websites for your business
           </span>
@@ -200,7 +200,7 @@ export default function TemplateShowcase() {
         <ol className="relative mx-auto mb-12 grid max-w-5xl gap-6 md:grid-cols-3">
           <motion.span
             aria-hidden="true"
-            className="absolute left-[16%] right-[16%] top-8 hidden h-0.5 origin-left bg-gradient-to-r from-blue-200 via-blue-400 to-emerald-300 md:block"
+            className="absolute left-[16%] right-[16%] top-8 hidden h-0.5 origin-left bg-gradient-to-r from-blue-200 via-blue-400 to-blue-500 md:block"
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true, margin: '-80px' }}
