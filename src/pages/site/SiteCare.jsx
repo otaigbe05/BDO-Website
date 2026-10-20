@@ -64,7 +64,8 @@ export default function SiteCare() {
         <p className="text-sm text-slate-600">
           Prefer to pay yearly ({yearly}/year)?{' '}
           <button type="button" disabled={Boolean(busy)} onClick={() => choose('care', 'year')} className="font-bold text-blue-700 underline">Keep it online, paid yearly</button>.
-          Want OMIS back instead? Restart it from your OMIS account and hosting is included again.
+          Want OMIS back instead? Restart it from your OMIS account and hosting is included again.{' '}
+          <a className="text-blue-700 underline" href={`/site/manage/${token}`}>Manage my plan</a>.
         </p>
         <Problems list={problems} />
       </div>

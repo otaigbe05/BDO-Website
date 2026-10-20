@@ -34,6 +34,7 @@ const SiteDesign = lazy(() => import('@/pages/site/SiteDesign'));
 const SitePublish = lazy(() => import('@/pages/site/SitePublish'));
 const SiteApprove = lazy(() => import('@/pages/site/SiteApprove'));
 const SiteCare = lazy(() => import('@/pages/site/SiteCare'));
+const SiteManage = lazy(() => import('@/pages/site/SiteManage'));
 
 // Advanced ScrollToTop component handling both pathnames and hash links properly
 const ScrollToTop = () => {
@@ -88,6 +89,7 @@ const AnimatedRoutes = () => {
           <Route path="/site/design/:token" element={<PageTransition><SiteDesign /></PageTransition>} />
           <Route path="/site/publish/:token" element={<PageTransition><SitePublish /></PageTransition>} />
           <Route path="/site/care/:token" element={<PageTransition><SiteCare /></PageTransition>} />
+          <Route path="/site/manage/:token" element={<PageTransition><SiteManage /></PageTransition>} />
           <Route path="/site/approve/:id/:token" element={<PageTransition><SiteApprove /></PageTransition>} />
           <Route path="*" element={<PageTransition><NotFoundPage /></PageTransition>} />
         </Routes>

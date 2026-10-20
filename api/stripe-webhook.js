@@ -18,6 +18,7 @@ import { db, reply, sendEmail, siteUrl } from './_lib/services.js';
 import { stripe, verifyWebhook, paidEvent, isOmisSubscription, isCareSubscription, prices, KEYS } from './_lib/stripe.js';
 import { recordSetupPaid, careActive, money } from './_lib/payments.js';
 import { termsEnd, OMIS_TERMS_MONTHS } from './_lib/omis-terms.js';
+import { startLeaving } from './_lib/leave.js';
 
 async function rawBody(req) {
   const chunks = [];
@@ -47,7 +48,8 @@ async function checkoutDone(session) {
   if (purpose === 'handover') {
     if (await paidEvent(lead.id, 'handover')) return;
     await db.insert('events', { lead_id: lead.id, kind: 'handover', detail: { session: session.id, amount: session.amount_total } });
-    await tellOwner(`Hand over: ${lead.business}`, `${lead.business} paid the difference (${money(session.amount_total, session.currency)}) to take their website with them. Send them the site files, then take ${lead.live_url ?? 'the site'} offline.`);
+    // Paid the difference: the plan stops now and the website ZIP goes out within a day.
+    await startLeaving(lead, new Date().toISOString(), `paid ${money(session.amount_total, session.currency)} to take the files`);
     return;
   }
   if (purpose === 'care') {
@@ -104,7 +106,9 @@ async function subscriptionEnded(sub) {
     const lead = await db.leadById(sub.metadata?.lead_id);
     if (!lead) return;
     await db.insert('events', { lead_id: lead.id, kind: 'care_ended', detail: { subscription: sub.id } });
-    await tellOwner(`Care ended: ${lead.business}`, `${lead.business} stopped website care. Send them their site files, then take ${lead.live_url ?? 'the site'} offline.`);
+    // Ended in Stripe (stopped from the manage page at period end, failed payments, or by hand):
+    // the leaving steps run as usual (ZIP, "moved" page, deletion after 30 days).
+    await startLeaving(lead, new Date().toISOString(), 'website care ended');
     return;
   }
   if (!isOmisSubscription(sub)) return;

@@ -22,6 +22,7 @@ import { db, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
 import { paymentsOn, prices, omisPlan, omisPaid, paidEvent, stripe, keyMode, KEYS } from './_lib/stripe.js';
 import { setupPaid, careActive, tellOwnerOnce } from './_lib/payments.js';
 import { OMIS_TERMS_VERSION, omisTermsText, termsEnd } from './_lib/omis-terms.js';
+import { startLeaving } from './_lib/leave.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const money = (cents) => `$${(cents / 100).toLocaleString('en-CA', { minimumFractionDigits: 0 })}`;
@@ -252,13 +253,8 @@ export default async function handler(req, res) {
           return reply(res, 200, { ok: true, url: session.url });
         }
         await db.insert('events', { lead_id: lead.id, kind: 'handover' });
-        if (process.env.SITES_OWNER_EMAIL) {
-          await sendEmail({
-            to: process.env.SITES_OWNER_EMAIL,
-            subject: `[Sites] Hand over: ${lead.business}`,
-            paragraphs: [`${lead.business} chose to take their website with them. Send them the site files, then take ${lead.live_url ?? 'the site'} offline.`],
-          });
-        }
+        // Their website ZIP goes out within a day (omis-sites pipeline "leaving"); the owner is told.
+        await startLeaving(lead, new Date().toISOString(), 'took their website after OMIS ended');
         return reply(res, 200, { ok: true, state: 'handover' });
       }
       let session;

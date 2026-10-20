@@ -53,6 +53,7 @@ export async function recordSetupPaid(lead, session) {
         terms.detail?.text ?? '',
         'Keep this email for your records. Reply to it any time with questions.',
       ],
+      links: [{ label: 'Manage my plan or leave', url: `${siteUrl()}/site/manage/${lead.intake_token}` }],
     });
   }
   // Publish once (customer_ok); the owner already had the "Paid" email, so no second one.
