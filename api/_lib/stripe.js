@@ -6,6 +6,8 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { db } from './services.js';
 
 export const paymentsOn = () => Boolean(process.env.SITES_STRIPE_KEY);
+/** "live" or "test" from the key's prefix (sk_live_, rk_test_, ...), shown on ?check=1. */
+export const keyMode = () => (/^(sk|rk)_live_/.test(process.env.SITES_STRIPE_KEY ?? '') ? 'live' : /^(sk|rk)_test_/.test(process.env.SITES_STRIPE_KEY ?? '') ? 'test' : 'unknown');
 
 /** Prices are found by the lookup keys the owner set in Stripe. */
 export const KEYS = {
@@ -74,6 +76,17 @@ export function verifyWebhook(raw, header) {
   if (!t || Math.abs(Date.now() / 1000 - t) > 300) return false;
   const expected = createHmac('sha256', secret).update(`${t}.${raw}`).digest('hex');
   return sigs.some((s) => s.length === expected.length && timingSafeEqual(Buffer.from(s), Buffer.from(expected)));
+}
+
+/**
+ * Was this Checkout paid? Asks Stripe directly (like ChurchNow), so a missed webhook cannot strand
+ * a paying customer. Only "complete" sessions whose money is in (or nothing was due) count; a bank
+ * payment still clearing does not.
+ */
+export async function paidSession(sessionId) {
+  if (!/^cs_(test|live)_[A-Za-z0-9]+$/.test(String(sessionId ?? ''))) return null;
+  const s = await stripe(`checkout/sessions/${sessionId}`);
+  return s.status === 'complete' && ['paid', 'no_payment_required'].includes(s.payment_status) ? s : null;
 }
 
 /** Payments are kept in the events table: kind "paid" (setup) or "care" (hosting plan). */

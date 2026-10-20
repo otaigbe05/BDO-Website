@@ -6,7 +6,7 @@ import { Shell, Notice, Problems, api } from './ui';
 import { WEBSITE, money } from '@/data/pricing';
 
 const DONE = {
-  care: 'Thank you. Your website stays online. You can stop website care any time from the link in your Stripe receipt.',
+  care: 'Thank you. Your website stays online. To stop website care at any time, reply to any of our emails.',
   handover: 'Thank you. We will email you your site files within two business days, with simple steps to put them online wherever you like.',
 };
 

@@ -10,7 +10,8 @@
 import { timingSafeEqual } from 'node:crypto';
 import { db, startJob, reply, handle } from './_lib/services.js';
 import { customerPublished } from './_lib/publish.js';
-import { paymentsOn, paidEvent } from './_lib/stripe.js';
+import { paymentsOn } from './_lib/stripe.js';
+import { setupPaid, tellOwnerOnce, money } from './_lib/payments.js';
 
 async function ownerLead(id, token) {
   const lead = await db.leadById(id);
@@ -23,7 +24,10 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const lead = await ownerLead(req.query.id, req.query.t);
       if (!lead) return reply(res, 404, { ok: false, error: 'This link is not valid.' });
+      // Payment as Stripe sees it (records it if the webhook missed it).
+      const paid = paymentsOn() && lead.package !== 'store' ? await setupPaid(lead).catch(() => null) : null;
       return reply(res, 200, {
+        payment: !paymentsOn() || lead.package === 'store' ? 'not needed' : paid ? `paid ${money(paid.detail?.amount, paid.detail?.currency)} on ${String(paid.at).slice(0, 10)}` : 'not paid yet',
         ok: true,
         business: lead.business, city: lead.city, template: lead.template, package: lead.package,
         status: lead.status, previewUrl: lead.preview_url, liveUrl: lead.live_url,
@@ -56,8 +60,15 @@ export default async function handler(req, res) {
     if (lead.status === 'held') return reply(res, 409, { ok: false, error: 'We are checking a few things on your site first. We will email you shortly.' });
     if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
     // With payments on, the customer pays first; the Stripe webhook then calls customerPublished.
-    if (paymentsOn() && lead.package !== 'store' && !(await paidEvent(lead.id, 'paid'))) {
+    if (paymentsOn() && lead.package !== 'store' && !(await setupPaid(lead))) {
       return reply(res, 402, { ok: false, needsPayment: true, error: 'Payment is needed before publishing.' });
+    }
+    // The live site should always take payment; say so if the Stripe key is missing there.
+    if (!paymentsOn() && process.env.VERCEL_ENV === 'production' && lead.package !== 'store') {
+      await tellOwnerOnce(lead, 'payments_off', `Payments are OFF: ${lead.business} published without paying`, [
+        `${lead.business} pressed Publish and was not asked to pay, because SITES_STRIPE_KEY is not set on the live site.`,
+        'Add it in Vercel (bdo-website, Settings, Environment Variables, Production), then redeploy.',
+      ]);
     }
     reply(res, 200, { ok: true, state: await customerPublished(lead) });
   });

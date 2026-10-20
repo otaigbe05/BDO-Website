@@ -47,7 +47,7 @@ export default function SiteApprove() {
         <h1 className="text-3xl font-bold text-slate-900">{info.business}</h1>
         <Card>
           <p className="text-slate-700">
-            {info.city} | Template {info.template} | {info.package} | Status: <strong>{info.status}</strong> | Customer pressed Publish: <strong>{info.customerOk ? 'yes' : 'not yet'}</strong>
+            {info.city} | Template {info.template} | {info.package} | Status: <strong>{info.status}</strong> | Customer pressed Publish: <strong>{info.customerOk ? 'yes' : 'not yet'}</strong> | Payment: <strong>{info.payment ?? 'unknown'}</strong>
           </p>
           {info.previewUrl && (
             <p>

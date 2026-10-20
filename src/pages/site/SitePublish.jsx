@@ -32,8 +32,10 @@ export default function SitePublish() {
 
   useEffect(() => {
     api(`/api/site-changes?t=${encodeURIComponent(token)}`).then((r) => setInfo(r.ok ? r : { invalid: true }));
-    api(`/api/site-checkout?t=${encodeURIComponent(token)}`).then((r) => setPay(r.ok ? r : r.unavailable ? { payments: true, unavailable: true, error: r.error } : { payments: false }));
-  }, [token]);
+    // Back from Stripe (?session=): the server asks Stripe about that payment straight away.
+    const session = params.get('session');
+    api(`/api/site-checkout?t=${encodeURIComponent(token)}${session ? `&session=${encodeURIComponent(session)}` : ''}`).then((r) => setPay(r.ok ? r : r.unavailable ? { payments: true, unavailable: true, error: r.error } : { payments: false }));
+  }, [token, params]);
 
   const quoteFor = (email) => api(`/api/site-checkout?t=${encodeURIComponent(token)}&omisEmail=${encodeURIComponent(email)}`);
 
@@ -168,7 +170,7 @@ export default function SitePublish() {
                 </div>
               </>
             )}
-            <p className="text-sm text-slate-600">Prices in Canadian dollars, plus HST/GST, which is worked out from your address on the payment page. You pay on Stripe&rsquo;s secure page.</p>
+            <p className="text-sm text-slate-600">Prices in Canadian dollars. For businesses in Canada, HST/GST is added, worked out from your address on the payment page. You pay on Stripe&rsquo;s secure page, where a business can also add its own tax number.</p>
           </section>
         )}
 

@@ -9,15 +9,28 @@
 //   POST { t, purpose: "omis-verify", omisEmail, code }  -> confirm it; that email then counts
 // An OMIS email that differs from the one on the website form only counts once its code is
 // confirmed, so nobody gets the OMIS price by typing someone else's email.
-// The Stripe webhook (/api/stripe-webhook) records the payment and carries on with Publish.
+// The Stripe webhook (/api/stripe-webhook) records the payment and carries on with Publish. The
+// GET also asks Stripe about the customer's Checkout (?session= on their return, and their recent
+// ones), so a missed webhook neither strands them nor asks them to pay twice.
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 import { db, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
-import { paymentsOn, prices, omisPlan, paidEvent, stripe, KEYS } from './_lib/stripe.js';
+import { paymentsOn, prices, omisPlan, stripe, keyMode, KEYS } from './_lib/stripe.js';
+import { setupPaid, careActive, tellOwnerOnce } from './_lib/payments.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const money = (cents) => `$${(cents / 100).toLocaleString('en-CA', { minimumFractionDigits: 0 })}`;
 
 const taxOn = () => process.env.SITES_STRIPE_TAX !== '0';
+// Business customers can add their own GST/HST (or VAT) number on Stripe's page, for their records.
+const BUSINESS_TAX_ID = { tax_id_collection: { enabled: true } };
+const UNAVAILABLE = { ok: false, payments: true, unavailable: true, error: 'Payment is not available right now. Please try again in a little while; we have been told.' };
+
+/** Stripe refused: tell the owner (at most every 6 hours per customer) with the check link. */
+const paymentProblem = (lead, err) =>
+  tellOwnerOnce(lead, 'payment_error', `Payment not working: ${lead.business}`, [
+    `${lead.business} tried to pay but Stripe answered: ${String(err.message).slice(0, 300)}`,
+    `Check the setup here: ${siteUrl()}/api/site-checkout?check=1`,
+  ]);
 const norm = (e) => String(e ?? '').trim().toLowerCase();
 const codeHash = (lead, email, code) => createHash('sha256').update(`${lead.intake_token}:${email}:${code}`).digest('hex');
 const CODE_MINUTES = 15;
@@ -55,10 +68,18 @@ export default async function handler(req, res) {
         ok: true,
         payments: paymentsOn(),
         webhookSecret: Boolean(process.env.SITES_STRIPE_WEBHOOK_SECRET),
+        mode: paymentsOn() ? keyMode() : 'off',
         tax: taxOn() ? 'added by Stripe Tax' : 'off',
-        settings: { SITES_STRIPE_KEY: state(process.env.SITES_STRIPE_KEY), SITES_STRIPE_WEBHOOK_SECRET: state(process.env.SITES_STRIPE_WEBHOOK_SECRET), env: process.env.VERCEL_ENV ?? 'unknown' },
+        settings: { SITES_STRIPE_KEY: state(process.env.SITES_STRIPE_KEY), SITES_STRIPE_WEBHOOK_SECRET: state(process.env.SITES_STRIPE_WEBHOOK_SECRET), SITES_OWNER_EMAIL: state(process.env.SITES_OWNER_EMAIL), env: process.env.VERCEL_ENV ?? 'unknown' },
         prices: {},
+        warnings: [],
       };
+      const env = process.env.VERCEL_ENV;
+      if (env === 'production' && !out.payments) out.warnings.push('Payments are OFF on the live site: customers publish without paying.');
+      if (env === 'production' && out.mode === 'test') out.warnings.push('The live site has a TEST key: nobody is really charged.');
+      if (env && env !== 'production' && out.mode === 'live') out.warnings.push('A preview site has the LIVE key: test payments would be real.');
+      if (out.payments && !out.webhookSecret) out.warnings.push('No webhook secret: renewals, cancellations and refunds are not seen.');
+      if (!process.env.SITES_OWNER_EMAIL) out.warnings.push('SITES_OWNER_EMAIL is not set: payment and problem emails are not sent.');
       if (out.payments) {
         try {
           const { data } = await stripe('prices', { lookup_keys: Object.values(KEYS), active: true, limit: 10 }, 'GET');
@@ -80,21 +101,14 @@ export default async function handler(req, res) {
     const back = `${siteUrl()}/site`;
 
     if (req.method === 'GET') {
-      if (await paidEvent(lead.id, 'paid')) return reply(res, 200, { ok: true, payments: true, paid: true });
+      if (await setupPaid(lead, req.query.session).catch(() => null)) return reply(res, 200, { ok: true, payments: true, paid: true });
       let q;
       try {
         q = await quote(lead, req.query.omisEmail);
       } catch (err) {
         console.error(err);
-        // Tell the owner, at most once every 6 hours per customer.
-        const last = (await db.events(lead.id, 'payment_error'))[0];
-        if (!last || Date.now() - new Date(last.at).getTime() > 6 * 3600 * 1000) {
-          await db.insert('events', { lead_id: lead.id, kind: 'payment_error', detail: { message: String(err.message).slice(0, 300) } });
-          if (process.env.SITES_OWNER_EMAIL) {
-            await sendEmail({ to: process.env.SITES_OWNER_EMAIL, subject: `[Sites] Payment not working: ${lead.business}`, paragraphs: [`${lead.business} tried to publish but Stripe answered: ${String(err.message).slice(0, 300)}`, 'Check the Stripe key in Vercel: https://www.bdoanalyticssolutions.com/api/site-checkout?check=1'] });
-          }
-        }
-        return reply(res, 503, { ok: false, payments: true, unavailable: true, error: 'Payment is not available right now. Please try again in a little while; we have been told.' });
+        await paymentProblem(lead, err);
+        return reply(res, 503, UNAVAILABLE);
       }
       return reply(res, 200, { ok: true, payments: true, paid: false, email: q.email, needsCode: q.unconfirmed, omis: q.omis, setup: q.setup, care: q.care, package: lead.package });
     }
@@ -143,29 +157,39 @@ export default async function handler(req, res) {
     const tax = taxOn() ? { automatic_tax: { enabled: true }, billing_address_collection: 'required' } : {};
 
     if (purpose === 'setup') {
+      // Already paid (even if the webhook has not arrived): never start a second payment.
+      if (await setupPaid(lead)) return reply(res, 200, { ok: true, paid: true });
       if (lead.status !== 'preview') return reply(res, 409, { ok: false, error: 'Your preview is still being prepared. We will email you when it is ready.' });
-      if (await paidEvent(lead.id, 'paid')) return reply(res, 200, { ok: true, paid: true });
-      const q = await quote(lead, omisEmail);
-      const meta = { lead_id: lead.id, purpose: 'setup', plan: q.omis ? 'with-omis' : 'alone' };
-      const care = interval === 'year' && q.p[KEYS.careYearly] ? q.p[KEYS.careYearly] : q.p[KEYS.careMonthly];
-      const session = await stripe('checkout/sessions', {
-        ...(q.omis
-          ? { mode: 'payment', line_items: [{ price: q.p[KEYS.withOmis].id, quantity: 1 }], customer: q.customer, payment_intent_data: { metadata: meta }, ...(tax.automatic_tax ? { customer_update: { address: 'auto', name: 'auto' } } : {}) }
-          : { mode: 'subscription', line_items: [{ price: q.p[KEYS.alone].id, quantity: 1 }, { price: care.id, quantity: 1 }], customer_email: lead.email, subscription_data: { metadata: meta } }),
-        metadata: meta,
-        client_reference_id: lead.id,
-        allow_promotion_codes: true,
-        success_url: `${back}/publish/${lead.intake_token}?paid=1`,
-        cancel_url: `${back}/publish/${lead.intake_token}`,
-        ...tax,
-      });
-      await db.insert('events', { lead_id: lead.id, kind: 'checkout', detail: { session: session.id, plan: meta.plan } });
+      let session;
+      try {
+        const q = await quote(lead, omisEmail);
+        const meta = { lead_id: lead.id, purpose: 'setup', plan: q.omis ? 'with-omis' : 'alone' };
+        const care = interval === 'year' && q.p[KEYS.careYearly] ? q.p[KEYS.careYearly] : q.p[KEYS.careMonthly];
+        session = await stripe('checkout/sessions', {
+          // OMIS customers pay on their OMIS Stripe customer. Stripe Tax needs their address, so it
+          // is saved to that customer; their name is left as the OMIS app set it.
+          ...(q.omis
+            ? { mode: 'payment', line_items: [{ price: q.p[KEYS.withOmis].id, quantity: 1 }], customer: q.customer, payment_intent_data: { metadata: meta }, ...(tax.automatic_tax ? { customer_update: { address: 'auto' } } : {}) }
+            : { mode: 'subscription', line_items: [{ price: q.p[KEYS.alone].id, quantity: 1 }, { price: care.id, quantity: 1 }], customer_email: lead.email, subscription_data: { metadata: meta, description: `Website: ${lead.business}` }, ...BUSINESS_TAX_ID }),
+          metadata: meta,
+          client_reference_id: lead.id,
+          allow_promotion_codes: true,
+          success_url: `${back}/publish/${lead.intake_token}?paid=1&session={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${back}/publish/${lead.intake_token}`,
+          ...tax,
+        });
+      } catch (err) {
+        console.error(err);
+        await paymentProblem(lead, err);
+        return reply(res, 503, UNAVAILABLE);
+      }
+      await db.insert('events', { lead_id: lead.id, kind: 'checkout', detail: { session: session.id, plan: session.metadata?.plan } });
       return reply(res, 200, { ok: true, url: session.url });
     }
 
     if (purpose === 'care' || purpose === 'handover') {
       if (!lead.live_url) return reply(res, 409, { ok: false, error: 'This site is not live.' });
-      if (await paidEvent(lead.id, 'care')) return reply(res, 200, { ok: true, state: 'care' });
+      if (await careActive(lead.id)) return reply(res, 200, { ok: true, state: 'care' });
       if (purpose === 'handover') {
         await db.insert('events', { lead_id: lead.id, kind: 'handover' });
         if (process.env.SITES_OWNER_EMAIL) {
@@ -177,21 +201,29 @@ export default async function handler(req, res) {
         }
         return reply(res, 200, { ok: true, state: 'handover' });
       }
-      const p = await prices();
-      const care = interval === 'year' && p[KEYS.careYearly] ? p[KEYS.careYearly] : p[KEYS.careMonthly];
-      const meta = { lead_id: lead.id, purpose: 'care' };
-      const session = await stripe('checkout/sessions', {
-        mode: 'subscription',
-        line_items: [{ price: care.id, quantity: 1 }],
-        customer_email: lead.email,
-        subscription_data: { metadata: meta },
-        metadata: meta,
-        client_reference_id: lead.id,
-        allow_promotion_codes: true,
-        success_url: `${back}/care/${lead.intake_token}?paid=1`,
-        cancel_url: `${back}/care/${lead.intake_token}`,
-        ...tax,
-      });
+      let session;
+      try {
+        const p = await prices();
+        const care = interval === 'year' && p[KEYS.careYearly] ? p[KEYS.careYearly] : p[KEYS.careMonthly];
+        const meta = { lead_id: lead.id, purpose: 'care' };
+        session = await stripe('checkout/sessions', {
+          mode: 'subscription',
+          line_items: [{ price: care.id, quantity: 1 }],
+          customer_email: lead.email,
+          subscription_data: { metadata: meta, description: `Website care: ${lead.business}` },
+          ...BUSINESS_TAX_ID,
+          metadata: meta,
+          client_reference_id: lead.id,
+          allow_promotion_codes: true,
+          success_url: `${back}/care/${lead.intake_token}?paid=1`,
+          cancel_url: `${back}/care/${lead.intake_token}`,
+          ...tax,
+        });
+      } catch (err) {
+        console.error(err);
+        await paymentProblem(lead, err);
+        return reply(res, 503, UNAVAILABLE);
+      }
       return reply(res, 200, { ok: true, url: session.url });
     }
 
