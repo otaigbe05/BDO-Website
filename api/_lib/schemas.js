@@ -8,17 +8,23 @@ const str = (max) => z.string().trim().min(1).max(max);
 const opt = (max) => z.string().trim().max(max).optional().transform((v) => (v ? v : undefined));
 const handle = z.string().trim().transform((v) => v.replace(/^@/, '')).pipe(z.string().regex(/^[A-Za-z0-9._]{0,30}$/)).optional().transform((v) => (v ? v : undefined));
 const https = z.string().trim().max(300).optional().transform((v) => (v ? v : undefined)).pipe(z.url({ protocol: /^https$/ }).optional());
-const phone = z.string().trim().refine((v) => v.replace(/\D/g, '').length >= 10, 'Phone needs at least 10 digits.');
+// Any country: 7 to 15 digits (the international maximum), with the country code outside CA/US.
+const phone = z.string().trim().refine((v) => { const n = v.replace(/\D/g, '').length; return n >= 7 && n <= 15; }, 'Phone number: 7 to 15 digits, with the country code outside Canada and the US.');
 
 export const PROVINCES = ['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU'];
+export const AU_STATES = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
+// Countries with a fixed province/state list; anywhere else the region is free text (any country).
+export const REGIONS = { get CA() { return PROVINCES; }, get US() { return STATES; }, AU: AU_STATES };
 export const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
 
 /** "n1r1a1", "N1R-1A1" -> "N1R 1A1"; "14201 1234" -> "14201-1234". Anything else is left as typed. */
 export function tidyPostal(country, v) {
+  if (v == null || v === '') return undefined;
   if (country === 'US') {
     const d = String(v).replace(/\D/g, '');
     return d.length === 9 ? `${d.slice(0, 5)}-${d.slice(5)}` : d.length === 5 ? d : String(v).trim();
   }
+  if (country !== 'CA') return String(v).trim().toUpperCase();
   const c = String(v).toUpperCase().replace(/[^A-Z0-9]/g, '');
   return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(c) ? `${c.slice(0, 3)} ${c.slice(3)}` : String(v).trim();
 }
@@ -30,6 +36,8 @@ export const leadSchema = z
     phone: phone.optional(),
     business: str(80),
     city: opt(60),
+    // Where the business is (two-letter code). Not stored on the lead row; kept as a "country" event.
+    country: z.string().regex(/^[A-Z]{2}$/).optional(),
     template: z.string().regex(/^[TBASP]\d{2}$/),
     // The shortlist to preview (favourite first), same trade, up to 10.
     designs: z.array(z.string().regex(/^[TBASP]\d{2}$/)).max(10).optional(),
@@ -119,20 +127,25 @@ export const intakeSchema = z
         email: z.email().optional(),
         street: str(120),
         city: str(60),
-        country: z.enum(['CA', 'US']).default('CA'),
-        province: z.enum([...PROVINCES, ...STATES]), // province or state code
-        postal: z.string(),
+        // Any country (two-letter code). Canada, the US and Australia pick a province/state and
+        // (CA/US) a checked postal code; elsewhere both are free text and optional.
+        country: z.string().regex(/^[A-Z]{2}$/).default('CA'),
+        province: z.string().trim().max(60).optional(),
+        postal: z.string().trim().max(12).optional(),
+        // The business's time zone (e.g. "Africa/Lagos"), from the visitor's browser on the form.
+        timeZone: z.string().trim().max(60).optional(),
         instagram: handle,
         googleBusinessUrl: https,
         foundedYear: z.int().min(1900).max(new Date().getFullYear()).optional(),
       })
       .strict()
       // Accept any spacing or dashes from copy and paste; store as "N1R 1A1" or "14201".
-      .transform((b) => ({ ...b, postal: tidyPostal(b.country, b.postal) }))
+      .transform((b) => ({ ...b, postal: tidyPostal(b.country, b.postal), province: b.province || undefined }))
       .superRefine((b, ctx) => {
-        const ca = b.country === 'CA';
-        if (!(ca ? PROVINCES : STATES).includes(b.province)) ctx.addIssue({ code: 'custom', path: ['province'], message: ca ? 'Choose a province.' : 'Choose a state.' });
-        if (!(ca ? /^[A-Z]\d[A-Z] \d[A-Z]\d$/ : /^\d{5}(-\d{4})?$/).test(b.postal)) ctx.addIssue({ code: 'custom', path: ['postal'], message: ca ? 'Postal code: 3 letters and 3 numbers, like N1R 1A1.' : 'ZIP code: 5 numbers, like 14201.' });
+        const list = REGIONS[b.country];
+        if (list && !list.includes(b.province)) ctx.addIssue({ code: 'custom', path: ['province'], message: b.country === 'CA' ? 'Choose a province.' : 'Choose a state.' });
+        const postal = b.country === 'CA' ? /^[A-Z]\d[A-Z] \d[A-Z]\d$/ : b.country === 'US' ? /^\d{5}(-\d{4})?$/ : null;
+        if (postal && !postal.test(b.postal ?? '')) ctx.addIssue({ code: 'custom', path: ['postal'], message: b.country === 'CA' ? 'Postal code: 3 letters and 3 numbers, like N1R 1A1.' : 'ZIP code: 5 numbers, like 14201.' });
       }),
     hours: z.array(z.object({ day: z.enum(DAYS), open: z.string().regex(TIME_RE), close: z.string().regex(TIME_RE) }).strict()).min(1, 'Add at least one open day.'),
     hoursNote: opt(200),

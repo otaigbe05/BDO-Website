@@ -9,11 +9,10 @@ import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputCla
 import DesignGuide from './DesignGuide';
 import { designProblems, TEAM_NEEDS } from '../../../api/_lib/design-rules.js';
 import DesignExtras from './DesignExtras';
+import { REGIONS, REGION_LABEL, POSTAL_LABEL, DEFAULT_REGION, PHONE_HINT, tidyPostal, countryList, timeZoneList, browserTimeZone, browserCountry } from '@/lib/countries';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DAY_NAMES = { Mon: 'Monday', Tue: 'Tuesday', Wed: 'Wednesday', Thu: 'Thursday', Fri: 'Friday', Sat: 'Saturday', Sun: 'Sunday' };
-const PROVINCES = ['ON', 'QC', 'BC', 'AB', 'MB', 'SK', 'NS', 'NB', 'NL', 'PE', 'YT', 'NT', 'NU'];
-const STATES = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'DC', 'FL', 'GA', 'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD', 'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ', 'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY'];
 const MAX_WORK = 40;
 // Designs built around the work need a minimum number of work photos (keep in step with
 // api/_lib/schemas.js PHOTO_NEEDS). priced: each needs a price (T01's flash wall).
@@ -60,12 +59,18 @@ const blankExtras = () => ({
   colours: [],
 });
 
+// Country names and time zones come from the browser (src/lib/countries.js).
+const COUNTRIES = countryList();
+const ZONES = timeZoneList();
+
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
 const blankMember = () => ({ name: '', role: '', specialty: '', instagram: '', bookingUrl: '', photo: null });
 
 function initial(lead) {
+  // The country picked on the first form (or a guess from the browser), and the browser's time zone.
+  const country = lead.country ?? browserCountry();
   return {
-    business: { name: lead.business, tagline: '', phone: lead.phone ?? '', email: lead.email ?? '', street: '', city: lead.city ?? '', country: 'CA', province: 'ON', postal: '', instagram: '', googleBusinessUrl: '' },
+    business: { name: lead.business, tagline: '', phone: lead.phone ?? '', email: lead.email ?? '', street: '', city: lead.city ?? '', country, province: DEFAULT_REGION[country] ?? '', postal: '', timeZone: browserTimeZone() ?? '', instagram: '', googleBusinessUrl: '' },
     hours: Object.fromEntries(DAYS.map((d, i) => [d, { open: i < 5, from: '09:00', to: '17:00' }])),
     hoursNote: '',
     services: [blankService(), blankService(), blankService()],
@@ -92,7 +97,7 @@ function fromIntake(p, urls) {
   const open = new Map(p.hours.map((h) => [h.day, h]));
   const b = p.business;
   return {
-    business: { name: b.name, tagline: b.tagline ?? '', phone: b.phone, email: b.email ?? '', street: b.street, city: b.city, country: b.country ?? 'CA', province: b.province, postal: b.postal, instagram: b.instagram ?? '', googleBusinessUrl: b.googleBusinessUrl ?? '' },
+    business: { name: b.name, tagline: b.tagline ?? '', phone: b.phone, email: b.email ?? '', street: b.street, city: b.city, country: b.country ?? 'CA', province: b.province ?? '', postal: b.postal ?? '', timeZone: b.timeZone ?? browserTimeZone() ?? '', instagram: b.instagram ?? '', googleBusinessUrl: b.googleBusinessUrl ?? '' },
     hours: Object.fromEntries(DAYS.map((d) => [d, open.has(d) ? { open: true, from: open.get(d).open, to: open.get(d).close } : { open: false, from: '09:00', to: '17:00' }])),
     hoursNote: p.hoursNote ?? '',
     services: p.services.map((s) => ({ name: s.name, price: s.price, duration: s.duration ?? '', description: s.description ?? '' })),
@@ -128,15 +133,6 @@ function fromExtras(x) {
   return e;
 }
 
-/** "n1r1a1", "N1R-1A1" -> "N1R 1A1"; "14201 1234" -> "14201-1234" (anything else as typed). */
-function tidyPostal(country, v) {
-  if (country === 'US') {
-    const d = v.replace(/\D/g, '');
-    return d.length === 9 ? `${d.slice(0, 5)}-${d.slice(5)}` : d.length === 5 ? d : v;
-  }
-  const c = v.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  return /^[A-Z]\d[A-Z]\d[A-Z]\d$/.test(c) ? `${c.slice(0, 3)} ${c.slice(3)}` : v;
-}
 
 // The content release. Bump CONSENT_VERSION in api/_lib/schemas.js when this wording changes.
 const CONSENT_POINTS = [
@@ -262,7 +258,12 @@ export default function SiteIntake() {
   const b = f.business;
   const trade = TRADE[lead.template[0]] ?? TRADE.B;
   const need = DESIGN_EXTRAS[lead.template] ?? {};
-  const us = b.country === 'US';
+  const regions = REGIONS[b.country];
+  const countries = COUNTRIES;
+  const zones = b.timeZone && !ZONES.includes(b.timeZone) ? [b.timeZone, ...ZONES] : ZONES;
+  const postalLabel = POSTAL_LABEL[b.country] ?? 'Postal code';
+  // Canada and the US check the postal code; elsewhere it is optional.
+  const postalNeeded = b.country === 'CA' || b.country === 'US';
 
   async function upload(file, kind) {
     setUploading((n) => n + 1);
@@ -457,7 +458,7 @@ export default function SiteIntake() {
             <Field label="Business name" htmlFor="b-name" required>
               <Text id="b-name" value={b.name} onChange={(v) => set('business.name', v)} required />
             </Field>
-            <Field label="Phone customers call" htmlFor="b-phone" required>
+            <Field label="Phone customers call" htmlFor="b-phone" required hint={postalNeeded ? undefined : PHONE_HINT}>
               <Text id="b-phone" type="tel" value={b.phone} onChange={(v) => set('business.phone', v)} required />
             </Field>
             <Field label="Street address" htmlFor="b-street" required>
@@ -471,21 +472,36 @@ export default function SiteIntake() {
                 id="b-country"
                 className={inputClass}
                 value={b.country ?? 'CA'}
-                onChange={(e) => setF((s) => ({ ...s, business: { ...s.business, country: e.target.value, province: e.target.value === 'US' ? 'NY' : 'ON', postal: '' } }))}
+                onChange={(e) => setF((s) => ({ ...s, business: { ...s.business, country: e.target.value, province: DEFAULT_REGION[e.target.value] ?? '', postal: '' } }))}
               >
-                <option value="CA">Canada</option>
-                <option value="US">United States</option>
-              </select>
-            </Field>
-            <Field label={us ? 'State' : 'Province'} htmlFor="b-prov" required>
-              <select id="b-prov" className={inputClass} value={b.province} onChange={(e) => set('business.province', e.target.value)}>
-                {(us ? STATES : PROVINCES).map((p) => (
-                  <option key={p}>{p}</option>
+                {countries.map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
                 ))}
               </select>
             </Field>
-            <Field label={us ? 'ZIP code' : 'Postal code'} htmlFor="b-postal" required>
-              <Text id="b-postal" value={b.postal} onChange={(v) => set('business.postal', v.toUpperCase())} onBlur={(e) => set('business.postal', tidyPostal(b.country, e.target.value))} required placeholder={us ? '14201' : 'N1R 1A1'} autoComplete="postal-code" />
+            {regions ? (
+              <Field label={REGION_LABEL[b.country]} htmlFor="b-prov" required>
+                <select id="b-prov" className={inputClass} value={b.province} onChange={(e) => set('business.province', e.target.value)}>
+                  {regions.map((p) => (
+                    <option key={p}>{p}</option>
+                  ))}
+                </select>
+              </Field>
+            ) : (
+              <Field label="State or region" htmlFor="b-prov" hint="Optional, for example Lagos State.">
+                <Text id="b-prov" value={b.province} onChange={(v) => set('business.province', v)} maxLength={60} autoComplete="address-level1" />
+              </Field>
+            )}
+            <Field label={postalLabel} htmlFor="b-postal" required={postalNeeded} hint={postalNeeded ? undefined : 'Optional.'}>
+              <Text id="b-postal" value={b.postal} onChange={(v) => set('business.postal', v.toUpperCase())} onBlur={(e) => set('business.postal', tidyPostal(b.country, e.target.value))} required={postalNeeded} maxLength={12} placeholder={b.country === 'US' ? '14201' : b.country === 'CA' ? 'N1R 1A1' : ''} autoComplete="postal-code" />
+            </Field>
+            <Field label="Time zone" htmlFor="b-tz" hint="For your opening hours and the 'open now' sign. We filled in the one your device uses.">
+              <select id="b-tz" className={inputClass} value={b.timeZone} onChange={(e) => set('business.timeZone', e.target.value)}>
+                {!b.timeZone && <option value="">Choose your time zone</option>}
+                {zones.map((z) => (
+                  <option key={z}>{z}</option>
+                ))}
+              </select>
             </Field>
             <Field label="Email shown on the site" htmlFor="b-email">
               <Text id="b-email" type="email" value={b.email} onChange={(v) => set('business.email', v)} />

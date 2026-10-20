@@ -4,6 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Shell, Card, Field, Text, Submit, Problems, Notice, api, loadCatalog } from './ui';
 import { WEBSITE, money } from '@/data/pricing';
+import { browserCountry, countryList, PHONE_HINT } from '@/lib/countries';
 
 // Prices come from src/data/pricing.js (null = hidden).
 export const PACKAGES = [
@@ -23,7 +24,8 @@ export default function SiteStart() {
   const opened = useRef(Date.now());
   const [catalog, setCatalog] = useState([]);
   const [f, setF] = useState({ template: params.get('template') ?? '', palette: 1, package: 'site-omis', name: '', email: '', phone: '', business: '', city: '', hasDomain: false, domain: '', buyDomain: false, wantDomain: '', website: '' });
-  const [country, setCountry] = useState('CA');
+  const [country, setCountry] = useState(browserCountry);
+  const countries = useMemo(() => countryList(), []);
   const [busy, setBusy] = useState(false);
   const [problems, setProblems] = useState([]);
   const [done, setDone] = useState(null);
@@ -53,7 +55,7 @@ export default function SiteStart() {
     e.preventDefault();
     setBusy(true);
     setProblems([]);
-    const body = { ...f, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, buyDomain: undefined, wantDomain: !f.hasDomain && f.buyDomain && f.wantDomain ? f.wantDomain : undefined, designs: others.length ? [f.template, ...others] : undefined, openedMs: Date.now() - opened.current };
+    const body = { ...f, country, phone: f.phone || undefined, city: f.city || undefined, domain: f.hasDomain ? f.domain : undefined, buyDomain: undefined, wantDomain: !f.hasDomain && f.buyDomain && f.wantDomain ? f.wantDomain : undefined, designs: others.length ? [f.template, ...others] : undefined, openedMs: Date.now() - opened.current };
     const r = await api('/api/site-lead', { method: 'POST', body: JSON.stringify(body) });
     setBusy(false);
     if (r.ok) setDone(r.store ? 'store' : 'site');
@@ -197,7 +199,7 @@ export default function SiteStart() {
             <Field label="Email" htmlFor="email" required>
               <Text id="email" type="email" value={f.email} onChange={set('email')} required autoComplete="email" />
             </Field>
-            <Field label="Phone" htmlFor="phone">
+            <Field label="Phone" htmlFor="phone" hint={country === 'CA' || country === 'US' ? undefined : PHONE_HINT}>
               <Text id="phone" type="tel" value={f.phone} onChange={set('phone')} autoComplete="tel" />
             </Field>
             <Field label="City" htmlFor="city">
@@ -205,17 +207,12 @@ export default function SiteStart() {
             </Field>
             <Field label="Country" htmlFor="country">
               <select id="country" className="w-full px-4 py-3 rounded-xl border border-slate-300 bg-white" value={country} onChange={(e) => setCountry(e.target.value)}>
-                <option value="CA">Canada</option>
-                <option value="US">United States</option>
-                <option value="other">Somewhere else</option>
+                {countries.map(([code, name]) => (
+                  <option key={code} value={code}>{name}</option>
+                ))}
               </select>
             </Field>
           </div>
-          {country === 'other' && (
-            <p className="rounded-xl bg-blue-50 border border-blue-200 p-3 text-slate-800">
-              We build sites for businesses in Canada and the United States right now. Email us at info@bdoanalyticssolutions.com and we will see what we can do.
-            </p>
-          )}
           <label className="flex items-center gap-3 text-slate-900">
             <input type="checkbox" checked={f.hasDomain} onChange={(e) => set('hasDomain')(e.target.checked)} />I already own a web address (domain)
           </label>
@@ -243,7 +240,7 @@ export default function SiteStart() {
         </Card>
 
         <Problems list={problems} />
-        <Submit busy={busy} disabled={busy || country === 'other'}>Send</Submit>
+        <Submit busy={busy} disabled={busy}>Send</Submit>
         <p className="text-sm text-slate-500">We use your details only to build your site and to contact you about it.</p>
       </form>
     </Shell>

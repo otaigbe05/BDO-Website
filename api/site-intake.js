@@ -38,7 +38,7 @@ export default async function handler(req, res) {
         previewUrl: lead.preview_url,
         have: summarize(lead.client),
         ...(lead.status === 'live' ? { updatesLeft: await updatesLeft(lead), updatesPerMonth: UPDATES_PER_MONTH } : {}),
-        lead: { name: lead.name, email: lead.email, phone: lead.phone, business: lead.business, city: lead.city, template: lead.template, palette: lead.palette, package: lead.package, domain: lead.domain },
+        lead: { name: lead.name, email: lead.email, phone: lead.phone, business: lead.business, city: lead.city, country: (await db.events(lead.id, 'country'))[0]?.detail?.country ?? null, template: lead.template, palette: lead.palette, package: lead.package, domain: lead.domain },
         previous,
         photoUrls,
       });
