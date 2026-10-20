@@ -8,7 +8,10 @@ import { TRADES, savedTrade, saveTrade } from '@/data/trades';
 // Home page hero. The visitor says what they run, and the whole hero turns to face them:
 // headline, the website design shown, the OMIS day beside it, and where the buttons go.
 // The choice is remembered on this device so the rest of the site can use it.
-const HomeHero = () => {
+// embedded: shown under the home page's three doors as the live "website + OMIS together" demo,
+// so it uses a second-level heading and leaves out the data and analytics mentions.
+const HomeHero = ({ embedded = false }) => {
+  const Heading = embedded ? 'h2' : 'h1';
   const reduce = useReducedMotion();
   const [trade, setTrade] = useState(null);
   useEffect(() => { setTrade(savedTrade()); }, []);
@@ -28,10 +31,10 @@ const HomeHero = () => {
       <div className="container relative mx-auto grid items-center gap-14 px-4 pb-24 pt-16 sm:px-6 lg:grid-cols-[1.05fr_1fr] lg:gap-10 lg:px-8 lg:pb-28 lg:pt-20">
         <div className="min-w-0">
           <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-teal-200">
-            Websites &middot; Booking software &middot; Data &amp; analytics
+            {embedded ? <>Website &middot; OMIS booking &middot; see them together</> : <>Websites &middot; Booking software &middot; Data &amp; analytics</>}
           </p>
 
-          <h1 className="min-h-[2.3em] text-white text-4xl font-black leading-[1.08] tracking-tight text-balance sm:text-5xl xl:text-6xl">
+          <Heading className="min-h-[2.3em] text-white text-4xl font-black leading-[1.08] tracking-tight text-balance sm:text-5xl xl:text-6xl">
             <AnimatePresence mode="wait" initial={false}>
               <motion.span
                 key={trade?.slug ?? 'any'}
@@ -44,10 +47,10 @@ const HomeHero = () => {
                 {trade ? trade.hero : <>A website that books.<br className="hidden sm:block" /> <span className="bg-gradient-to-r from-sky-300 to-emerald-300 bg-clip-text text-transparent">A system that runs the shop.</span></>}
               </motion.span>
             </AnimatePresence>
-          </h1>
+          </Heading>
 
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-slate-200">
-            {trade ? trade.pitch : 'We design websites for businesses that run on appointments, and build OMIS, the booking software behind them. When you want your numbers to make sense too, we do data and analytics.'}
+            {trade ? trade.pitch : embedded ? 'Pick your trade: see a real design from our gallery, with the OMIS day running beside it.' : 'We design websites for businesses that run on appointments, and build OMIS, the booking software behind them. When you want your numbers to make sense too, we do data and analytics.'}
           </p>
 
           <fieldset className="mt-8">
@@ -98,8 +101,8 @@ const HomeHero = () => {
             )}
           </div>
           <p className="mt-4 text-sm text-slate-300">
-            See your own site before you pay. OMIS is 14 days free, no credit card. Need dashboards or reporting?{' '}
-            <Link to="/services" className="font-bold text-teal-200 underline underline-offset-4 hover:text-white">See our data consulting</Link>.
+            See your own site before you pay. OMIS is 14 days free, no credit card.{!embedded && <>{' '}Need dashboards or reporting?{' '}
+            <Link to="/services" className="font-bold text-teal-200 underline underline-offset-4 hover:text-white">See our data consulting</Link>.</>}
           </p>
         </div>
 

@@ -13,10 +13,11 @@ export const PRODUCTS = {
   analytics: { label: 'Data & analytics', who: 'For any business', dot: 'bg-violet-600', text: 'text-violet-700', band: 'bg-violet-50 border-violet-200', button: 'bg-violet-700 hover:bg-violet-800', card: 'bg-violet-50 ring-violet-200', icon: BarChart3 },
 };
 
-// Two headlines while the owner decides (preview: add ?headline=shops to the address).
+// Headlines while the owner decides (preview: ?headline=shops or ?headline=all).
 const HEADLINES = {
   three: { h1: 'Three ways we help your business grow.', sub: 'Pick what you need. Each one stands on its own, and they work even better together.' },
   shops: { h1: 'Websites and booking for businesses that run on appointments.', sub: 'Plus data and analytics help for any business. Pick what you need: each one stands on its own, and they work even better together.' },
+  all: { h1: 'Websites, booking and data help for growing businesses.', sub: 'Pick what you need. Each one stands on its own, and they work even better together.' },
 };
 
 const DOORS = [
@@ -36,7 +37,7 @@ const DoorButton = ({ door, className }) => {
 const ThreeDoors = () => {
   const reduce = useReducedMotion();
   const [params] = useSearchParams();
-  const head = HEADLINES[params.get('headline') === 'shops' ? 'shops' : 'three'];
+  const head = HEADLINES[params.get('headline')] ?? HEADLINES.three;
   return (
     <>
       <section className="hero-night relative overflow-hidden text-white">

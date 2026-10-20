@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, ExternalLink, CalendarCheck, Wallet, FileSignature, BellRing, Users2, LayoutDashboard, BarChart2, FileSpreadsheet, RefreshCw } from 'lucide-react';
 import ThreeDoors, { ProductBand } from '@/components/ThreeDoors';
+import HomeHero from '@/components/HomeHero';
 import TemplateShowcase from '@/components/TemplateShowcase';
 
 const Home = () => {
@@ -52,6 +53,9 @@ const Home = () => {
             <div className="bg-white overflow-hidden font-sans">
                 {/* One company, three doors (components/ThreeDoors.jsx). */}
                 <ThreeDoors />
+
+                {/* Websites + OMIS together, live: pick a trade and the design and OMIS day follow. */}
+                <HomeHero embedded />
 
                 {/* 1. Websites (blue) */}
                 <ProductBand product="websites" />
