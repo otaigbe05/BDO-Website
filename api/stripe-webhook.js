@@ -17,6 +17,7 @@
 import { db, reply, sendEmail, siteUrl } from './_lib/services.js';
 import { stripe, verifyWebhook, paidEvent, isOmisSubscription, isCareSubscription, prices, KEYS } from './_lib/stripe.js';
 import { recordSetupPaid, careActive, money } from './_lib/payments.js';
+import { termsEnd, OMIS_TERMS_MONTHS } from './_lib/omis-terms.js';
 
 async function rawBody(req) {
   const chunks = [];
@@ -41,6 +42,12 @@ async function checkoutDone(session) {
 
   if (purpose === 'setup') {
     await recordSetupPaid(lead, session);
+    return;
+  }
+  if (purpose === 'handover') {
+    if (await paidEvent(lead.id, 'handover')) return;
+    await db.insert('events', { lead_id: lead.id, kind: 'handover', detail: { session: session.id, amount: session.amount_total } });
+    await tellOwner(`Hand over: ${lead.business}`, `${lead.business} paid the difference (${money(session.amount_total, session.currency)}) to take their website with them. Send them the site files, then take ${lead.live_url ?? 'the site'} offline.`);
     return;
   }
   if (purpose === 'care') {
@@ -113,7 +120,7 @@ async function subscriptionEnded(sub) {
       subject: `Your ${lead.business} website`,
       paragraphs: [
         `Hi ${lead.name}, your OMIS plan has ended. Your website is still yours, and it is still online.`,
-        `You can keep it online with us for ${await carePrice()} (hosting and up to 3 updates a month, cancel any time), or take it with you: we send you the site files and you host it wherever you like.`,
+        `You can keep it online with us for ${await carePrice()} (hosting and up to 3 updates a month, cancel any time), or take it with you: we send you the site files and you host it wherever you like${termsEnd(paid.at) > new Date() ? ` (as agreed when you paid, because OMIS ended within ${OMIS_TERMS_MONTHS} months, taking the files first needs the difference between the two setup prices; the link shows the amount)` : ''}.`,
         'Pick one with the link below. If we do not hear from you in 30 days, we will send you the files and take the site offline.',
       ],
       links: [{ label: 'Choose what happens to my website', url: `${siteUrl()}/site/care/${lead.intake_token}` }],

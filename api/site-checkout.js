@@ -1,9 +1,14 @@
 // /api/site-checkout : website payments (Stripe Checkout). The customer's intake token is the key.
-//   GET  ?t=<token>[&omisEmail=]   -> what they will pay: $199 if that email has an OMIS plan that
-//                                    is active or in its free trial, otherwise $449 + care
-//   POST { t, purpose: "setup", omisEmail?, interval? }   -> Checkout link for Publish
+//   GET  ?t=<token>[&omisEmail=]   -> what they will pay: $199 if that email has a PAID OMIS plan
+//                                    (a free trial does not count), otherwise $449 + care. The
+//                                    OMIS price comes with terms (api/_lib/omis-terms.js).
+//   GET  ?t=<token>&care=1         -> the care page's choices (and whether hand-over costs the
+//                                    difference: OMIS ended within 6 months of setup)
+//   POST { t, purpose: "setup", omisEmail?, interval?, agree? }   -> Checkout link for Publish;
+//                                    the OMIS price needs agree: true (the terms box), saved first
 //   POST { t, purpose: "care", interval }                 -> Checkout link to keep the site online
 //   POST { t, purpose: "handover" }                       -> customer takes their site instead
+//                                    (free, or a Checkout for the difference within 6 months)
 //   GET  ?check=1                  -> setup check for the owner (prices found, webhook secret set)
 //   POST { t, purpose: "omis-code", omisEmail }          -> email a 6-digit code to that OMIS email
 //   POST { t, purpose: "omis-verify", omisEmail, code }  -> confirm it; that email then counts
@@ -14,13 +19,24 @@
 // ones), so a missed webhook neither strands them nor asks them to pay twice.
 import { createHash, randomInt, timingSafeEqual } from 'node:crypto';
 import { db, reply, handle, sendEmail, siteUrl } from './_lib/services.js';
-import { paymentsOn, prices, omisPlan, stripe, keyMode, KEYS } from './_lib/stripe.js';
+import { paymentsOn, prices, omisPlan, omisPaid, paidEvent, stripe, keyMode, KEYS } from './_lib/stripe.js';
 import { setupPaid, careActive, tellOwnerOnce } from './_lib/payments.js';
+import { OMIS_TERMS_VERSION, omisTermsText, termsEnd } from './_lib/omis-terms.js';
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const money = (cents) => `$${(cents / 100).toLocaleString('en-CA', { minimumFractionDigits: 0 })}`;
 
 const taxOn = () => process.env.SITES_STRIPE_TAX !== '0';
+const difference = (p) => p[KEYS.alone].unit_amount - p[KEYS.withOmis].unit_amount;
+const termsFor = (p) => omisTermsText({ care: `${money(p[KEYS.careMonthly].unit_amount)}/month`, difference: money(difference(p)) });
+
+/** OMIS ended within the terms: taking the site files costs the difference until this date. */
+async function handoverDue(lead) {
+  const paid = await paidEvent(lead.id, 'paid');
+  if (paid?.detail?.plan !== 'with-omis') return null;
+  const until = termsEnd(paid.at);
+  return until > new Date() ? until : null;
+}
 // Business customers can add their own GST/HST (or VAT) number on Stripe's page, for their records.
 const BUSINESS_TAX_ID = { tax_id_collection: { enabled: true } };
 const UNAVAILABLE = { ok: false, payments: true, unavailable: true, error: 'Payment is not available right now. Please try again in a little while; we have been told.' };
@@ -45,15 +61,19 @@ async function omisEmailFor(lead, omisEmail) {
 
 async function quote(lead, omisEmail) {
   const { email, unconfirmed } = await omisEmailFor(lead, omisEmail);
-  const [p, omis] = await Promise.all([prices(), omisPlan(email)]);
+  const [p, plan] = await Promise.all([prices(), omisPlan(email)]);
+  const omis = omisPaid(plan) ? plan : null;
   const yearly = p[KEYS.careYearly];
   return {
     email,
     unconfirmed,
     omis: omis ? omis.status : null,
+    // A free trial is found but does not count yet: the page says so.
+    omisTrial: Boolean(plan?.trial),
     customer: omis?.customer ?? null,
     setup: money((omis ? p[KEYS.withOmis] : p[KEYS.alone]).unit_amount),
     care: omis ? null : { monthly: money(p[KEYS.careMonthly].unit_amount), yearly: yearly ? money(yearly.unit_amount) : null },
+    terms: omis ? { version: OMIS_TERMS_VERSION, text: termsFor(p) } : null,
     p,
   };
 }
@@ -100,6 +120,16 @@ export default async function handler(req, res) {
     if (!paymentsOn()) return reply(res, 200, { ok: true, payments: false });
     const back = `${siteUrl()}/site`;
 
+    if (req.method === 'GET' && req.query.care === '1') {
+      const p = await prices();
+      const until = await handoverDue(lead);
+      return reply(res, 200, {
+        ok: true,
+        care: { monthly: money(p[KEYS.careMonthly].unit_amount), yearly: p[KEYS.careYearly] ? money(p[KEYS.careYearly].unit_amount) : null },
+        handover: until ? { price: money(difference(p)), until: until.toISOString().slice(0, 10) } : { price: null },
+      });
+    }
+
     if (req.method === 'GET') {
       if (await setupPaid(lead, req.query.session).catch(() => null)) return reply(res, 200, { ok: true, payments: true, paid: true });
       let q;
@@ -110,11 +140,11 @@ export default async function handler(req, res) {
         await paymentProblem(lead, err);
         return reply(res, 503, UNAVAILABLE);
       }
-      return reply(res, 200, { ok: true, payments: true, paid: false, email: q.email, needsCode: q.unconfirmed, omis: q.omis, setup: q.setup, care: q.care, package: lead.package });
+      return reply(res, 200, { ok: true, payments: true, paid: false, email: q.email, needsCode: q.unconfirmed, omis: q.omis, omisTrial: q.omisTrial, setup: q.setup, care: q.care, terms: q.terms, package: lead.package });
     }
     if (req.method !== 'POST') return reply(res, 405, { ok: false, error: 'GET or POST only' });
 
-    const { purpose, omisEmail, interval, code } = req.body ?? {};
+    const { purpose, omisEmail, interval, code, agree } = req.body ?? {};
 
     if (purpose === 'omis-code') {
       const e = norm(omisEmail);
@@ -163,7 +193,10 @@ export default async function handler(req, res) {
       let session;
       try {
         const q = await quote(lead, omisEmail);
-        const meta = { lead_id: lead.id, purpose: 'setup', plan: q.omis ? 'with-omis' : 'alone' };
+        // The OMIS price only with the terms ticked; the exact text they agreed to is saved first.
+        if (q.omis && agree !== true) return reply(res, 400, { ok: false, needsAgree: true, error: 'Please tick the box to agree to the OMIS price terms.' });
+        if (q.omis) await db.insert('events', { lead_id: lead.id, kind: 'omis_terms', detail: { version: q.terms.version, text: q.terms.text, email: q.email } });
+        const meta = { lead_id: lead.id, purpose: 'setup', plan: q.omis ? 'with-omis' : 'alone', ...(q.omis ? { omis_terms: q.terms.version } : {}) };
         const care = interval === 'year' && q.p[KEYS.careYearly] ? q.p[KEYS.careYearly] : q.p[KEYS.careMonthly];
         session = await stripe('checkout/sessions', {
           // OMIS customers pay on their OMIS Stripe customer. Stripe Tax needs their address, so it
@@ -174,6 +207,8 @@ export default async function handler(req, res) {
           metadata: meta,
           client_reference_id: lead.id,
           allow_promotion_codes: true,
+          // The terms again, under Stripe's pay button.
+          ...(q.omis ? { custom_text: { submit: { message: q.terms.text } } } : {}),
           success_url: `${back}/publish/${lead.intake_token}?paid=1&session={CHECKOUT_SESSION_ID}`,
           cancel_url: `${back}/publish/${lead.intake_token}`,
           ...tax,
@@ -191,6 +226,31 @@ export default async function handler(req, res) {
       if (!lead.live_url) return reply(res, 409, { ok: false, error: 'This site is not live.' });
       if (await careActive(lead.id)) return reply(res, 200, { ok: true, state: 'care' });
       if (purpose === 'handover') {
+        // Within the terms (OMIS ended early): the files cost the difference, paid on Stripe.
+        const until = await handoverDue(lead);
+        if (until) {
+          let session;
+          try {
+            const p = await prices();
+            const meta = { lead_id: lead.id, purpose: 'handover' };
+            session = await stripe('checkout/sessions', {
+              mode: 'payment',
+              line_items: [{ quantity: 1, price_data: { currency: p[KEYS.alone].currency, unit_amount: difference(p), product_data: { name: `Website files: ${lead.business}`, description: 'The difference between the two setup prices (OMIS ended within 6 months).' } } }],
+              customer_email: lead.email,
+              payment_intent_data: { metadata: meta },
+              metadata: meta,
+              client_reference_id: lead.id,
+              success_url: `${back}/care/${lead.intake_token}?handover=1`,
+              cancel_url: `${back}/care/${lead.intake_token}`,
+              ...tax,
+            });
+          } catch (err) {
+            console.error(err);
+            await paymentProblem(lead, err);
+            return reply(res, 503, UNAVAILABLE);
+          }
+          return reply(res, 200, { ok: true, url: session.url });
+        }
         await db.insert('events', { lead_id: lead.id, kind: 'handover' });
         if (process.env.SITES_OWNER_EMAIL) {
           await sendEmail({

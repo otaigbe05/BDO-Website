@@ -5,6 +5,7 @@
 // call on the first try is retried instead of forgotten.
 import { db, sendEmail, siteUrl } from './services.js';
 import { paidEvent, paidSession } from './stripe.js';
+import { termsEnd } from './omis-terms.js';
 import { customerPublished } from './publish.js';
 
 export const money = (cents, currency = 'cad') => (cents == null ? '' : `$${(cents / 100).toFixed(2)} ${currency.toUpperCase()}`);
@@ -38,6 +39,21 @@ export async function recordSetupPaid(lead, session) {
         ],
       });
     }
+  }
+  // OMIS price: the customer gets the terms they ticked, in writing, with the date they end.
+  const terms = session.metadata.plan === 'with-omis' ? (await db.events(lead.id, 'omis_terms'))[0] : null;
+  if (terms && !(await paidEvent(lead.id, 'terms_sent'))) {
+    await db.insert('events', { lead_id: lead.id, kind: 'terms_sent', detail: { version: terms.detail?.version } });
+    await sendEmail({
+      to: lead.email,
+      subject: `Your ${lead.business} website: payment received`,
+      paragraphs: [
+        `Hi ${lead.name}, thank you: we received ${money(session.amount_total, session.currency)} for your website setup. Stripe also emails you a receipt.`,
+        `You agreed to these terms for the OMIS price, which apply until ${termsEnd(new Date()).toISOString().slice(0, 10)}:`,
+        terms.detail?.text ?? '',
+        'Keep this email for your records. Reply to it any time with questions.',
+      ],
+    });
   }
   // Publish once (customer_ok); the owner already had the "Paid" email, so no second one.
   if (!lead.customer_ok) return customerPublished(lead, { quiet: true });

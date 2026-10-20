@@ -8,6 +8,8 @@ import { Shell, Notice, Submit, Problems, Field, Text, api } from './ui';
 import { WEBSITE, money } from '@/data/pricing';
 import DesignGuide from './DesignGuide';
 
+const TRIAL_NOTE = 'You are on a free OMIS trial. The lower OMIS website price unlocks after your first OMIS payment: come back to this page then, or publish now at the regular price.';
+
 const MESSAGES = {
   publishing: 'Your site is being published. You will get an email with the link in a few minutes.',
   'waiting-owner': 'Thanks. We do a quick final check before your site goes live. You will get an email with the link, usually the same business day. (Not in your inbox? Check Promotions or Spam.)',
@@ -22,6 +24,7 @@ export default function SitePublish() {
   const [pay, setPay] = useState(null);
   const [omisEmail, setOmisEmail] = useState('');
   const [interval, setCycle] = useState('month');
+  const [agree, setAgree] = useState(false);
   const [busy, setBusy] = useState(false);
   const [checking, setChecking] = useState(false);
   const [code, setCode] = useState('');
@@ -47,7 +50,7 @@ export default function SitePublish() {
     if (q.ok && !q.needsCode) {
       setChecking(false);
       setPay(q);
-      if (!q.omis) setCodeNote('We could not find an OMIS plan for that email.');
+      if (!q.omis) setCodeNote(q.omisTrial ? TRIAL_NOTE : 'We could not find a paid OMIS plan for that email.');
       return;
     }
     const r = await api('/api/site-checkout', { method: 'POST', body: JSON.stringify({ t: token, purpose: 'omis-code', omisEmail }) });
@@ -68,7 +71,7 @@ export default function SitePublish() {
     const q = await quoteFor(omisEmail);
     setChecking(false);
     if (q.ok) setPay(q);
-    setCodeNote(q.omis ? '' : 'Confirmed, but that OMIS plan is not active.');
+    setCodeNote(q.omis ? '' : q.omisTrial ? TRIAL_NOTE : 'Confirmed, but that email has no paid OMIS plan.');
   }
 
   async function publish(e) {
@@ -77,7 +80,7 @@ export default function SitePublish() {
     setProblems([]);
     const needsPay = pay?.payments && !pay.paid && pay.package !== 'store';
     const r = needsPay
-      ? await api('/api/site-checkout', { method: 'POST', body: JSON.stringify({ t: token, purpose: 'setup', omisEmail: pay.email, interval }) })
+      ? await api('/api/site-checkout', { method: 'POST', body: JSON.stringify({ t: token, purpose: 'setup', omisEmail: pay.email, interval, agree: pay.omis ? agree : undefined }) })
       : await api('/api/site-golive', { method: 'POST', body: JSON.stringify({ who: 'customer', t: token }) });
     if (r.url) return window.location.assign(r.url);
     setBusy(false);
@@ -119,11 +122,21 @@ export default function SitePublish() {
           <section className="rounded-2xl border border-slate-300 bg-white p-5 space-y-4" aria-live="polite">
             {pay.omis ? (
               <>
-                <p className="font-bold text-slate-900">We found your OMIS plan ({pay.omis === 'trialing' ? 'free trial' : 'active'}) for {pay.email}.</p>
+                <p className="font-bold text-slate-900">We found your OMIS plan for {pay.email}.</p>
                 <p className="text-slate-700">Website setup: <span className="font-bold">{pay.setup}</span>, paid once. Hosting and care are included while you have OMIS.</p>
+                {pay.terms && (
+                  <label className="flex items-start gap-3 rounded-xl bg-slate-50 p-4 text-slate-800">
+                    <input type="checkbox" className="mt-1" checked={agree} onChange={(e) => setAgree(e.target.checked)} required />
+                    <span>
+                      <span className="font-bold">I agree to the OMIS price terms: </span>
+                      {pay.terms.text}
+                    </span>
+                  </label>
+                )}
               </>
             ) : (
               <>
+                {pay.omisTrial && <p className="rounded-xl bg-amber-50 p-3 text-slate-800">{TRIAL_NOTE}</p>}
                 <p className="text-slate-700">Website setup: <span className="font-bold">{pay.setup}</span>, paid once, plus website care (hosting, security certificate and up to 3 updates a month):</p>
                 <div className="flex flex-wrap gap-3">
                   <label className={`flex items-center gap-2 rounded-xl border px-4 py-3 cursor-pointer ${interval === 'month' ? 'border-blue-700 ring-2 ring-blue-700' : 'border-slate-300'}`}>
@@ -140,7 +153,7 @@ export default function SitePublish() {
                 <p className="text-sm text-slate-600">No contract: stop care any time and take your site with you.</p>
                 <div className="rounded-xl bg-slate-50 p-4 space-y-3">
                   <p className="text-sm text-slate-700">
-                    With an OMIS plan, setup is {money(WEBSITE.setupWithOmis)} and hosting is included.{' '}
+                    With a paid OMIS plan, setup is {money(WEBSITE.setupWithOmis)} and hosting is included.{' '}
                     <a className="text-blue-700 underline" href="https://www.omis-crm.com/" target="_blank" rel="noreferrer">Start a free OMIS trial</a>, then come back to this page.
                     Already have OMIS under a different email? Check it here:
                   </p>
@@ -170,7 +183,7 @@ export default function SitePublish() {
                 </div>
               </>
             )}
-            <p className="text-sm text-slate-600">Prices in Canadian dollars. For businesses in Canada, HST/GST is added, worked out from your address on the payment page. You pay on Stripe&rsquo;s secure page, where a business can also add its own tax number.</p>
+            <p className="text-sm text-slate-600">Prices in Canadian dollars. HST/GST is added for businesses in Canada.</p>
           </section>
         )}
 
@@ -178,7 +191,7 @@ export default function SitePublish() {
 
         <Problems list={problems} />
         <div className="text-center">
-          <Submit busy={busy} disabled={busy || pay.unavailable}>{charge ? 'Pay and publish my site' : 'Yes, publish my site'}</Submit>
+          <Submit busy={busy} disabled={busy || pay.unavailable || (charge && pay.omis && pay.terms && !agree)}>{charge ? 'Pay and publish my site' : 'Yes, publish my site'}</Submit>
         </div>
       </form>
     </Shell>

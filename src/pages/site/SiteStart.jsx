@@ -14,10 +14,70 @@ export const PACKAGES = [
 ];
 
 /** "Joe's Barber Shop" -> "joesbarbershop.ca" (a starting idea the customer can change). */
-const suggestDomain = (name) => {
-  const base = String(name ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]/g, '').slice(0, 40);
-  return base ? `${base}.ca` : '';
-};
+const squash = (v) => String(v ?? '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]/g, '').slice(0, 40);
+
+/** Name ideas from the business name and city: .ca and .com in Canada, .com and .net elsewhere
+ *  (country endings often need a local presence, and .ca needs a Canadian one). */
+function domainIdeas(business, city, country) {
+  const full = squash(business);
+  const place = squash(city);
+  const bases = [...new Set([full, full && place ? `${full}${place}`.slice(0, 40) : ''].filter(Boolean))];
+  const ends = country === 'CA' ? ['ca', 'com'] : ['com', 'net'];
+  return bases.flatMap((b) => ends.map((e) => `${b}.${e}`)).slice(0, 6);
+}
+
+/** "Buy me a web address": ideas checked against the public register, like ChurchNow's picker. */
+function NamePicker({ business, city, country, value, onChange }) {
+  const [results, setResults] = useState([]);
+  const [note, setNote] = useState('');
+  const [busy, setBusy] = useState(false);
+  async function check() {
+    const typed = value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+    const list = [...new Set([...(typed ? [typed] : []), ...domainIdeas(business, city, country)])].slice(0, 8);
+    if (!list.length) return setNote('Add your business name first, or type a name you like.');
+    setBusy(true);
+    setNote('Checking...');
+    const r = await api(`/api/site-domain?names=${encodeURIComponent(list.join(','))}`);
+    setBusy(false);
+    if (!r.ok) {
+      setResults(list.map((name) => ({ name, free: null })));
+      return setNote('We could not check right now. Pick one anyway and we will check before buying.');
+    }
+    setResults(r.results);
+    const first = r.results.find((x) => x.free) ?? null;
+    if (first && !r.results.some((x) => x.name === typed && x.free)) onChange(first.name);
+    setNote(first ? 'Pick the one you like. We buy it in your business name when your site goes live.' : 'None of these look free. Try another name.');
+  }
+  return (
+    <div className="space-y-3 rounded-xl bg-slate-50 p-4">
+      <p className="text-sm text-slate-700">Included in your price. We register it in your business name, connect it when your site goes live, and you can move it elsewhere any time.</p>
+      <div className="flex flex-wrap items-end gap-2">
+        <div className="flex-1 min-w-[12rem]">
+          <Field label="The address you would like" htmlFor="wantDomain" hint="Type one, or press Check for ideas from your business name.">
+            <Text id="wantDomain" value={value} onChange={onChange} placeholder={country === 'CA' ? 'yourshop.ca' : 'yourshop.com'} />
+          </Field>
+        </div>
+        <button type="button" onClick={check} disabled={busy} className="h-11 rounded-xl border border-slate-400 px-4 font-bold text-slate-900 disabled:opacity-50">{busy ? 'Checking...' : 'Check'}</button>
+      </div>
+      {results.length > 0 && (
+        <ul className="grid gap-2 sm:grid-cols-2" role="list">
+          {results.map((x) => (
+            <li key={x.name}>
+              <label className={`flex items-center justify-between gap-3 rounded-xl border bg-white px-4 py-3 ${x.free === false ? 'opacity-50' : 'cursor-pointer'} ${value === x.name ? 'border-blue-700 ring-2 ring-blue-700' : 'border-slate-300'}`}>
+                <span className="flex items-center gap-2">
+                  <input type="radio" name="wantDomainPick" checked={value === x.name} disabled={x.free === false} onChange={() => onChange(x.name)} />
+                  {x.name}
+                </span>
+                <span className={`text-sm ${x.free ? 'text-emerald-700' : 'text-slate-500'}`}>{x.free === true ? 'Looks free' : x.free === false ? 'Taken' : ''}</span>
+              </label>
+            </li>
+          ))}
+        </ul>
+      )}
+      {note && <p className="text-sm text-slate-700" role="status">{note}</p>}
+    </div>
+  );
+}
 
 export default function SiteStart() {
   const [params] = useSearchParams();
@@ -223,14 +283,12 @@ export default function SiteStart() {
           )}
           {!f.hasDomain && (
             <label className="flex items-center gap-3 text-slate-900">
-              <input type="checkbox" checked={f.buyDomain} onChange={(e) => setF((s) => ({ ...s, buyDomain: e.target.checked, wantDomain: s.wantDomain || suggestDomain(s.business) }))} />
+              <input type="checkbox" checked={f.buyDomain} onChange={(e) => setF((s) => ({ ...s, buyDomain: e.target.checked }))} />
               Buy me a web address (we register it in your business name and connect it)
             </label>
           )}
           {!f.hasDomain && f.buyDomain && (
-            <Field label="The address you would like" htmlFor="wantDomain" hint="For example: yourshop.ca. If it is taken, we email you before buying anything else.">
-              <Text id="wantDomain" value={f.wantDomain} onChange={set('wantDomain')} placeholder="yourshop.ca" />
-            </Field>
+            <NamePicker business={f.business} city={f.city} country={country} value={f.wantDomain} onChange={set('wantDomain')} />
           )}
           {/* Hidden from people; bots fill it in. */}
           <div aria-hidden="true" style={{ position: 'absolute', left: '-9999px' }}>

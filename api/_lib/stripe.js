@@ -50,18 +50,24 @@ export async function prices() {
 }
 
 /**
- * Does this email have an OMIS plan that is active or in its free trial? Any subscription in
- * the account that is not a website price is an OMIS plan. Read-only.
+ * Does this email have a PAID OMIS plan? Any subscription in the account that is not a website
+ * price is an OMIS plan. Only "active" counts (owner, 2026-10-20): a free trial does not get the
+ * OMIS website price, but is reported (trial: true) so the page can say it unlocks after the
+ * first OMIS payment. Read-only.
  */
 export async function omisPlan(email) {
   const { data: customers } = await stripe('customers', { email, limit: 10 }, 'GET');
+  let trial = null;
   for (const c of customers) {
     const { data: subs } = await stripe('subscriptions', { customer: c.id, status: 'all', limit: 20 }, 'GET');
-    const live = subs.find((s) => ['active', 'trialing'].includes(s.status) && s.items.data.some((i) => !isWebsitePrice(i.price)));
-    if (live) return { customer: c.id, status: live.status };
+    const omis = subs.filter((s) => s.items.data.some((i) => !isWebsitePrice(i.price)));
+    if (omis.some((s) => s.status === 'active')) return { customer: c.id, status: 'active' };
+    if (omis.some((s) => s.status === 'trialing')) trial = { customer: c.id, status: 'trialing', trial: true };
   }
-  return null;
+  return trial;
 }
+/** A plan that gets the OMIS website price (paid, not a trial). */
+export const omisPaid = (plan) => plan?.status === 'active';
 
 export const isOmisSubscription = (sub) => sub.items.data.some((i) => !isWebsitePrice(i.price));
 export const isCareSubscription = (sub) => sub.items.data.some((i) => String(i.price?.lookup_key ?? '').startsWith('website_care'));
