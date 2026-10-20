@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ArrowRight, ExternalLink, LayoutTemplate, CalendarCheck, BarChart3 } from 'lucide-react';
 import { OMIS_PLANS, WEBSITE, money } from '@/data/pricing';
@@ -13,12 +13,9 @@ export const PRODUCTS = {
   analytics: { label: 'Data & analytics', who: 'For any business', dot: 'bg-violet-600', text: 'text-violet-700', band: 'bg-violet-50 border-violet-200', button: 'bg-violet-700 hover:bg-violet-800', card: 'bg-violet-50 ring-violet-200', icon: BarChart3 },
 };
 
-// Headlines while the owner decides (preview: ?headline=shops or ?headline=all).
-const HEADLINES = {
-  three: { h1: 'Three ways we help your business grow.', sub: 'Pick what you need. Each one stands on its own, and they work even better together.' },
-  shops: { h1: 'Websites and booking for businesses that run on appointments.', sub: 'Plus data and analytics help for any business. Pick what you need: each one stands on its own, and they work even better together.' },
-  all: { h1: 'Websites, booking and data help for growing businesses.', sub: 'Pick what you need. Each one stands on its own, and they work even better together.' },
-};
+// Shops first (owner, 2026-10-20): the words appointment businesses search for, and analytics named
+// in the line under it.
+const HEADLINE = { h1: 'Websites and booking for businesses that run on appointments.', sub: 'Plus data and analytics help for any business. Pick what you need: each one stands on its own, and they work even better together.' };
 
 const DOORS = [
   { key: 'websites', text: `A website made for your trade, ready to preview today. From ${money(WEBSITE.setupAlone)}, or ${money(WEBSITE.setupWithOmis)} with OMIS.`, cta: 'See the designs', href: '/templates/', native: true },
@@ -36,8 +33,7 @@ const DoorButton = ({ door, className }) => {
 
 const ThreeDoors = () => {
   const reduce = useReducedMotion();
-  const [params] = useSearchParams();
-  const head = HEADLINES[params.get('headline')] ?? HEADLINES.three;
+  const head = HEADLINE;
   return (
     <>
       <section className="hero-night relative overflow-hidden text-white">
