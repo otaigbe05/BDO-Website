@@ -119,6 +119,10 @@ export function extrasProblems(template, extras = {}, photos = []) {
   return out;
 }
 
+// The styles and sizes the T90 helper asks about (COPY of omis-sites pipeline/intake.mjs).
+export const MATCH_STYLES = ['realism', 'fine', 'bold'];
+export const MATCH_SIZES = ['small', 'medium', 'large'];
+
 export const intakeSchema = z
   .object({
     template: z.string().regex(/^[TBASP]\d{2}$/),
@@ -165,7 +169,8 @@ export const intakeSchema = z
       .min(1, 'Add at least one service with a price.'),
     team: z
       // bio: paragraphs separated by a blank line (up to 5, 700 characters each).
-      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), bio: opt(3600), instagram: handle, bookingUrl: https }).strict())
+      // styles and sizes: what they take on, for the "who should I book?" helper (T90).
+      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), bio: opt(3600), styles: z.array(z.enum(MATCH_STYLES)).max(MATCH_STYLES.length).optional(), sizes: z.array(z.enum(MATCH_SIZES)).max(3).optional(), instagram: handle, bookingUrl: https }).strict())
       .default([]),
     photos: z.array(photo).max(60).default([]),
     aboutNotes: opt(3000),
