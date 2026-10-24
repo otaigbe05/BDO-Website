@@ -1,6 +1,7 @@
 // Form checks for the client-site funnel. The intake schema is a COPY of
 // omis-sites/pipeline/intake.mjs (intakeSchema); keep the two in step when either changes.
 import { z } from 'zod';
+import { paragraphs, exactWordsProblems } from './words.js';
 
 const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
@@ -78,6 +79,8 @@ export const extrasSchema = z
     blocks: z.object({ name: str(50), list: z.array(z.object({ name: str(30), weeks: num(1, 8), sessions: num(1, 6), focus: str(200) }).strict()).min(2).max(5) }).strict().optional(),
     route: z.object({ name: str(50), distance: str(30), meet: str(160), stops: z.array(z.object({ name: str(50), note: str(140), distance: opt(20) }).strict()).min(3).max(7) }).strict().optional(),
     colours: z.array(z.object({ name: str(24), hex: z.string().regex(/^#[0-9A-Fa-f]{6}$/) }).strict()).max(8).optional(),
+    // A short line for the first screen, in the owner's words (T90).
+    line: opt(80),
   })
   .strict();
 
@@ -91,6 +94,8 @@ export const DESIGN_EXTRAS = {
   A13: { steps: 'required' }, T12: { steps: 'required' }, S15: { steps: 'required' },
   A07: { packages: 'optional' }, S07: { packages: 'optional' }, P01: { packages: 'optional' }, P06: { packages: 'optional' }, P09: { packages: 'optional' },
   S12: { colours: 'required' },
+  // workByArtist: every work photo says which artist did it (the work is shown by artist).
+  T90: { steps: 'required', line: 'optional', workByArtist: 'required' },
 };
 
 /** Plain-words problems when a design's required extra details are missing (empty when fine). */
@@ -110,6 +115,7 @@ export function extrasProblems(template, extras = {}, photos = []) {
     if (names.size < 3) out.push('Colours: add at least 3 colours you offer.');
     else if (shown.size < 3) out.push('Colours: tag your work photos so at least 3 of your colours each have a photo.');
   }
+  if (req('workByArtist') && photos.some((p) => p.kind === 'work' && !p.member)) out.push('Work photos: say which artist did each one.');
   return out;
 }
 
@@ -135,6 +141,7 @@ export const intakeSchema = z
         // The business's time zone (e.g. "Africa/Lagos"), from the visitor's browser on the form.
         timeZone: z.string().trim().max(60).optional(),
         instagram: handle,
+        facebook: https.pipe(z.string().regex(/^https:\/\/(www\.|m\.)?facebook\.com\/\S+$/, 'Facebook: the link to your page, like https://www.facebook.com/yourpage.').optional()),
         googleBusinessUrl: https,
         foundedYear: z.int().min(1900).max(new Date().getFullYear()).optional(),
       })
@@ -147,27 +154,46 @@ export const intakeSchema = z
         const postal = b.country === 'CA' ? /^[A-Z]\d[A-Z] \d[A-Z]\d$/ : b.country === 'US' ? /^\d{5}(-\d{4})?$/ : null;
         if (postal && !postal.test(b.postal ?? '')) ctx.addIssue({ code: 'custom', path: ['postal'], message: b.country === 'CA' ? 'Postal code: 3 letters and 3 numbers, like N1R 1A1.' : 'ZIP code: 5 numbers, like 14201.' });
       }),
-    hours: z.array(z.object({ day: z.enum(DAYS), open: z.string().regex(TIME_RE), close: z.string().regex(TIME_RE) }).strict()).min(1, 'Add at least one open day.'),
+    // By appointment only: no open days, and the hours note says how to come in (checked below).
+    hours: z.array(z.object({ day: z.enum(DAYS), open: z.string().regex(TIME_RE), close: z.string().regex(TIME_RE) }).strict()).default([]),
     hoursNote: opt(200),
     omisUrl: https,
+    // The booking button's words, e.g. "Book a free consultation" (default "Book now").
+    bookingLabel: opt(40),
     services: z
       .array(z.object({ name: str(80), price: str(40), duration: opt(60), description: opt(300), category: opt(60) }).strict())
       .min(1, 'Add at least one service with a price.'),
     team: z
-      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), instagram: handle, bookingUrl: https }).strict())
+      // bio: paragraphs separated by a blank line (up to 5, 700 characters each).
+      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), bio: opt(3600), instagram: handle, bookingUrl: https }).strict())
       .default([]),
     photos: z.array(photo).max(60).default([]),
     aboutNotes: opt(3000),
     policyNotes: opt(2000),
     faqNotes: opt(3000),
     extraNotes: opt(2000),
+    // On: about, FAQ ("Q:" / "A:" lines) and policies ("Title: text" paragraphs) go on the site as written.
+    exactWords: z.boolean().default(false),
     reviews: z.array(z.object({ quote: str(400), author: str(60), source: opt(40) }).strict()).max(12).default([]),
     // Answers to the design's extra questions (DESIGN_EXTRAS).
     extras: extrasSchema.default({}),
     // The content release (SiteIntake.jsx CONSENT_TEXT). The server stamps version and time.
     consent: z.object({ accepted: z.literal(true, { error: 'Please tick the box to confirm the content release.' }), version: str(20), at: str(40) }).strict(),
   })
-  .strict();
+  .strict()
+  .superRefine((v, ctx) => {
+    if (!v.hours.length && !v.hoursNote) ctx.addIssue({ code: 'custom', path: ['hours'], message: 'Tick at least one open day, or (by appointment only) say so in the hours note.' });
+    v.team.forEach((m, i) => {
+      const paras = paragraphs(m.bio);
+      if (paras.length > 5) ctx.addIssue({ code: 'custom', path: ['team', i, 'bio'], message: `${m.name}'s story: 5 paragraphs at most.` });
+      if (paras.some((t) => t.length > 700)) ctx.addIssue({ code: 'custom', path: ['team', i, 'bio'], message: `${m.name}'s story: each paragraph 700 characters at most.` });
+    });
+    if (!v.exactWords) return;
+    for (const p of exactWordsProblems(v)) ctx.addIssue({ code: 'custom', path: [p.path], message: p.message });
+  });
+
+// Exact-words parsing lives in words.js (no imports, so the form can use it in the browser too).
+export { paragraphs, parseFaq, parsePolicies, exactWordsProblems } from './words.js';
 
 // Bump when the release wording in SiteIntake.jsx changes, so each intake records what was agreed.
 export const CONSENT_VERSION = '2026-10-07';

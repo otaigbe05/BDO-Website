@@ -50,6 +50,12 @@ export default function DesignExtras({ need, x, set, stepHint }) {
         </div>
       )}
 
+      {need.line && (
+        <Field label="A short line for the top of your page" htmlFor="x-line" hint="Optional, up to 80 characters. For example: Your story. Your scars. Your legacy.">
+          <Text id="x-line" value={x.line} onChange={(v) => set('extras.line', v)} maxLength={80} />
+        </Field>
+      )}
+
       {need.steps && (
         <div className="space-y-3">
           <h3 className="font-bold text-slate-900">Step by step<Req need={need.steps} /></h3>

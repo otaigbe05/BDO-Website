@@ -8,6 +8,7 @@ import { Plus, Trash2, Loader2 } from 'lucide-react';
 import { Shell, Card, Field, Text, Area, Submit, Problems, Notice, api, inputClass, loadCatalog } from './ui';
 import DesignGuide from './DesignGuide';
 import { designProblems, TEAM_NEEDS } from '../../../api/_lib/design-rules.js';
+import { exactWordsProblems } from '../../../api/_lib/words.js';
 import DesignExtras from './DesignExtras';
 import { REGIONS, REGION_LABEL, POSTAL_LABEL, DEFAULT_REGION, PHONE_HINT, tidyPostal, countryList, timeZoneList, browserTimeZone, browserCountry } from '@/lib/countries';
 
@@ -39,7 +40,11 @@ const DESIGN_EXTRAS = {
   A13: { steps: 'required', stepTimes: true }, T12: { steps: 'required' }, S15: { steps: 'required' },
   A07: { packages: 'optional' }, S07: { packages: 'optional' }, P01: { packages: 'optional' }, P06: { packages: 'optional' }, P09: { packages: 'optional' },
   S12: { colours: 'required' },
+  // Made for one studio: work shown by artist, a first-screen line, more studio photos.
+  T90: { steps: 'required', line: 'optional', workByArtist: 'required', studio: true },
 };
+// More photos of the space, for designs with studio: true.
+const MAX_STUDIO = 3;
 // What the steps are about, in the trade's words.
 const STEP_HINT = {
   T: 'From the first message to healed: for example Consult, Drawing, Stencil, Session, Healed.',
@@ -57,6 +62,7 @@ const blankExtras = () => ({
   blocks: { name: '', list: [] },
   route: { name: '', distance: '', meet: '', stops: [] },
   colours: [],
+  line: '',
 });
 
 // Country names and time zones come from the browser (src/lib/countries.js).
@@ -64,26 +70,29 @@ const COUNTRIES = countryList();
 const ZONES = timeZoneList();
 
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
-const blankMember = () => ({ name: '', role: '', specialty: '', instagram: '', bookingUrl: '', photo: null });
+const blankMember = () => ({ name: '', role: '', specialty: '', bio: '', instagram: '', bookingUrl: '', photo: null });
 
 function initial(lead) {
   // The country picked on the first form (or a guess from the browser), and the browser's time zone.
   const country = lead.country ?? browserCountry();
   return {
-    business: { name: lead.business, tagline: '', phone: lead.phone ?? '', email: lead.email ?? '', street: '', city: lead.city ?? '', country, province: DEFAULT_REGION[country] ?? '', postal: '', timeZone: browserTimeZone() ?? '', instagram: '', googleBusinessUrl: '' },
+    business: { name: lead.business, tagline: '', phone: lead.phone ?? '', email: lead.email ?? '', street: '', city: lead.city ?? '', country, province: DEFAULT_REGION[country] ?? '', postal: '', timeZone: browserTimeZone() ?? '', instagram: '', facebook: '', googleBusinessUrl: '' },
     hours: Object.fromEntries(DAYS.map((d, i) => [d, { open: i < 5, from: '09:00', to: '17:00' }])),
     hoursNote: '',
     services: [blankService(), blankService(), blankService()],
     team: [],
     photos: { logo: null, hero: null, about: null },
+    studio: [],
     work: [],
     aboutNotes: '',
     policyNotes: '',
     faqNotes: '',
     extraNotes: '',
+    exactWords: false,
     reviews: [],
     reviewsReal: false,
     omisUrl: '',
+    bookingLabel: '',
     domain: lead.domain ?? '',
     extras: blankExtras(),
     consent: false,
@@ -92,25 +101,28 @@ function initial(lead) {
 
 /** Saved answers -> form state (edit mode). photoUrls: short-lived links to their uploads. */
 function fromIntake(p, urls) {
-  const photo = (x) => (x ? { key: x.key, preview: urls[x.key] ?? '' } : null);
+  const photo = (x) => (x ? { key: x.key, preview: urls[x.key] ?? '', member: x.member ?? '' } : null);
   const byKind = (k) => p.photos.find((x) => x.kind === k);
   const open = new Map(p.hours.map((h) => [h.day, h]));
   const b = p.business;
   return {
-    business: { name: b.name, tagline: b.tagline ?? '', phone: b.phone, email: b.email ?? '', street: b.street, city: b.city, country: b.country ?? 'CA', province: b.province ?? '', postal: b.postal ?? '', timeZone: b.timeZone ?? browserTimeZone() ?? '', instagram: b.instagram ?? '', googleBusinessUrl: b.googleBusinessUrl ?? '' },
+    business: { name: b.name, tagline: b.tagline ?? '', phone: b.phone, email: b.email ?? '', street: b.street, city: b.city, country: b.country ?? 'CA', province: b.province ?? '', postal: b.postal ?? '', timeZone: b.timeZone ?? browserTimeZone() ?? '', instagram: b.instagram ?? '', facebook: b.facebook ?? '', googleBusinessUrl: b.googleBusinessUrl ?? '' },
     hours: Object.fromEntries(DAYS.map((d) => [d, open.has(d) ? { open: true, from: open.get(d).open, to: open.get(d).close } : { open: false, from: '09:00', to: '17:00' }])),
     hoursNote: p.hoursNote ?? '',
     services: p.services.map((s) => ({ name: s.name, price: s.price, duration: s.duration ?? '', description: s.description ?? '' })),
-    team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
+    team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', bio: m.bio ?? '', instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
     photos: { logo: photo(byKind('logo')), hero: photo(byKind('hero')), about: photo(byKind('about')) },
+    studio: p.photos.filter((x) => x.kind === 'about').slice(1).map(photo),
     work: p.photos.filter((x) => x.kind === 'work').map((x) => ({ key: x.key, preview: urls[x.key] ?? '', caption: x.caption ?? '', member: x.member ?? '', price: x.price ?? '', colour: x.colour ?? '' })),
     aboutNotes: p.aboutNotes ?? '',
     policyNotes: p.policyNotes ?? '',
     faqNotes: p.faqNotes ?? '',
     extraNotes: p.extraNotes ?? '',
+    exactWords: p.exactWords === true,
     reviews: p.reviews.map((r) => ({ quote: r.quote, author: r.author, source: r.source ?? '' })),
     reviewsReal: p.reviews.length > 0,
     omisUrl: p.omisUrl ?? '',
+    bookingLabel: p.bookingLabel ?? '',
     domain: p.domain ?? '',
     extras: fromExtras(p.extras ?? {}),
     consent: false,
@@ -126,6 +138,7 @@ function fromExtras(x) {
   if (x.steps) e.steps = x.steps.map((st) => ({ title: st.title, text: st.text, time: st.time ?? '' }));
   if (x.packages) e.packages = x.packages.map((k) => ({ name: k.name, price: k.price, length: k.length ?? '', includes: k.includes ?? '' }));
   if (x.makes) e.makes = x.makes.join(', ');
+  if (x.line) e.line = x.line;
   if (x.interval) e.interval = { name: x.interval.name, work: txt(x.interval.work), rest: txt(x.interval.rest), rounds: txt(x.interval.rounds), note: x.interval.note ?? '' };
   if (x.blocks) e.blocks = { name: x.blocks.name, list: x.blocks.list.map((b) => ({ name: b.name, weeks: txt(b.weeks), sessions: txt(b.sessions), focus: b.focus })) };
   if (x.route) e.route = { name: x.route.name, distance: x.route.distance, meet: x.route.meet, stops: x.route.stops.map((st) => ({ name: st.name, note: st.note, distance: st.distance ?? '' })) };
@@ -191,7 +204,8 @@ export default function SiteIntake() {
         saved = null;
       }
       const fresh = r.previous ? fromIntake(r.previous, r.photoUrls ?? {}) : initial(r.lead);
-      setF(saved ? { ...saved, extras: saved.extras ?? blankExtras() } : fresh);
+      // A draft saved on this device before the form gained new questions gets their blanks.
+      setF(saved ? { ...fresh, ...saved, business: { ...fresh.business, ...saved.business }, extras: { ...blankExtras(), ...saved.extras } } : fresh);
       setState('open');
     });
   }, [token]);
@@ -299,6 +313,18 @@ export default function SiteIntake() {
     }
   }
 
+  async function pickStudio(files) {
+    const room = MAX_STUDIO - f.studio.length;
+    for (const file of [...files].slice(0, room)) {
+      try {
+        const up = await upload(file, 'about');
+        setF((s) => ({ ...s, studio: [...s.studio, up] }));
+      } catch (err) {
+        setProblems([err.message]);
+      }
+    }
+  }
+
   async function pickMemberPhoto(i, files) {
     if (!files?.[0]) return;
     try {
@@ -326,6 +352,7 @@ export default function SiteIntake() {
     if (need.blocks && x.blocks.list.some((b) => b.name.trim())) out.blocks = { name: x.blocks.name, list: x.blocks.list.filter((b) => b.name.trim()).map((b) => ({ ...b, weeks: Number(b.weeks) || '', sessions: Number(b.sessions) || '' })) };
     if (need.route && x.route.stops.some((st) => st.name.trim())) out.route = { name: x.route.name, distance: x.route.distance, meet: x.route.meet, stops: x.route.stops.filter((st) => st.name.trim()).map(clean) };
     if (need.colours) out.colours = x.colours.filter((c) => c.name.trim());
+    if (need.line && x.line.trim()) out.line = x.line.trim();
     return Object.fromEntries(Object.entries(out).filter(([, v]) => !(Array.isArray(v) && v.length === 0)));
   }
 
@@ -346,6 +373,7 @@ export default function SiteIntake() {
       if (names.size < 3) out.push('Colours: add at least 3 colours you offer.');
       else if (shown.size < 3) out.push('Colours: pick a colour for your work photos so at least 3 colours each have a photo.');
     }
+    if (req('workByArtist') && f.work.some((w) => !w.member)) out.push('Your work: pick whose work each photo is (under each photo).');
     return out;
   }
 
@@ -353,7 +381,8 @@ export default function SiteIntake() {
     const clean = (o) => Object.fromEntries(Object.entries(o).filter(([, v]) => v !== '' && v != null));
     const team = f.team.filter((m) => m.name.trim());
     const photos = [
-      ...['logo', 'hero', 'about'].filter((k) => f.photos[k]).map((k) => ({ key: f.photos[k].key, kind: k })),
+      ...['logo', 'hero', 'about'].filter((k) => f.photos[k]).map((k) => clean({ key: f.photos[k].key, kind: k, member: k === 'hero' && need.workByArtist ? f.photos.hero.member : '' })),
+      ...(need.studio && f.photos.about ? f.studio.map((x) => ({ key: x.key, kind: 'about' })) : []),
       ...team.filter((m) => m.photo).map((m) => ({ key: m.photo.key, kind: 'team', member: m.name.trim() })),
       ...f.work.map((w) => clean({ key: w.key, kind: 'work', caption: w.caption, member: w.member, price: w.price, colour: need.colours ? w.colour : '' })),
     ];
@@ -363,6 +392,7 @@ export default function SiteIntake() {
       hours: DAYS.filter((d) => f.hours[d].open).map((d) => ({ day: d, open: f.hours[d].from, close: f.hours[d].to })),
       hoursNote: f.hoursNote,
       omisUrl: f.omisUrl,
+      bookingLabel: f.bookingLabel,
       services: f.services.filter((s) => s.name.trim() || s.price.trim()).map(clean),
       team: team.map(({ photo, ...m }) => clean(m)),
       photos,
@@ -370,6 +400,7 @@ export default function SiteIntake() {
       policyNotes: f.policyNotes,
       faqNotes: f.faqNotes,
       extraNotes: f.extraNotes,
+      exactWords: f.exactWords,
       reviews: f.reviewsReal ? f.reviews.filter((r) => r.quote.trim() && r.author.trim()).map(clean) : [],
       extras: extrasPayload(),
       // The server stamps the wording version and time.
@@ -389,6 +420,11 @@ export default function SiteIntake() {
     if (designIssues.length) return setProblems(designIssues);
     const extraIssues = extrasIssues();
     if (extraIssues.length) return setProblems(extraIssues);
+    if (!DAYS.some((d) => f.hours[d].open) && !f.hoursNote.trim()) return setProblems(['Opening hours: tick at least one open day, or (by appointment only) say so in the box under the days.']);
+    if (f.exactWords) {
+      const words = exactWordsProblems(f).map((p) => p.message);
+      if (words.length) return setProblems(words);
+    }
     if (f.reviews.some((r) => r.quote.trim()) && !f.reviewsReal) return setProblems(['Reviews: tick the box to confirm they are real reviews from your customers, or remove them.']);
     if (!f.consent) return setProblems(['Content release: please read it and tick the box at the bottom of the form.']);
     setBusy(true);
@@ -509,6 +545,9 @@ export default function SiteIntake() {
             <Field label="Instagram" htmlFor="b-ig" hint="Your handle, like @yourshop">
               <Text id="b-ig" value={b.instagram} onChange={(v) => set('business.instagram', v)} />
             </Field>
+            <Field label="Facebook page" htmlFor="b-fb" hint="Optional. The link to your page.">
+              <Text id="b-fb" type="url" value={b.facebook} onChange={(v) => set('business.facebook', v)} placeholder="https://www.facebook.com/..." />
+            </Field>
           </div>
           <Field label="One line about you" htmlFor="b-tag" hint={`Optional. For example: ${trade.tagline}`}>
             <Text id="b-tag" value={b.tagline} onChange={(v) => set('business.tagline', v)} maxLength={140} />
@@ -518,7 +557,7 @@ export default function SiteIntake() {
           </Field>
         </Card>
 
-        <Card title="Opening hours" intro="Tick the days you are open.">
+        <Card title="Opening hours" intro="Tick the days you are open. By appointment only? Untick every day and say so in the box below.">
           <div className="space-y-3">
             {DAYS.map((d) => (
               <div key={d} className="grid grid-cols-2 sm:grid-cols-[7.5rem_1fr_1fr] items-center gap-x-3 gap-y-1">
@@ -531,7 +570,7 @@ export default function SiteIntake() {
               </div>
             ))}
           </div>
-          <Field label="Anything else about hours" htmlFor="h-note" hint="Optional. For example: By appointment on Sundays.">
+          <Field label="Anything else about hours" htmlFor="h-note" hint="For example: By appointment on Sundays. Needed if you untick every day.">
             <Text id="h-note" value={f.hoursNote} onChange={(v) => set('hoursNote', v)} maxLength={200} />
           </Field>
         </Card>
@@ -566,6 +605,7 @@ export default function SiteIntake() {
                 <Text aria-label="What they are known for (optional)" placeholder="Known for (optional)" value={m.specialty} onChange={(v) => set(`team.${i}.specialty`, v)} />
                 <Text aria-label="Instagram (optional)" placeholder="Instagram (optional)" value={m.instagram} onChange={(v) => set(`team.${i}.instagram`, v)} />
               </div>
+              <Area aria-label="Their story (optional)" rows={3} placeholder="Their story (optional). Leave a blank line between paragraphs." value={m.bio} onChange={(v) => set(`team.${i}.bio`, v)} maxLength={3600} />
               {lead.package === 'site-omis' && (
                 <Text aria-label="Their own booking link (optional)" placeholder="Their own OMIS booking link (optional)" type="url" value={m.bookingUrl} onChange={(v) => set(`team.${i}.bookingUrl`, v)} />
               )}
@@ -601,8 +641,33 @@ export default function SiteIntake() {
             );
           })()}
           <PhotoSlot kind="hero" label="Main photo" hint="The big photo at the top. Your best shot of your work or your space. If you skip it, we pick your strongest photo." />
+          {need.workByArtist && f.photos.hero && f.team.some((m) => m.name.trim()) && (
+            <Field label="Whose work is the main photo?" htmlFor="hero-member">
+              <select id="hero-member" className={inputClass} value={f.photos.hero.member ?? ''} onChange={(e) => set('photos.hero.member', e.target.value)}>
+                <option value="">Choose</option>
+                {f.team.filter((m) => m.name.trim()).map((m) => (
+                  <option key={m.name}>{m.name.trim()}</option>
+                ))}
+              </select>
+            </Field>
+          )}
           <PhotoSlot kind="logo" label="Logo" hint="Optional." />
           <PhotoSlot kind="about" label="Photo of you or your space" hint="Optional." />
+          {need.studio && f.photos.about && (
+            <Field label={`More photos of your space (up to ${MAX_STUDIO})`} htmlFor="studio" hint="Optional.">
+              <input id="studio" type="file" multiple accept="image/jpeg,image/png,image/webp" disabled={f.studio.length >= MAX_STUDIO} onChange={(e) => pickStudio(e.target.files)} className="text-sm" />
+              {f.studio.length > 0 && (
+                <ul className="flex flex-wrap gap-3 mt-3">
+                  {f.studio.map((x, i) => (
+                    <li key={x.key} className="space-y-1">
+                      <img src={x.preview} alt="" className="w-20 h-20 object-cover rounded-lg border border-slate-200" />
+                      <button type="button" className="text-sm text-red-700 underline" onClick={() => set('studio', f.studio.filter((_, j) => j !== i))}>Remove</button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Field>
+          )}
           <Field label={`Your work (up to ${MAX_WORK})`} htmlFor="work" hint="Pick several at once.">
             <input id="work" type="file" multiple accept="image/jpeg,image/png,image/webp" onChange={(e) => pickWork(e.target.files)} className="text-sm" />
           </Field>
@@ -647,14 +712,18 @@ export default function SiteIntake() {
 
         {Object.keys(need).length > 0 && <DesignExtras need={need} x={f.extras} set={set} stepHint={STEP_HINT[lead.template[0]] ?? ''} />}
 
-        <Card title="In your own words" intro="Write it like you would say it. We turn it into the text on your site, using only what you tell us.">
+        <Card title="In your own words" intro={f.exactWords ? 'These go on your site exactly as you write them, so check spelling and punctuation.' : 'Write it like you would say it. We turn it into the text on your site, using only what you tell us.'}>
+          <label className="flex items-start gap-3 text-slate-900">
+            <input type="checkbox" className="mt-1" checked={f.exactWords} onChange={(e) => set('exactWords', e.target.checked)} />
+            Use my words exactly as I write them (about, rules and questions), with no rewording.
+          </label>
           <Field label="About your business" htmlFor="about" hint="How it started, what you are known for, who you serve.">
             <Area id="about" rows={5} value={f.aboutNotes} onChange={(v) => set('aboutNotes', v)} maxLength={3000} />
           </Field>
-          <Field label="Rules customers should know" htmlFor="policies" hint={trade.rules}>
+          <Field label="Rules customers should know" htmlFor="policies" hint={f.exactWords ? 'One paragraph per rule, starting with its title and a colon. For example: Deposit: A deposit is needed to book.' : trade.rules}>
             <Area id="policies" value={f.policyNotes} onChange={(v) => set('policyNotes', v)} maxLength={2000} />
           </Field>
-          <Field label="Questions customers ask you" htmlFor="faq" hint="With your answers.">
+          <Field label="Questions customers ask you" htmlFor="faq" hint={f.exactWords ? 'Start each question with Q: and each answer with A: on the next line.' : 'With your answers.'}>
             <Area id="faq" value={f.faqNotes} onChange={(v) => set('faqNotes', v)} maxLength={3000} />
           </Field>
           <Field label="Anything else" htmlFor="extra">
@@ -692,6 +761,9 @@ export default function SiteIntake() {
               <Text id="omis" type="url" value={f.omisUrl} onChange={(v) => set('omisUrl', v)} placeholder="https://www.omis-crm.com/book/..." />
             </Field>
           )}
+          <Field label="Words on your booking button" htmlFor="book-label" hint="Optional. For example: Book a free consultation. If empty: Book now.">
+            <Text id="book-label" value={f.bookingLabel} onChange={(v) => set('bookingLabel', v)} maxLength={40} />
+          </Field>
           <Field label="Your domain" htmlFor="domain" hint="If you own one, like yourshop.ca. If not, leave it empty; your site works without one and we can help you get one in your name.">
             <Text id="domain" value={f.domain} onChange={(v) => set('domain', v)} placeholder="yourshop.ca" />
           </Field>

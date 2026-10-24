@@ -16,7 +16,7 @@ const CAR_PARTS = [
 const carParts = (services) => CAR_PARTS.filter((words) => services.some((s) => words.some((w) => new RegExp(`(^|[^a-z])${w.replace('/', '\\/')}`, 'i').test(s.name ?? '')))).length;
 
 // People and services some designs are built around (found by scripts/minimal.mjs in omis-sites).
-export const TEAM_NEEDS = { B04: 1, B10: 1, T10: 1, S10: 1, B15: 2 };
+export const TEAM_NEEDS = { B04: 1, B10: 1, T10: 1, S10: 1, B15: 2, T90: 1 };
 
 /** Team and service problems for the chosen design, in plain words (empty when fine). */
 export function designProblems(template, data) {
