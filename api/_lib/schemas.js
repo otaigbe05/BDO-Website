@@ -169,8 +169,9 @@ export const intakeSchema = z
       .min(1, 'Add at least one service with a price.'),
     team: z
       // bio: paragraphs separated by a blank line (up to 5, 700 characters each).
-      // styles and sizes: what they take on, for the "who should I book?" helper (T90).
-      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), bio: opt(3600), styles: z.array(z.enum(MATCH_STYLES)).max(MATCH_STYLES.length).optional(), sizes: z.array(z.enum(MATCH_SIZES)).max(3).optional(), instagram: handle, bookingUrl: https }).strict())
+      // takes: the styles they take on and at which sizes, for the "who should I book?" helper
+      // (T90). styles + sizes: the older form of the same answer (every style at every size).
+      .array(z.object({ name: str(60), role: str(80), specialty: opt(120), bio: opt(3600), takes: z.array(z.object({ style: z.enum(MATCH_STYLES), sizes: z.array(z.enum(MATCH_SIZES)).min(1).max(3) }).strict()).max(MATCH_STYLES.length).optional(), styles: z.array(z.enum(MATCH_STYLES)).max(MATCH_STYLES.length).optional(), sizes: z.array(z.enum(MATCH_SIZES)).max(3).optional(), instagram: handle, bookingUrl: https }).strict())
       .default([]),
     photos: z.array(photo).max(60).default([]),
     aboutNotes: opt(3000),

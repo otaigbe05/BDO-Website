@@ -46,6 +46,8 @@ const DESIGN_EXTRAS = {
 // "Who should I book?" helper (matchStyles): keep in step with api/_lib/schemas.js MATCH_STYLES.
 const MATCH_STYLES = [['realism', 'Realism or portraits'], ['fine', 'Fine line'], ['bold', 'Bold, street art feel']];
 const MATCH_SIZES = [['small', 'Small'], ['medium', 'Medium'], ['large', 'Large']];
+// Saved answer -> form: { realism: ['large'], ... } (also reads the older styles + sizes answer).
+const takesForm = (m) => Object.fromEntries((m.takes?.length ? m.takes : (m.styles ?? []).map((style) => ({ style, sizes: m.sizes?.length ? m.sizes : MATCH_SIZES.map(([v]) => v) }))).map((t) => [t.style, t.sizes]));
 // More photos of the space, for designs with studio: true.
 const MAX_STUDIO = 3;
 // What the steps are about, in the trade's words.
@@ -73,7 +75,7 @@ const COUNTRIES = countryList();
 const ZONES = timeZoneList();
 
 const blankService = () => ({ name: '', price: '', duration: '', description: '' });
-const blankMember = () => ({ name: '', role: '', specialty: '', bio: '', styles: [], sizes: [], instagram: '', bookingUrl: '', photo: null });
+const blankMember = () => ({ name: '', role: '', specialty: '', bio: '', takes: {}, instagram: '', bookingUrl: '', photo: null });
 
 function initial(lead) {
   // The country picked on the first form (or a guess from the browser), and the browser's time zone.
@@ -113,7 +115,7 @@ function fromIntake(p, urls) {
     hours: Object.fromEntries(DAYS.map((d) => [d, open.has(d) ? { open: true, from: open.get(d).open, to: open.get(d).close } : { open: false, from: '09:00', to: '17:00' }])),
     hoursNote: p.hoursNote ?? '',
     services: p.services.map((s) => ({ name: s.name, price: s.price, duration: s.duration ?? '', description: s.description ?? '' })),
-    team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', bio: m.bio ?? '', styles: m.styles ?? [], sizes: m.sizes ?? [], instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
+    team: p.team.map((m) => ({ name: m.name, role: m.role, specialty: m.specialty ?? '', bio: m.bio ?? '', takes: takesForm(m), instagram: m.instagram ?? '', bookingUrl: m.bookingUrl ?? '', photo: photo(p.photos.find((x) => x.kind === 'team' && x.member === m.name)) })),
     photos: { logo: photo(byKind('logo')), hero: photo(byKind('hero')), about: photo(byKind('about')) },
     studio: p.photos.filter((x) => x.kind === 'about').slice(1).map(photo),
     work: p.photos.filter((x) => x.kind === 'work').map((x) => ({ key: x.key, preview: urls[x.key] ?? '', caption: x.caption ?? '', member: x.member ?? '', price: x.price ?? '', colour: x.colour ?? '' })),
@@ -397,7 +399,7 @@ export default function SiteIntake() {
       omisUrl: f.omisUrl,
       bookingLabel: f.bookingLabel,
       services: f.services.filter((s) => s.name.trim() || s.price.trim()).map(clean),
-      team: team.map(({ photo, styles, sizes, ...m }) => clean({ ...m, ...(need.matchStyles ? { styles: styles ?? [], sizes: sizes ?? [] } : {}) })),
+      team: team.map(({ photo, takes, styles, sizes, ...m }) => clean({ ...m, ...(need.matchStyles ? { takes: MATCH_STYLES.map(([style]) => ({ style, sizes: MATCH_SIZES.map(([v]) => v).filter((v) => takes?.[style]?.includes(v)) })).filter((t) => t.sizes.length) } : {}) })),
       photos,
       aboutNotes: f.aboutNotes,
       policyNotes: f.policyNotes,
@@ -610,17 +612,27 @@ export default function SiteIntake() {
               </div>
               {need.matchStyles && (
                 <fieldset className="space-y-2">
-                  <legend className="text-sm text-slate-700">For the "who should I book?" helper on your site: what does {m.name || 'this person'} take on? Leave empty to leave them out of it.</legend>
-                  {[['styles', MATCH_STYLES], ['sizes', MATCH_SIZES]].map(([key, list]) => (
-                    <div key={key} className="flex flex-wrap gap-x-5 gap-y-2">
-                      {list.map(([v, label]) => (
-                        <label key={v} className="flex items-center gap-2 text-slate-900">
-                          <input type="checkbox" checked={(m[key] ?? []).includes(v)} onChange={(e) => set(`team.${i}.${key}`, e.target.checked ? [...(m[key] ?? []), v] : (m[key] ?? []).filter((x) => x !== v))} />
-                          {label}
-                        </label>
+                  <legend className="text-sm text-slate-700">For the "who should I book?" helper on your site: tick what {m.name || 'this person'} takes on, style by style. Leave a row empty if they do not do that style.</legend>
+                  <table className="text-sm text-slate-900">
+                    <thead>
+                      <tr><th className="sr-only">Style</th>{MATCH_SIZES.map(([v, label]) => <th key={v} scope="col" className="px-3 font-medium text-slate-600">{label}</th>)}</tr>
+                    </thead>
+                    <tbody>
+                      {MATCH_STYLES.map(([style, styleLabel]) => (
+                        <tr key={style}>
+                          <th scope="row" className="pr-3 py-1 text-left font-medium">{styleLabel}</th>
+                          {MATCH_SIZES.map(([size, sizeLabel]) => {
+                            const on = (m.takes?.[style] ?? []).includes(size);
+                            return (
+                              <td key={size} className="px-3 py-1 text-center">
+                                <input type="checkbox" aria-label={`${styleLabel}, ${sizeLabel}`} className="w-5 h-5" checked={on} onChange={(e) => set(`team.${i}.takes`, { ...(m.takes ?? {}), [style]: e.target.checked ? [...(m.takes?.[style] ?? []), size] : (m.takes?.[style] ?? []).filter((x) => x !== size) })} />
+                              </td>
+                            );
+                          })}
+                        </tr>
                       ))}
-                    </div>
-                  ))}
+                    </tbody>
+                  </table>
                 </fieldset>
               )}
               <Area aria-label="Their story (optional)" rows={3} placeholder="Their story (optional). Leave a blank line between paragraphs." value={m.bio} onChange={(v) => set(`team.${i}.bio`, v)} maxLength={3600} />
