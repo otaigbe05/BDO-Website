@@ -199,7 +199,7 @@ export default function SiteIntake() {
     api(`/api/site-intake?t=${encodeURIComponent(token)}`).then((r) => {
       if (!r.ok) return setState('invalid');
       setLead(r.lead);
-      setInfo({ previewUrl: r.previewUrl, roundsLeft: r.roundsLeft, status: r.status });
+      setInfo({ previewUrl: r.previewUrl, roundsLeft: r.roundsLeft, status: r.status, live: r.live === true, updatesLeft: r.updatesLeft, updatesPerMonth: r.updatesPerMonth });
       if (!r.open) return setState('closed');
       setMode(r.mode);
       let saved = null;
@@ -468,7 +468,7 @@ export default function SiteIntake() {
           <h1 className="text-3xl md:text-4xl font-bold text-slate-900">{mode === 'edit' ? 'Change your website' : 'Your website details'}</h1>
           <p className="text-lg text-slate-600">
             {mode === 'edit'
-              ? info.status === 'live'
+              ? info.live
                 ? `Your site stays online while we prepare the update. Change anything below and tell us anything else in the box. You get a preview to check, then publish it; there is no extra charge.${info.updatesLeft !== undefined ? ` Updates left this month: ${info.updatesLeft} of ${info.updatesPerMonth}.` : ''}`
                 : `Your answers are filled in. Change anything below, add or remove photos, and tell us anything else in the box. Changes included: ${info.roundsLeft ?? 0} more.`
               : `For the ${lead.business} website (design ${lead.template}). Only fields marked * are needed; the more you tell us, the better your site. Your answers are saved on this device as you type.`}

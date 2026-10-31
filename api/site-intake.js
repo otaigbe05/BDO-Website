@@ -20,6 +20,8 @@ export default async function handler(req, res) {
     const lead = await db.leadByToken('intake_token', token);
     if (!lead) return reply(res, 404, { ok: false, error: 'This link is not valid. Check the email we sent you.' });
     const mode = FIRST.includes(lead.status) ? 'first' : EDIT.includes(lead.status) ? 'edit' : 'closed';
+    // Has a live site (also while an update of it waits as a preview): monthly limit, re-approval.
+    const live = Boolean(lead.live_url);
 
     if (req.method === 'GET') {
       let previous = null;
@@ -37,7 +39,8 @@ export default async function handler(req, res) {
         roundsLeft: Math.max(0, ROUNDS - lead.change_rounds),
         previewUrl: lead.preview_url,
         have: summarize(lead.client),
-        ...(lead.status === 'live' ? { updatesLeft: await updatesLeft(lead), updatesPerMonth: UPDATES_PER_MONTH } : {}),
+        live,
+        ...(live ? { updatesLeft: await updatesLeft(lead), updatesPerMonth: UPDATES_PER_MONTH } : {}),
         lead: { name: lead.name, email: lead.email, phone: lead.phone, business: lead.business, city: lead.city, country: (await db.events(lead.id, 'country'))[0]?.detail?.country ?? null, template: lead.template, palette: lead.palette, package: lead.package, domain: lead.domain },
         previous,
         photoUrls,
@@ -65,13 +68,13 @@ export default async function handler(req, res) {
       return reply(res, 200, { ok: true, mode });
     }
     const notes = String(req.body?.changeNotes ?? '').trim().slice(0, 3000);
-    if (lead.status === 'live' && (await updatesLeft(lead)) === 0) {
+    if (live && (await updatesLeft(lead)) === 0) {
       await updateOverLimit(lead, notes.length >= 3 ? notes : 'Updated details in the form.');
       return reply(res, 200, { ok: true, mode, overLimit: true, updatesPerMonth: UPDATES_PER_MONTH });
     }
     await db.insert('change_requests', { lead_id: lead.id, request: notes.length >= 3 ? notes : 'Updated details in the form.' });
-    await db.update(lead.id, { status: 'changes_requested', customer_ok: false, ...(lead.status === 'live' ? { owner_ok: false } : {}) });
-    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { notes: notes.length, photos: parsed.data.photos.length, live: lead.status === 'live' } });
+    await db.update(lead.id, { status: 'changes_requested', customer_ok: false, ...(live ? { owner_ok: false } : {}) });
+    await db.insert('events', { lead_id: lead.id, kind: 'change_request', detail: { notes: notes.length, photos: parsed.data.photos.length, live } });
     await startJob('changes', lead.id);
     reply(res, 200, { ok: true, mode, roundsLeft: Math.max(0, ROUNDS - lead.change_rounds) });
   });
