@@ -57,12 +57,15 @@ for (const page of PAGES) {
 
 // Gallery pages live in the omis-sites project behind /templates. If the catalog can't be
 // read, the sitemap still lists the gallery's front page.
+// Only the gallery and its trade pages are listed. Each design's demo page (/templates/<trade>/<ID>/)
+// shows a fictional sample business and is marked noindex on purpose, and /templates/view/ is
+// blocked in robots.txt, so listing them only produced "Excluded by noindex" in Search Console.
 let gallery = ['/templates/'];
 try {
   const res = await fetch(GALLERY, { signal: AbortSignal.timeout(10000) });
   const { templates } = await res.json();
   const verticals = [...new Set(templates.map((t) => t.path.split('/')[0]))];
-  gallery = gallery.concat(verticals.map((v) => `/templates/${v}/`), templates.map((t) => `/templates/${t.path}`));
+  gallery = gallery.concat(verticals.map((v) => `/templates/${v}/`));
 } catch (e) {
   console.warn(`[seo] gallery catalog not read (${e.message}); sitemap lists /templates/ only`);
 }
