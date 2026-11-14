@@ -222,6 +222,15 @@ export function photoProblems(template, photos) {
 
 export const changeSchema = z.object({ t: z.string().regex(/^[0-9a-f]{48}$/), request: z.string().trim().min(3).max(3000) }).strict();
 
+// The answer to a question about a change request (/site/answer). o: the owner's approve key, on
+// the owner's "Answer for them" link only.
+export const answerSchema = z.object({
+  t: z.string().regex(/^[0-9a-f]{48}$/),
+  q: z.string().uuid(),
+  answer: z.string().trim().min(1, 'Type your answer').max(2000),
+  o: z.string().max(200).optional(),
+}).strict();
+
 /** Plain-English list of problems for the form. */
 export function problems(error) {
   return error.issues.map((i) => `${i.path.join(' > ') || 'form'}: ${i.message}`);
