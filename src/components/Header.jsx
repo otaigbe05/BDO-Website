@@ -79,6 +79,7 @@ const Header = () => {
         { title: 'OMIS booking', to: '/omis-product', dot: 'bg-emerald-600' },
         { title: 'Data & analytics', to: '/services', dot: 'bg-violet-600' },
         { title: 'Pricing', to: '/pricing' },
+        { title: 'Blog', to: '/blog' },
         { title: 'About', to: '/about' },
         { title: 'Contact', to: '/contact' },
     ];

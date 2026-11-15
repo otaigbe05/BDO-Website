@@ -41,6 +41,7 @@ const Footer = () => {
       title: "Company",
       links: [
         { text: "About Us", to: "/about" },
+        { text: "Blog", to: "/blog" },
         { text: "Contact", to: "/contact" },
         { text: "Book an OMIS demo", to: "/book-demo" },
         { text: "Privacy Policy", to: "/privacy-policy" },
