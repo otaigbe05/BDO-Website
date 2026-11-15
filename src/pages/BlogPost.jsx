@@ -7,6 +7,7 @@ import { posts, postBySlug } from '@/lib/blog';
 import { longDate, related, jsonLd } from '@/lib/blog-core';
 import { tradeBySlug } from '@/data/trades';
 import { OMIS_PLANS, WEBSITE, money } from '@/data/pricing';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 const SITE = 'https://www.bdoanalyticssolutions.com';
 
@@ -93,6 +94,8 @@ const BlogPost = () => {
           )}
 
           <NextStep trade={meta.trade} />
+
+          <div className="mt-8"><NewsletterSignup /></div>
 
           {meta.sources.length > 0 && (
             <section className="mt-12" aria-labelledby="sources-h">

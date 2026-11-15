@@ -140,6 +140,7 @@ const PrivacyPolicy = () => {
             <li><strong>Withdrawal of Consent:</strong> You may withdraw consent to our collection and use of your personal information at any time, subject to legal or contractual restrictions.</li>
             <li><strong>Deletion:</strong> You have the right to request deletion of your personal information, subject to our legal retention obligations.</li>
             <li><strong>Opt-Out:</strong> You may opt out of receiving promotional or marketing communications at any time by following the unsubscribe instructions in those messages or contacting us directly.</li>
+            <li><strong>Newsletter:</strong> If you sign up for our monthly newsletter, we keep your email address, the wording you agreed to, the page you signed up on and the dates you signed up, confirmed and unsubscribed, as Canada's anti-spam law requires. We use your email only to send the newsletter. Every newsletter has a one-click unsubscribe link, and you can also ask us to delete your record.</li>
             <li><strong>Data Portability:</strong> You may request a copy of your data in a structured, commonly used, and machine-readable format.</li>
             <li><strong>Complaints:</strong> You have the right to lodge a complaint with the Office of the Privacy Commissioner of Canada if you believe your privacy rights have been violated.</li>
           </ul>
