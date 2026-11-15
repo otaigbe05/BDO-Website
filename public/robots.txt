@@ -3,5 +3,6 @@ Allow: /
 Disallow: /site/
 Disallow: /api/
 Disallow: /templates/view/
+Disallow: /newsletter/
 
 Sitemap: https://www.bdoanalyticssolutions.com/sitemap.xml

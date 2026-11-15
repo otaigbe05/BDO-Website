@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet-async';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Rss } from 'lucide-react';
 import { posts } from '@/lib/blog';
+import NewsletterSignup from '@/components/NewsletterSignup';
 import { TOPICS, longDate, BLOG_TITLE as TITLE, BLOG_DESCRIPTION as DESCRIPTION } from '@/lib/blog-core';
 
 const SITE = 'https://www.bdoanalyticssolutions.com';
@@ -65,6 +66,7 @@ const BlogIndex = () => {
               ))}
             </ul>
           )}
+          <div className="mx-auto mt-16 max-w-4xl"><NewsletterSignup /></div>
         </section>
       </div>
     </>

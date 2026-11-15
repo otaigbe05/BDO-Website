@@ -7,6 +7,7 @@ import { ArrowRight, ExternalLink, CalendarCheck, Wallet, FileSignature, BellRin
 import ThreeDoors, { ProductBand } from '@/components/ThreeDoors';
 import HomeHero from '@/components/HomeHero';
 import TemplateShowcase from '@/components/TemplateShowcase';
+import NewsletterSignup from '@/components/NewsletterSignup';
 
 const Home = () => {
     const siteUrl = "https://www.bdoanalyticssolutions.com";
@@ -150,6 +151,12 @@ const Home = () => {
                                 <Link to="/services">See our data services</Link>
                             </Button>
                         </div>
+                    </div>
+                </section>
+
+                <section className="px-4 py-16 sm:px-6 lg:px-8">
+                    <div className="mx-auto max-w-4xl">
+                        <NewsletterSignup />
                     </div>
                 </section>
             </div>
